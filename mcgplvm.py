@@ -1,5 +1,4 @@
 import time
-# import ValueEx
 
 import tensorflow as tf
 import numpy as np
@@ -14,19 +13,27 @@ def RBF(X1, X2=None, name="") -> tf.Tensor:
     with tf.name_scope(name):
         eps = 1e-4
         _X2 = X1 if X2 is None else X2
+        if X1.shape.as_list()[-1] != _X2.shape.as_list()[-1]:
+            raise ValueError(
+                f"Last dimension of X1 and X2 must match, but shape(X1)={X1.shape.as_list()} and shape(X2)={X2.shape.as_list()}")
         variance = 1.
         X1s = tf.reduce_sum(tf.square(X1), axis=-1)
         X2s = tf.reduce_sum(tf.square(_X2), axis=-1)
-        square_dist = -2.0 * tf.matmul(X1, _X2, transpose_b=True) + tf.reshape(X1s, (-1, 1)) + tf.reshape(X2s, (1, -1))
+
+        # square_dist = -2.0 * tf.matmul(X1, _X2, transpose_b=True) + tf.reshape(X1s, (-1, 1)) + tf.reshape(X2s, (1, -1))
+        # Below is a more general version that should be the same for matrices of rank 2
+        square_dist = -2.0 * tf.matmul(X1, _X2, transpose_b=True) \
+                      + tf.expand_dims(X1s, axis=-1) + tf.expand_dims(X2s, axis=-2)
+
         rbf = variance * tf.exp(-square_dist / 2.)
-        return (rbf + eps * tf.eye(X1.get_shape().as_list()[0])) if X2 is None else rbf
+        return (rbf + eps * tf.eye(X1.shape.as_list()[-2])) if X2 is None else rbf
 
 
 class MCGPLVM:
     def __init__(self, y: tf.Tensor, x: np.ndarray):
-        if x.shape[0] != y.get_shape().as_list()[0]:
+        if x.shape[0] != y.shape.as_list()[0]:
             raise ValueError(
-                f"First dimension of x and y must match, but shape(x)={list(x.shape)} and shape(y)={y.get_shape().as_list()}")
+                f"First dimension of x and y must match, but shape(x)={list(x.shape)} and shape(y)={y.shape.as_list()}")
         self._latent_dim = x.shape[1]
         self.num_inducing = 20
         self.y = y
@@ -34,7 +41,6 @@ class MCGPLVM:
         with tf.variable_scope("qx"):
             self.qx_mean = tf.get_variable("mean", [self.num_data, self.xdim],
                                            initializer=tf.constant_initializer(x))
-            # initializer=tf.random_normal_initializer())
             self.qx_log_std = tf.get_variable("log_std", [self.num_data, self.xdim],
                                               initializer=tf.constant_initializer(np.log(0.1)))
             self.qx_std = tf.exp(self.qx_log_std, name="std")
@@ -50,11 +56,6 @@ class MCGPLVM:
                                                 shape=[self.ydim, self.num_inducing * (self.num_inducing + 1) / 2],
                                                 initializer=tf.zeros_initializer())
             self.qu_scale = tf.contrib.distributions.fill_triangular(tf.exp(self.qu_log_scale, name="scale"))
-            """
-            self.qu_log_scale = tf.get_variable("log_scale", shape=[self.ydim, self.num_inducing],
-                                                initializer=tf.zeros_initializer())
-            self.qu_scale = tf.matrix_diag(tf.exp(self.qu_log_scale), name="scale")
-            """
 
     def kl_qx_px(self):
         with tf.name_scope("kl_qx_px"):
@@ -65,6 +66,7 @@ class MCGPLVM:
 
     def kl_qu_pu(self):
         with tf.name_scope("kl_qu_pu"):
+            # TODO: Figure out why nodes pu_2, qu_2, normal and normal_2 are created. Done by MultivariateNormalTriL?
             qu = tf.contrib.distributions.MultivariateNormalTriL(self.qu_mean, self.qu_scale, name="qu")
             k_zz = RBF(self.z, name="k_zz")
             l_zz = tf.tile(tf.expand_dims(tf.cholesky(k_zz), axis=0), [self.ydim, 1, 1], name="l_zz")
@@ -84,41 +86,45 @@ class MCGPLVM:
 
     def elbo(self):
         with tf.name_scope("elbo"):
-            return -self.kl_qx_px() - self.kl_qu_pu() + self.mc_expectation()
+            elbo = tf.identity(-self.kl_qx_px() - self.kl_qu_pu() + self.mc_expectation(), name="elbo")
+        return elbo
 
     def loss(self):
-        with tf.name_scope("loss"):
-            return -self.elbo()
+        loss = tf.negative(self.elbo(), name="loss")
+        return loss
 
     def sample_f(self, num_samples):
         with tf.name_scope("sample_f"):
             k_zz = RBF(self.z, name="k_zz")
             k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
 
-            samples = []
-            for i in range(num_samples):
-                with tf.name_scope(f"sample_{i}"):
-                    # x = qx_mean + qx_std * e_x, e_x ~ N(0,1)
-                    e_x = tf.random_normal(shape=[self.num_data, self.xdim], name="e_x")
-                    x_sample = tf.add(self.qx_mean, tf.multiply(self.qx_std, e_x), name="x_sample")
+            # x = qx_mean + qx_std * e_x, e_x ~ N(0,1)
+            e_x = tf.random_normal(shape=[num_samples, self.num_data, self.xdim], name="e_x")
+            x_sample = tf.add(self.qx_mean, tf.multiply(self.qx_std, e_x), name="x_sample")
+            assert x_sample.shape.as_list() == [num_samples, self.num_data, self.xdim]
 
-                    # u = qu_mean + qu_scale * e_u, e_u ~ N(0,1)
-                    e_u = tf.random_normal(shape=[self.ydim, self.num_inducing, 1], name="e_u")
-                    u_sample = tf.add(self.qu_mean, tf.squeeze(tf.matmul(self.qu_scale, e_u), 2), name="u_sample")
+            # u = qu_mean + qu_scale * e_u, e_u ~ N(0,1)
+            e_u = tf.random_normal(shape=[num_samples, self.ydim, self.num_inducing], name="e_u")
+            u_sample = tf.add(self.qu_mean, tf.einsum("ijk,tik->tij", self.qu_scale, e_u), name="u_sample")
+            assert u_sample.shape.as_list() == [num_samples, self.ydim, self.num_inducing]
 
-                    k_zx = RBF(self.z, x_sample, name="k_zx")
-                    k_xx = RBF(x_sample, name="k_xx")
+            k_zx = RBF(tf.tile(tf.expand_dims(self.z, axis=0), multiples=[num_samples, 1, 1]), x_sample, name="k_zx")
+            assert k_zx.shape.as_list() == [num_samples, self.num_inducing, self.num_data]
+            k_xx = RBF(x_sample, name="k_xx")
+            assert k_xx.shape.as_list() == [num_samples, self.num_data, self.num_data]
 
-                    a = tf.matmul(k_zz_inv, k_zx, name="a")
-                    b = tf.subtract(k_xx, tf.matmul(k_zx, tf.matmul(k_zz_inv, k_zx), transpose_a=True), name="full_b")
-                    b = tf.diag_part(b, name="diag_b")
-                    b = tf.maximum(b, 1e-16, name="pos_b")  # Sometimes b is small negative, which will break in sqrt(b)
+            a = tf.einsum("ij,sjk->sik", k_zz_inv, k_zx, name="a")
+            assert a.shape.as_list() == [num_samples, self.num_inducing, self.num_data]
+            full_b = tf.subtract(k_xx, tf.matmul(k_zx, a, transpose_a=True), name="full_b")
+            assert full_b.shape.as_list() == [num_samples, self.num_data, self.num_data]
+            b = tf.matrix_diag_part(full_b, name="diag_b")
+            assert b.shape.as_list() == [num_samples, self.num_data]
+            b = tf.maximum(b, 1e-16, name="pos_b")  # Sometimes b is small negative, which will break in sqrt(b)
 
-                    # f = a.T * u + sqrt(b) * e_f, e_f ~ N(0,1)
-                    e_f = tf.random_normal(shape=[self.ydim, self.num_data], name="e_f")
-                    f_sample = tf.add(tf.matmul(u_sample, a), tf.multiply(tf.sqrt(b), e_f), name="f_sample")
-                    samples.append(f_sample)
-            f_samples = tf.stack(samples, name="f_samples")
+            # f = a.T * u + sqrt(b) * e_f, e_f ~ N(0,1)
+            e_f = tf.random_normal(shape=[num_samples, self.ydim, self.num_data], name="e_f")
+            f_samples = tf.add(tf.matmul(u_sample, a), tf.multiply(tf.expand_dims(tf.sqrt(b), 1), e_f),
+                               name="f_samples")
             return f_samples
 
     @property
@@ -127,11 +133,11 @@ class MCGPLVM:
 
     @property
     def ydim(self):
-        return self.y.get_shape().as_list()[1]
+        return self.y.shape.as_list()[1]
 
     @property
     def num_data(self):
-        return self.y.get_shape().as_list()[0]
+        return self.y.shape.as_list()[0]
 
 
 if __name__ == "__main__":
@@ -141,8 +147,8 @@ if __name__ == "__main__":
     Q = 2
     y_circle = get_circle_data(N, D)
     pca = PCA(Q)
-    # x_circle = pca.fit_transform(y_circle)
-    x_circle = np.random.normal(size=(N, Q))
+    x_circle = pca.fit_transform(y_circle)
+    # x_circle = np.random.normal(size=(N, Q))
     y = tf.convert_to_tensor(y_circle, dtype=tf.float32)
 
     print("Creating model...")
@@ -151,7 +157,7 @@ if __name__ == "__main__":
     print("Building graph...")
     loss = m.loss()
 
-    learning_rate = 1e-3
+    learning_rate = 1e-4
     with tf.name_scope("train"):
         with tf.variable_scope("", reuse=tf.AUTO_REUSE):
             train_x = tf.train.RMSPropOptimizer(learning_rate).minimize(
@@ -161,8 +167,18 @@ if __name__ == "__main__":
                 loss, var_list=[tf.get_variable("z"), tf.get_variable("qu/mean"), tf.get_variable("qu/log_scale")],
                 name="train_u")
 
-    tf.summary.scalar("training_loss", loss, collections=["training"])
-    summary = tf.summary.merge_all("training")
+    with tf.name_scope("summary"):
+        tf.summary.scalar("kl_qx_px", m.kl_qx_px(), collections=["training"])
+        tf.summary.scalar("kl_qu_pu", m.kl_qu_pu(), collections=["training"])
+        tf.summary.scalar("expectation", m.mc_expectation(), collections=["training"])
+        tf.summary.scalar("training_loss", loss, collections=["training"])
+        tf.summary.histogram("qx_mean", m.qx_mean, collections=["training"])
+        tf.summary.histogram("qx_std", m.qx_std, collections=["training"])
+        tf.summary.histogram("z", m.z, collections=["training"])
+        tf.summary.histogram("qu_mean", m.qu_mean, collections=["training"])
+        tf.summary.histogram("qu_scale", m.qu_scale, collections=["training"])
+        merged_summary = tf.summary.merge_all("training")
+
     init = tf.global_variables_initializer()
     plt.axis([-5, 5, -5, 5])
     plt.ion()
@@ -179,10 +195,12 @@ if __name__ == "__main__":
             sess.run(train_x)
             sess.run(train_u)
             if i % (n_iter // 100) == 0:
-                loss_summary = sess.run(summary)
-                summary_writer.add_summary(loss_summary, i)
-                iter_loss = sess.run(loss)
-                loss_print = f"Step {i} - Loss: {iter_loss}"
+                run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
+                run_metadata = tf.RunMetadata()
+                train_loss, summary = sess.run([loss, merged_summary], options=run_options, run_metadata=run_metadata)
+                summary_writer.add_run_metadata(run_metadata, "step%d" % i)
+                summary_writer.add_summary(summary, i)
+                loss_print = f"Step {i} - Loss: {train_loss}"
                 print(loss_print)
                 x_mean = sess.run(m.qx_mean)
                 z = sess.run(m.z)
