@@ -1,4 +1,5 @@
 import time
+# import ValueEx
 
 import tensorflow as tf
 import numpy as np
@@ -14,8 +15,8 @@ def RBF(X1, X2=None, name="") -> tf.Tensor:
         eps = 1e-4
         _X2 = X1 if X2 is None else X2
         variance = 1.
-        X1s = tf.reduce_sum(tf.square(X1), -1)
-        X2s = tf.reduce_sum(tf.square(_X2), -1)
+        X1s = tf.reduce_sum(tf.square(X1), axis=-1)
+        X2s = tf.reduce_sum(tf.square(_X2), axis=-1)
         square_dist = -2.0 * tf.matmul(X1, _X2, transpose_b=True) + tf.reshape(X1s, (-1, 1)) + tf.reshape(X2s, (1, -1))
         rbf = variance * tf.exp(-square_dist / 2.)
         return (rbf + eps * tf.eye(X1.get_shape().as_list()[0])) if X2 is None else rbf
@@ -23,7 +24,10 @@ def RBF(X1, X2=None, name="") -> tf.Tensor:
 
 class MCGPLVM:
     def __init__(self, y: tf.Tensor, x: np.ndarray):
-        self._latent_dim = 2
+        if x.shape[0] != y.get_shape().as_list()[0]:
+            raise ValueError(
+                f"First dimension of x and y must match, but shape(x)={list(x.shape)} and shape(y)={y.get_shape().as_list()}")
+        self._latent_dim = x.shape[1]
         self.num_inducing = 20
         self.y = y
 
@@ -42,40 +46,40 @@ class MCGPLVM:
         with tf.variable_scope("qu"):
             self.qu_mean = tf.get_variable("mean", [self.ydim, self.num_inducing],
                                            initializer=tf.random_normal_initializer(0.01))
-            # FIXME: Should work with triangular!
-            """ 
-            self.qu_scale = tf.contrib.distributions.fill_triangular(
-                tf.get_variable("qu_scale", shape=[self.ydim, self.num_inducing * (self.num_inducing + 1) / 2],
-                                initializer=tf.constant_initializer(0.1)))
+            self.qu_log_scale = tf.get_variable("log_scale",
+                                                shape=[self.ydim, self.num_inducing * (self.num_inducing + 1) / 2],
+                                                initializer=tf.zeros_initializer())
+            self.qu_scale = tf.contrib.distributions.fill_triangular(tf.exp(self.qu_log_scale, name="scale"))
             """
             self.qu_log_scale = tf.get_variable("log_scale", shape=[self.ydim, self.num_inducing],
                                                 initializer=tf.zeros_initializer())
             self.qu_scale = tf.matrix_diag(tf.exp(self.qu_log_scale), name="scale")
+            """
 
     def kl_qx_px(self):
         with tf.name_scope("kl_qx_px"):
             qx = tf.distributions.Normal(self.qx_mean, self.qx_std, name="qx")
             px = tf.distributions.Normal(0., 1., name="px")
-            kl = tf.reduce_sum(tf.distributions.kl_divergence(qx, px, allow_nan_stats=False), name="kl")
+            kl = tf.reduce_sum(tf.distributions.kl_divergence(qx, px, allow_nan_stats=False), axis=[0, 1], name="kl")
         return kl
 
     def kl_qu_pu(self):
         with tf.name_scope("kl_qu_pu"):
             qu = tf.contrib.distributions.MultivariateNormalTriL(self.qu_mean, self.qu_scale, name="qu")
-            k_zz = tf.add(RBF(self.z, self.z, name="k_zz"), tf.eye(self.num_inducing) * 1e-5)
-            l_zz = tf.tile(tf.expand_dims(tf.cholesky(k_zz), 0), [self.ydim, 1, 1], name="l_zz")
+            k_zz = RBF(self.z, name="k_zz")
+            l_zz = tf.tile(tf.expand_dims(tf.cholesky(k_zz), axis=0), [self.ydim, 1, 1], name="l_zz")
             pu = tf.contrib.distributions.MultivariateNormalTriL(tf.zeros([self.ydim, self.num_inducing]), l_zz,
                                                                  name="pu")
-            kl = tf.reduce_sum(tf.distributions.kl_divergence(qu, pu, allow_nan_stats=False), name="kl")
+            kl = tf.reduce_sum(tf.distributions.kl_divergence(qu, pu, allow_nan_stats=False), axis=0, name="kl")
         return kl
 
     def mc_expectation(self):
         with tf.name_scope("mc_expectation"):
-            num_samples = int(1e0)
+            num_samples = int(1e1)
             approx_exp_all = tf.contrib.bayesflow.monte_carlo.expectation(
                 f=lambda f: tf.distributions.Normal(loc=f, scale=1. ** 2).log_prob(tf.transpose(self.y)),
                 samples=self.sample_f(num_samples), name="approx_exp_all")
-            approx_exp = tf.reduce_sum(approx_exp_all, name="approx_exp")
+            approx_exp = tf.reduce_sum(approx_exp_all, axis=[0, 1], name="approx_exp")
             return approx_exp
 
     def elbo(self):
@@ -86,7 +90,7 @@ class MCGPLVM:
         with tf.name_scope("loss"):
             return -self.elbo()
 
-    def sample_f(self, num_samples):  # FIXME: Why does the return tensor contain nan values?
+    def sample_f(self, num_samples):
         with tf.name_scope("sample_f"):
             k_zz = RBF(self.z, name="k_zz")
             k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
@@ -132,9 +136,13 @@ class MCGPLVM:
 
 if __name__ == "__main__":
     print("Generating data...")
-    y_circle = get_circle_data(30, 5)
-    pca = PCA(2)
-    x_circle = pca.fit_transform(y_circle)
+    N = 30
+    D = 5
+    Q = 2
+    y_circle = get_circle_data(N, D)
+    pca = PCA(Q)
+    # x_circle = pca.fit_transform(y_circle)
+    x_circle = np.random.normal(size=(N, Q))
     y = tf.convert_to_tensor(y_circle, dtype=tf.float32)
 
     print("Creating model...")
@@ -143,7 +151,7 @@ if __name__ == "__main__":
     print("Building graph...")
     loss = m.loss()
 
-    learning_rate = 1e-4
+    learning_rate = 1e-3
     with tf.name_scope("train"):
         with tf.variable_scope("", reuse=tf.AUTO_REUSE):
             train_x = tf.train.RMSPropOptimizer(learning_rate).minimize(
@@ -151,7 +159,6 @@ if __name__ == "__main__":
                 name="train_x")
             train_u = tf.train.RMSPropOptimizer(learning_rate).minimize(
                 loss, var_list=[tf.get_variable("z"), tf.get_variable("qu/mean"), tf.get_variable("qu/log_scale")],
-                # loss, var_list=[tf.get_variable("qu/mean"), tf.get_variable("qu/log_scale")],
                 name="train_u")
 
     tf.summary.scalar("training_loss", loss, collections=["training"])
@@ -164,20 +171,25 @@ if __name__ == "__main__":
         print("Initializing variables...")
         sess.run(init)
         # embed()
-        print(f"Initial log joint: {sess.run(loss)}")
+        print(f"Initial loss: {sess.run(loss)}")
         print("Starting training...")
-        for i in range(10000):
+        n_iter = 50000
+        for i in range(n_iter):
             x_mean = m.qx_mean.eval()
             sess.run(train_x)
             sess.run(train_u)
-            if i % 100 == 0:
+            if i % (n_iter // 100) == 0:
                 loss_summary = sess.run(summary)
                 summary_writer.add_summary(loss_summary, i)
-                print(f"Step {i} - Log joint: {sess.run(loss)}")
+                iter_loss = sess.run(loss)
+                loss_print = f"Step {i} - Loss: {iter_loss}"
+                print(loss_print)
                 x_mean = sess.run(m.qx_mean)
                 z = sess.run(m.z)
                 plt.scatter(x_mean[:, 0], x_mean[:, 1], c="b")
-                plt.scatter(z[:, 0], z[:, 1], c="k", marker="x")
+                plt.plot(x_mean[:, 0], x_mean[:, 1], c="b")
+                # plt.scatter(z[:, 0], z[:, 1], c="k", marker="x")
+                plt.title(loss_print)
                 plt.pause(0.05)
                 plt.cla()
         x_mean = sess.run(m.qx_mean)
