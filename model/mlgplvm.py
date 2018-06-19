@@ -77,11 +77,11 @@ class MLGPLVM:
 
     def log_prob(self, f):
         with tf.name_scope("log_prob"):
-            ret = tf.stack([self._distributions_list[i](f[:, i, :]).log_prob(tf.transpose(self.y[:, i])) for i in
-                            range(self.ydim)], axis=1)
-            return ret
+            log_prob = tf.stack([self._distributions_list[i](f[:, i, :]).log_prob(tf.transpose(self.y[:, i])) for i in
+                                 range(self.ydim)], axis=1)
+            return log_prob
 
-    def sample_f(self, num_samples):
+    def sample_f(self, num_samples: int):
         with tf.name_scope("sample_f"):
             k_zz = self.rbf(self.z, name="k_zz")
             k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
@@ -117,13 +117,13 @@ class MLGPLVM:
             return f_samples
 
     @property
-    def xdim(self):
+    def xdim(self) -> int:
         return self._latent_dim
 
     @property
-    def ydim(self):
+    def ydim(self) -> int:
         return self.y.shape.as_list()[1]
 
     @property
-    def num_data(self):
+    def num_data(self) -> int:
         return self.y.shape.as_list()[0]
