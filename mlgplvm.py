@@ -14,8 +14,8 @@ def RBF(X1, X2=None, name="") -> tf.Tensor:
         eps = 1e-4
         _X2 = X1 if X2 is None else X2
         if X1.shape.as_list()[-1] != _X2.shape.as_list()[-1]:
-            raise ValueError(
-                f"Last dimension of X1 and X2 must match, but shape(X1)={X1.shape.as_list()} and shape(X2)={X2.shape.as_list()}")
+            raise ValueError(f"Last dimension of X1 and X2 must match, "
+                             f"but shape(X1)={X1.shape.as_list()} and shape(X2)={X2.shape.as_list()}")
         variance = 1.
         X1s = tf.reduce_sum(tf.square(X1), axis=-1)
         X2s = tf.reduce_sum(tf.square(_X2), axis=-1)
@@ -29,7 +29,7 @@ def RBF(X1, X2=None, name="") -> tf.Tensor:
         return (rbf + eps * tf.eye(X1.shape.as_list()[-2])) if X2 is None else rbf
 
 
-class MCGPLVM:
+class MLGPLVM:
     def __init__(self, y: tf.Tensor, x: np.ndarray):
         if x.shape[0] != y.shape.as_list()[0]:
             raise ValueError(
@@ -141,6 +141,8 @@ class MCGPLVM:
 
 
 if __name__ == "__main__":
+    np.random.seed(1)
+    tf.set_random_seed(1)
     print("Generating data...")
     N = 30
     D = 5
@@ -152,7 +154,7 @@ if __name__ == "__main__":
     y = tf.convert_to_tensor(y_circle, dtype=tf.float32)
 
     print("Creating model...")
-    m = MCGPLVM(y, x_circle)
+    m = MLGPLVM(y, x_circle)
 
     print("Building graph...")
     loss = m.loss()
@@ -161,10 +163,10 @@ if __name__ == "__main__":
     with tf.name_scope("train"):
         with tf.variable_scope("", reuse=tf.AUTO_REUSE):
             train_x = tf.train.RMSPropOptimizer(learning_rate).minimize(
-                loss, var_list=[tf.get_variable("qx/mean"), tf.get_variable("qx/log_std")],
+                loss, var_list=[tf.get_variable("z"), tf.get_variable("qx/mean"), tf.get_variable("qx/log_std")],
                 name="train_x")
             train_u = tf.train.RMSPropOptimizer(learning_rate).minimize(
-                loss, var_list=[tf.get_variable("z"), tf.get_variable("qu/mean"), tf.get_variable("qu/log_scale")],
+                loss, var_list=[tf.get_variable("qu/mean"), tf.get_variable("qu/log_scale")],
                 name="train_u")
 
     with tf.name_scope("summary"):
