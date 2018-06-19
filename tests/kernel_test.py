@@ -1,4 +1,4 @@
-from rbf import RBF
+from kernel import RBF
 
 import unittest
 
