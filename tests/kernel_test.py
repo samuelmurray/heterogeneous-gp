@@ -1,4 +1,4 @@
-from mcgplvm import RBF
+from mlgplvm import RBF
 
 import unittest
 
