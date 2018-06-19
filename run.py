@@ -8,6 +8,7 @@ from sklearn.decomposition import PCA
 
 from data import get_circle_data
 from model import MLGPLVM
+import distributions
 
 
 if __name__ == "__main__":
@@ -24,7 +25,8 @@ if __name__ == "__main__":
     y = tf.convert_to_tensor(y_circle, dtype=tf.float32)
 
     print("Creating model...")
-    m = MLGPLVM(y, x_circle)
+    dist_list = [distributions.normal for _ in range(D)]
+    m = MLGPLVM(y, x_circle, dist_list)
 
     print("Building graph...")
     loss = m.loss()

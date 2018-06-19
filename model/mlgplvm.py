@@ -1,3 +1,5 @@
+from typing import List, Callable
+
 import tensorflow as tf
 import numpy as np
 
@@ -5,11 +7,16 @@ from kernel import RBF
 
 
 class MLGPLVM:
-    def __init__(self, y: tf.Tensor, x: np.ndarray):
+    def __init__(self, y: tf.Tensor, x: np.ndarray,
+                 distribution_list: List[Callable[[tf.Tensor], tf.distributions.Distribution]]):
         if x.shape[0] != y.shape.as_list()[0]:
             raise ValueError(
                 f"First dimension of x and y must match, but shape(x)={list(x.shape)} and shape(y)={y.shape.as_list()}")
+        if len(distribution_list) != y.shape.as_list()[1]:
+            raise ValueError(
+                f"Must provide one distribution per y dimension, but len(distribtution_list)={len(distribution_list)} and shape(y)={y.shape.as_list()}")
         self.rbf = RBF()
+        self._distributions_list = distribution_list
         self._latent_dim = x.shape[1]
         self.num_inducing = 20
         self.y = y
@@ -32,6 +39,15 @@ class MLGPLVM:
                                                 initializer=tf.zeros_initializer())
             self.qu_scale = tf.contrib.distributions.fill_triangular(tf.exp(self.qu_log_scale, name="scale"))
 
+    def loss(self):
+        loss = tf.negative(self.elbo(), name="loss")
+        return loss
+
+    def elbo(self):
+        with tf.name_scope("elbo"):
+            elbo = tf.identity(-self.kl_qx_px() - self.kl_qu_pu() + self.mc_expectation(), name="elbo")
+        return elbo
+
     def kl_qx_px(self):
         with tf.name_scope("kl_qx_px"):
             qx = tf.distributions.Normal(self.qx_mean, self.qx_std, name="qx")
@@ -53,20 +69,17 @@ class MLGPLVM:
     def mc_expectation(self):
         with tf.name_scope("mc_expectation"):
             num_samples = int(1e1)
-            approx_exp_all = tf.contrib.bayesflow.monte_carlo.expectation(
-                f=lambda f: tf.distributions.Normal(loc=f, scale=1. ** 2).log_prob(tf.transpose(self.y)),
-                samples=self.sample_f(num_samples), name="approx_exp_all")
+            approx_exp_all = tf.contrib.bayesflow.monte_carlo.expectation(f=self.log_prob,
+                                                                          samples=self.sample_f(num_samples),
+                                                                          name="approx_exp_all")
             approx_exp = tf.reduce_sum(approx_exp_all, axis=[0, 1], name="approx_exp")
             return approx_exp
 
-    def elbo(self):
-        with tf.name_scope("elbo"):
-            elbo = tf.identity(-self.kl_qx_px() - self.kl_qu_pu() + self.mc_expectation(), name="elbo")
-        return elbo
-
-    def loss(self):
-        loss = tf.negative(self.elbo(), name="loss")
-        return loss
+    def log_prob(self, f):
+        with tf.name_scope("log_prob"):
+            ret = tf.stack([self._distributions_list[i](f[:, i, :]).log_prob(tf.transpose(self.y[:, i])) for i in
+                            range(self.ydim)], axis=1)
+            return ret
 
     def sample_f(self, num_samples):
         with tf.name_scope("sample_f"):
