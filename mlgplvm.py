@@ -7,26 +7,7 @@ from IPython import embed
 from sklearn.decomposition import PCA
 
 from data import get_circle_data
-
-
-def RBF(X1, X2=None, name="") -> tf.Tensor:
-    with tf.name_scope(name):
-        eps = 1e-4
-        _X2 = X1 if X2 is None else X2
-        if X1.shape.as_list()[-1] != _X2.shape.as_list()[-1]:
-            raise ValueError(f"Last dimension of X1 and X2 must match, "
-                             f"but shape(X1)={X1.shape.as_list()} and shape(X2)={X2.shape.as_list()}")
-        variance = 1.
-        X1s = tf.reduce_sum(tf.square(X1), axis=-1)
-        X2s = tf.reduce_sum(tf.square(_X2), axis=-1)
-
-        # square_dist = -2.0 * tf.matmul(X1, _X2, transpose_b=True) + tf.reshape(X1s, (-1, 1)) + tf.reshape(X2s, (1, -1))
-        # Below is a more general version that should be the same for matrices of rank 2
-        square_dist = -2.0 * tf.matmul(X1, _X2, transpose_b=True) \
-                      + tf.expand_dims(X1s, axis=-1) + tf.expand_dims(X2s, axis=-2)
-
-        rbf = variance * tf.exp(-square_dist / 2.)
-        return (rbf + eps * tf.eye(X1.shape.as_list()[-2])) if X2 is None else rbf
+from rbf import RBF
 
 
 class MLGPLVM:
@@ -34,6 +15,7 @@ class MLGPLVM:
         if x.shape[0] != y.shape.as_list()[0]:
             raise ValueError(
                 f"First dimension of x and y must match, but shape(x)={list(x.shape)} and shape(y)={y.shape.as_list()}")
+        self.rbf = RBF()
         self._latent_dim = x.shape[1]
         self.num_inducing = 20
         self.y = y
@@ -68,7 +50,7 @@ class MLGPLVM:
         with tf.name_scope("kl_qu_pu"):
             # TODO: Figure out why nodes pu_2, qu_2, normal and normal_2 are created. Done by MultivariateNormalTriL?
             qu = tf.contrib.distributions.MultivariateNormalTriL(self.qu_mean, self.qu_scale, name="qu")
-            k_zz = RBF(self.z, name="k_zz")
+            k_zz = self.rbf(self.z, name="k_zz")
             l_zz = tf.tile(tf.expand_dims(tf.cholesky(k_zz), axis=0), [self.ydim, 1, 1], name="l_zz")
             pu = tf.contrib.distributions.MultivariateNormalTriL(tf.zeros([self.ydim, self.num_inducing]), l_zz,
                                                                  name="pu")
@@ -95,7 +77,7 @@ class MLGPLVM:
 
     def sample_f(self, num_samples):
         with tf.name_scope("sample_f"):
-            k_zz = RBF(self.z, name="k_zz")
+            k_zz = self.rbf(self.z, name="k_zz")
             k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
 
             # x = qx_mean + qx_std * e_x, e_x ~ N(0,1)
@@ -108,9 +90,9 @@ class MLGPLVM:
             u_sample = tf.add(self.qu_mean, tf.einsum("ijk,tik->tij", self.qu_scale, e_u), name="u_sample")
             assert u_sample.shape.as_list() == [num_samples, self.ydim, self.num_inducing]
 
-            k_zx = RBF(tf.tile(tf.expand_dims(self.z, axis=0), multiples=[num_samples, 1, 1]), x_sample, name="k_zx")
+            k_zx = self.rbf(tf.tile(tf.expand_dims(self.z, axis=0), multiples=[num_samples, 1, 1]), x_sample, name="k_zx")
             assert k_zx.shape.as_list() == [num_samples, self.num_inducing, self.num_data]
-            k_xx = RBF(x_sample, name="k_xx")
+            k_xx = self.rbf(x_sample, name="k_xx")
             assert k_xx.shape.as_list() == [num_samples, self.num_data, self.num_data]
 
             a = tf.einsum("ij,sjk->sik", k_zz_inv, k_zx, name="a")
