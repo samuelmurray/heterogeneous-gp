@@ -1,7 +1,14 @@
+from typing import Tuple, List, Callable
+
+import tensorflow as tf
 import numpy as np
 
+import distributions
 
-def get_circle_data(n_data, output_dim):
+Likelihood = Callable[[tf.Tensor], tf.distributions.Distribution]
+
+
+def get_circle_data(n_data: int, output_dim: int) -> Tuple[np.ndarray, List[Likelihood]]:
     import GPy
     t = np.linspace(0, (n_data - 1), n_data)
     period = 2 * np.pi / n_data
@@ -17,10 +24,11 @@ def get_circle_data(n_data, output_dim):
     mid = output_dim // 2
     y[:, :mid] = np.random.normal(f[:, :mid], var_y)
     y[:, mid:] = np.random.binomial(1, 1 / (1 + np.exp(-f[:, mid:])))
-    return y
+    likelihoods = [distributions.normal for _ in range(mid)] + [distributions.bernoulli for _ in range(mid)]
+    return y, likelihoods
 
 
-def get_gaussian_data(n_data):
+def get_gaussian_data(n_data: int) -> Tuple[np.ndarray, List[Likelihood]]:
     y = np.empty((n_data, 3))
     mid = n_data // 2
 
@@ -31,4 +39,5 @@ def get_gaussian_data(n_data):
     y[mid:, 0] = np.random.normal(1, .5, size=mid)
     y[mid:, 1] = np.random.normal(1, .5, size=mid)
     y[mid:, 2] = np.random.binomial(1, 0.3, size=mid)
-    return y
+    likelihoods = [distributions.normal, distributions.normal, distributions.bernoulli]
+    return y, likelihoods

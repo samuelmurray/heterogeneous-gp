@@ -7,7 +7,6 @@ from IPython import embed
 
 from data import get_circle_data, get_gaussian_data
 from model import MLGPLVM
-import distributions
 
 if __name__ == "__main__":
     np.random.seed(1)
@@ -15,11 +14,10 @@ if __name__ == "__main__":
     print("Generating data...")
     num_data = 100
     latent_dim = 2
-    y_obs = get_gaussian_data(num_data)
+    y_obs, likelihoods = get_gaussian_data(num_data)
     y = tf.convert_to_tensor(y_obs, dtype=tf.float32)
 
     print("Creating model...")
-    likelihoods = [distributions.normal, distributions.normal, distributions.bernoulli]
     m = MLGPLVM(y, latent_dim, likelihoods=likelihoods)
 
     print("Building graph...")
