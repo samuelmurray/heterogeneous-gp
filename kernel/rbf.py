@@ -6,10 +6,11 @@ class RBF:
 
     def __init__(self, variance: float = 1., gamma: float = 0.5):
         with tf.variable_scope("kern"):
-            self._log_variance = tf.get_variable("log_variance", 1,
+            self._log_variance = tf.get_variable("log_variance", shape=[1],
                                                  initializer=tf.constant_initializer(np.log(variance)))
             self._variance = tf.exp(self._log_variance, name="variance")
-            self._log_gamma = tf.get_variable("log_gamma", 1, initializer=tf.constant_initializer(np.log(gamma)))
+            self._log_gamma = tf.get_variable("log_gamma", shape=[1],
+                                              initializer=tf.constant_initializer(np.log(gamma)))
             self._gamma = tf.exp(self._log_gamma, name="gamma")
 
     def __call__(self, x1: tf.Tensor, x2: tf.Tensor = None, *, name: str = "") -> tf.Tensor:

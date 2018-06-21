@@ -1,11 +1,12 @@
 from typing import Tuple, List, Callable
 
 import tensorflow as tf
+import tensorflow.contrib.distributions as ds
 import numpy as np
 
 import distributions
 
-Likelihood = Callable[[tf.Tensor], tf.distributions.Distribution]
+Likelihood = Callable[[tf.Tensor], ds.Distribution]
 
 
 def get_circle_data(n_data: int, output_dim: int) -> Tuple[np.ndarray, List[Likelihood]]:
