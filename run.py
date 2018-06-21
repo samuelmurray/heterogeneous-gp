@@ -3,9 +3,7 @@ import time
 import tensorflow as tf
 import numpy as np
 from matplotlib import pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 from IPython import embed
-from sklearn.decomposition import PCA
 
 from data import get_circle_data, get_gaussian_data
 from model import MLGPLVM
@@ -15,27 +13,14 @@ if __name__ == "__main__":
     np.random.seed(1)
     # tf.set_random_seed(1)
     print("Generating data...")
-    N = 100
-    D = 10
-    Q = 2
-    # y_obs = get_circle_data(N, D)
-    y_obs = get_gaussian_data(N)
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(y_obs[:N // 2, 0], y_obs[:N // 2, 2], y_obs[:N // 2, 1])
-    ax.scatter(y_obs[N // 2:, 0], y_obs[N // 2:, 2], y_obs[N // 2:, 1])
-    plt.show()
-    pca = PCA(Q)
-    # x = pca.fit_transform(y_obs)
-    x = np.random.normal(size=(N, Q))
+    num_data = 100
+    latent_dim = 2
+    y_obs = get_gaussian_data(num_data)
     y = tf.convert_to_tensor(y_obs, dtype=tf.float32)
 
     print("Creating model...")
-    # dist_list = [distributions.normal for _ in range(D // 2)] + [distributions.bernoulli for _ in range(D // 2)]
-    # dist_list = [distributions.normal for _ in range(D)]
-    dist_list = [distributions.normal, distributions.normal, distributions.bernoulli]
-    # dist_list = [distributions.normal, distributions.normal, distributions.normal]
-    m = MLGPLVM(y, x, dist_list)
+    likelihoods = [distributions.normal, distributions.normal, distributions.bernoulli]
+    m = MLGPLVM(y, latent_dim, likelihoods=likelihoods)
 
     print("Building graph...")
     loss = m.loss()
@@ -88,8 +73,8 @@ if __name__ == "__main__":
                 print(loss_print)
                 x_mean = sess.run(m.qx_mean)
                 z = sess.run(m.z)
-                plt.scatter(x_mean[:N // 2, 0], x_mean[:N // 2, 1])  # , c="b")
-                plt.scatter(x_mean[N // 2:, 0], x_mean[N // 2:, 1])  # , c="b")
+                plt.scatter(x_mean[:num_data // 2, 0], x_mean[:num_data // 2, 1])  # , c="b")
+                plt.scatter(x_mean[num_data // 2:, 0], x_mean[num_data // 2:, 1])  # , c="b")
                 # plt.plot(x_mean[:, 0], x_mean[:, 1], c="b")
                 # plt.scatter(z[:, 0], z[:, 1], c="k", marker="x")
                 plt.title(loss_print)

@@ -8,9 +8,13 @@ from kernel import RBF
 
 class MLGPLVM:
 
-    def __init__(self, y: tf.Tensor, x: np.ndarray,
+    def __init__(self, y: tf.Tensor, xdim: int, *,
+                 x: np.array = None,
+                 num_inducing: int = 50,
                  likelihoods: List[Callable[[tf.Tensor], tf.distributions.Distribution]]):
-        if x.shape[0] != y.shape.as_list()[0]:
+        if x is None:
+            x = np.random.normal(size=(y.shape.as_list()[0], xdim))
+        elif x.shape[0] != y.shape.as_list()[0]:
             raise ValueError(
                 f"First dimension of x and y must match, but shape(x)={list(x.shape)} and shape(y)={y.shape.as_list()}")
         if len(likelihoods) != y.shape.as_list()[1]:
@@ -19,8 +23,10 @@ class MLGPLVM:
                 f"but len(likelihoods)={len(likelihoods)} and shape(y)={y.shape.as_list()}")
         self.kern = RBF()
         self._likelihoods = likelihoods
-        self._latent_dim = x.shape[1]
-        self.num_inducing = 50
+        self._xdim = x.shape[1]
+        self._ydim = y.shape.as_list()[1]
+        self._num_inducing = num_inducing
+        self._num_data = y.shape.as_list()[0]
         self.y = y
 
         with tf.variable_scope("qx"):
@@ -121,12 +127,16 @@ class MLGPLVM:
 
     @property
     def xdim(self) -> int:
-        return self._latent_dim
+        return self._xdim
 
     @property
     def ydim(self) -> int:
-        return self.y.shape.as_list()[1]
+        return self._ydim
+
+    @property
+    def num_inducing(self) -> int:
+        return self._num_inducing
 
     @property
     def num_data(self) -> int:
-        return self.y.shape.as_list()[0]
+        return self._num_data
