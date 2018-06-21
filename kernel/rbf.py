@@ -4,7 +4,7 @@ import numpy as np
 
 class RBF:
 
-    def __init__(self, variance=1., gamma=0.5):
+    def __init__(self, variance: float = 1., gamma: float = 0.5):
         with tf.variable_scope("kern"):
             self._log_variance = tf.get_variable("log_variance", 1,
                                                  initializer=tf.constant_initializer(np.log(variance)))
@@ -12,7 +12,7 @@ class RBF:
             self._log_gamma = tf.get_variable("log_gamma", 1, initializer=tf.constant_initializer(np.log(gamma)))
             self._gamma = tf.exp(self._log_gamma, name="gamma")
 
-    def __call__(self, x1, x2=None, *, name="") -> tf.Tensor:
+    def __call__(self, x1: tf.Tensor, x2: tf.Tensor = None, *, name: str = "") -> tf.Tensor:
         with tf.name_scope(name):
             eps = 1e-4
             _x2 = x1 if x2 is None else x2

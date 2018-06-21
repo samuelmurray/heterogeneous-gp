@@ -7,11 +7,12 @@ from kernel import RBF
 
 
 class MLGPLVM:
+    Likelihood = Callable[[tf.Tensor], tf.distributions.Distribution]
 
     def __init__(self, y: tf.Tensor, xdim: int, *,
-                 x: np.array = None,
+                 x: np.ndarray = None,
                  num_inducing: int = 50,
-                 likelihoods: List[Callable[[tf.Tensor], tf.distributions.Distribution]]):
+                 likelihoods: List[Likelihood]):
         if x is None:
             x = np.random.normal(size=(y.shape.as_list()[0], xdim))
         elif x.shape[0] != y.shape.as_list()[0]:
@@ -60,7 +61,7 @@ class MLGPLVM:
         with tf.name_scope("kl_qx_px"):
             qx = tf.distributions.Normal(self.qx_mean, self.qx_std, name="qx")
             px = tf.distributions.Normal(0., 1., name="px")
-            kl = tf.reduce_sum(tf.distributions.kl_divergence(qx, px, ajjllow_nan_stats=False), axis=[0, 1], name="kl")
+            kl = tf.reduce_sum(tf.distributions.kl_divergence(qx, px, allow_nan_stats=False), axis=[0, 1], name="kl")
         return kl
 
     def kl_qu_pu(self):
