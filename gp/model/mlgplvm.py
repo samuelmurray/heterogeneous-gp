@@ -6,7 +6,7 @@ import tensorflow.contrib.bayesflow as bf
 import numpy as np
 
 from .inducing_points_model import InducingPointsModel
-from kernel import RBF
+from ..kernel import RBF
 
 
 class MLGPLVM(InducingPointsModel):
