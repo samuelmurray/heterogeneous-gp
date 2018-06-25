@@ -9,7 +9,7 @@ import distributions
 Likelihood = Callable[[tf.Tensor], ds.Distribution]
 
 
-def get_circle_data(n_data: int, output_dim: int) -> Tuple[np.ndarray, List[Likelihood]]:
+def get_circle_data(n_data: int, output_dim: int, gaussian: bool = True) -> Tuple[np.ndarray, List[Likelihood]]:
     import GPy
     t = np.linspace(0, (n_data - 1), n_data)
     period = 2 * np.pi / n_data
@@ -22,10 +22,14 @@ def get_circle_data(n_data: int, output_dim: int) -> Tuple[np.ndarray, List[Like
 
     var_y = 0.01
     y = np.empty((n_data, output_dim))
-    mid = output_dim // 2
-    y[:, :mid] = np.random.normal(f[:, :mid], var_y)
-    y[:, mid:] = np.random.binomial(1, 1 / (1 + np.exp(-f[:, mid:])))
-    likelihoods = [distributions.normal for _ in range(mid)] + [distributions.bernoulli for _ in range(mid)]
+    if gaussian:
+        y = np.random.normal(f, var_y)
+        likelihoods = [distributions.normal for _ in range(n_data)]
+    else:
+        mid = output_dim // 2
+        y[:, :mid] = np.random.normal(f[:, :mid], var_y)
+        y[:, mid:] = np.random.binomial(1, 1 / (1 + np.exp(-f[:, mid:])))
+        likelihoods = [distributions.normal for _ in range(mid)] + [distributions.bernoulli for _ in range(mid)]
     return y, likelihoods
 
 
