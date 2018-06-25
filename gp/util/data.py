@@ -24,7 +24,7 @@ def get_circle_data(n_data: int, output_dim: int, gaussian: bool = True) -> Tupl
     y = np.empty((n_data, output_dim))
     if gaussian:
         y = np.random.normal(f, var_y)
-        likelihoods = [distributions.normal for _ in range(n_data)]
+        likelihoods = [distributions.normal for _ in range(output_dim)]
     else:
         mid = output_dim // 2
         y[:, :mid] = np.random.normal(f[:, :mid], var_y)
