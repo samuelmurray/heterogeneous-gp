@@ -4,7 +4,7 @@ import tensorflow as tf
 import tensorflow.contrib.distributions as ds
 import numpy as np
 
-import distributions
+from util import distributions
 
 Likelihood = Callable[[tf.Tensor], ds.Distribution]
 
