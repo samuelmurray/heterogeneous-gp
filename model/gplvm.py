@@ -7,7 +7,7 @@ from kernel import RBF
 class GPLVM:
     HALF_LN2PI = 0.5 * tf.log(2 * np.pi)
 
-    def __init__(self, y: tf.Tensor, xdim: int):
+    def __init__(self, y: tf.Tensor, xdim: int) -> None:
         self.y = y
         self.x = tf.get_variable("x", shape=[y.get_shape().as_list()[0], xdim],
                                  initializer=tf.random_normal_initializer())
@@ -16,7 +16,7 @@ class GPLVM:
         self._ydim = self.y.get_shape().as_list()[1]
         self._num_data = self.x.get_shape().as_list()[0]
 
-    def log_likelihood(self):
+    def log_likelihood(self) -> tf.Tensor:
         k_xx = self.kern(self.x)
         L: tf.Tensor
         try:
@@ -30,21 +30,22 @@ class GPLVM:
                           - self.ydim * self.num_data * self.HALF_LN2PI)
         return log_likelihood
 
-    def log_prior(self):
+    def log_prior(self) -> tf.Tensor:
         log_prior = - 0.5 * tf.reduce_sum(tf.square(self.x)) - self.xdim * self.num_data * self.HALF_LN2PI
         return log_prior
 
-    def log_joint(self):
+    def log_joint(self) -> tf.Tensor:
         log_likelihood = self.log_likelihood()
         log_prior = self.log_prior()
+        print(type(log_likelihood))
         return log_likelihood + log_prior
 
     @property
-    def xdim(self):
+    def xdim(self) -> int:
         return self._xdim
 
     @property
-    def ydim(self):
+    def ydim(self) -> int:
         return self._ydim
 
     @property

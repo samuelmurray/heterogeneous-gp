@@ -5,7 +5,7 @@ from kernel import RBF
 
 
 class GP:
-    def __init__(self, x: tf.Tensor, y: tf.Tensor):
+    def __init__(self, x: tf.Tensor, y: tf.Tensor) -> None:
         if x.shape.as_list()[0] != y.shape.as_list()[0]:
             raise ValueError(
                 f"First dimension of x and y must match, "
@@ -17,7 +17,7 @@ class GP:
         self.k_xx = self.kern(x)
         self.k_xx_inv = tf.matrix_inverse(self.k_xx)
 
-    def predict(self, z: np.ndarray):
+    def predict(self, z: np.ndarray) -> tf.Tensor:
         k_zx = self.kern(tf.convert_to_tensor(z, dtype=tf.float32), self.x)
         mean = tf.matmul(tf.matmul(k_zx, self.k_xx_inv), self.y)
         return mean

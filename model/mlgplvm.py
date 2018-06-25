@@ -14,7 +14,7 @@ class MLGPLVM:
     def __init__(self, y: tf.Tensor, xdim: int, *,
                  x: np.ndarray = None,
                  num_inducing: int = 50,
-                 likelihoods: List[Likelihood]):
+                 likelihoods: List[Likelihood]) -> None:
         if x is None:
             x = np.random.normal(size=(y.shape.as_list()[0], xdim))
         elif x.shape[0] != y.shape.as_list()[0]:
@@ -51,22 +51,22 @@ class MLGPLVM:
                                                 initializer=tf.zeros_initializer())
             self.qu_scale = ds.fill_triangular(tf.exp(self.qu_log_scale, name="scale"))
 
-    def loss(self):
+    def loss(self) -> tf.Tensor:
         loss = tf.negative(self.elbo(), name="loss")
         return loss
 
-    def elbo(self):
+    def elbo(self) -> tf.Tensor:
         elbo = tf.identity(-self.kl_qx_px() - self.kl_qu_pu() + self.mc_expectation(), name="elbo")
         return elbo
 
-    def kl_qx_px(self):
+    def kl_qx_px(self) -> tf.Tensor:
         with tf.name_scope("kl_qx_px"):
             qx = ds.Normal(self.qx_mean, self.qx_std, name="qx")
             px = ds.Normal(0., 1., name="px")
             kl = tf.reduce_sum(ds.kl_divergence(qx, px, allow_nan_stats=False), axis=[0, 1], name="kl")
         return kl
 
-    def kl_qu_pu(self):
+    def kl_qu_pu(self) -> tf.Tensor:
         with tf.name_scope("kl_qu_pu"):
             # TODO: Figure out why nodes pu_2, qu_2, normal and normal_2 are created. Done by MultivariateNormalTriL?
             qu = ds.MultivariateNormalTriL(self.qu_mean, self.qu_scale, name="qu")
@@ -76,21 +76,21 @@ class MLGPLVM:
             kl = tf.reduce_sum(ds.kl_divergence(qu, pu, allow_nan_stats=False), axis=0, name="kl")
         return kl
 
-    def mc_expectation(self):
+    def mc_expectation(self) -> tf.Tensor:
         with tf.name_scope("mc_expectation"):
             num_samples = int(1e1)
             approx_exp_all = bf.monte_carlo.expectation(f=self.log_prob, samples=self.sample_f(num_samples),
                                                         name="approx_exp_all")
             approx_exp = tf.reduce_sum(approx_exp_all, axis=[0, 1], name="approx_exp")
-            return approx_exp
+        return approx_exp
 
-    def log_prob(self, f):
+    def log_prob(self, f: tf.Tensor) -> tf.Tensor:
         with tf.name_scope("log_prob"):
             log_prob = tf.stack([self._likelihoods[i](f[:, i, :]).log_prob(tf.transpose(self.y[:, i]))
                                  for i in range(self.ydim)], axis=1)
-            return log_prob
+        return log_prob
 
-    def sample_f(self, num_samples: int):
+    def sample_f(self, num_samples: int) -> tf.Tensor:
         with tf.name_scope("sample_f"):
             k_zz = self.kern(self.z, name="k_zz")
             k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
@@ -128,7 +128,7 @@ class MLGPLVM:
             f_samples = tf.add(tf.matmul(u_sample, a),
                                tf.multiply(tf.expand_dims(tf.sqrt(b), 1), e_f),
                                name="f_samples")
-            return f_samples
+        return f_samples
 
     @property
     def xdim(self) -> int:
