@@ -57,7 +57,6 @@ if __name__ == "__main__":
         print("Starting training...")
         n_iter = 50000
         for i in range(n_iter):
-            x_mean = m.qx_mean.eval()
             sess.run(train_x)
             sess.run(train_u)
             if i % (n_iter // 100) == 0:
