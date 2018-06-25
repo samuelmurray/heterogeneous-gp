@@ -2,8 +2,8 @@ import tensorflow as tf
 from matplotlib import pyplot as plt
 from IPython import embed
 
-from util.data import get_circle_data
-from model import GPLVM
+from gp.util.data import get_circle_data
+from gp.model import GPLVM
 
 if __name__ == "__main__":
     y_train, _ = get_circle_data(50, 10)

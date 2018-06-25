@@ -5,16 +5,17 @@ import numpy as np
 from matplotlib import pyplot as plt
 from IPython import embed
 
-from util.data import get_gaussian_data
-from model import MLGPLVM
+from gp.util.data import get_circle_data, get_gaussian_data, oilflow
+from gp.model import MLGPLVM
 
 if __name__ == "__main__":
     np.random.seed(1)
-    # tf.set_random_seed(1)
     print("Generating data...")
     num_data = 100
     latent_dim = 2
-    y_obs, likelihoods = get_gaussian_data(num_data)
+    # y_obs, likelihoods = get_gaussian_data(num_data)
+    # y_obs, likelihoods = get_circle_data(100, 10)
+    y_obs, likelihoods, labels = oilflow(num_data)
     y = tf.convert_to_tensor(y_obs, dtype=tf.float32)
 
     print("Creating model...")
@@ -45,12 +46,13 @@ if __name__ == "__main__":
         tf.summary.histogram("qu_mean", m.qu_mean, collections=["training"])
         tf.summary.histogram("qu_scale", m.qu_scale, collections=["training"])
         merged_summary = tf.summary.merge_all("training")
+    log_dir = f"../../log/{time.strftime('%Y%m%d%H%M%S')}"
 
     init = tf.global_variables_initializer()
     plt.axis([-5, 5, -5, 5])
     plt.ion()
     with tf.Session() as sess:
-        summary_writer = tf.summary.FileWriter(f"log/{time.strftime('%Y%m%d%H%M%S')}", sess.graph)
+        summary_writer = tf.summary.FileWriter(log_dir, sess.graph)
         print("Initializing variables...")
         sess.run(init)
         print(f"Initial loss: {sess.run(loss)}")
@@ -59,25 +61,31 @@ if __name__ == "__main__":
         for i in range(n_iter):
             sess.run(train_x)
             sess.run(train_u)
-            if i % (n_iter // 100) == 0:
+            if i % 100 == 0:
                 run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
                 run_metadata = tf.RunMetadata()
                 train_loss, summary = sess.run([loss, merged_summary], options=run_options, run_metadata=run_metadata)
-                summary_writer.add_run_metadata(run_metadata, "step%d" % i)
+                summary_writer.add_run_metadata(run_metadata, f"step{i}")
                 summary_writer.add_summary(summary, i)
                 loss_print = f"Step {i} - Loss: {train_loss}"
                 print(loss_print)
                 x_mean = sess.run(m.qx_mean)
                 z = sess.run(m.z)
-                plt.scatter(x_mean[:num_data // 2, 0], x_mean[:num_data // 2, 1])
-                plt.scatter(x_mean[num_data // 2:, 0], x_mean[num_data // 2:, 1])
+                plt.scatter(*x_mean[labels == 0].T)
+                plt.scatter(*x_mean[labels == 1].T)
+                plt.scatter(*x_mean[labels == 2].T)
+                # plt.scatter(x_mean[:num_data // 2, 0], x_mean[:num_data // 2, 1])
+                # plt.scatter(x_mean[num_data // 2:, 0], x_mean[num_data // 2:, 1])
+
                 plt.scatter(z[:, 0], z[:, 1], c="k", marker="x")
                 # plt.plot(x_mean[:, 0], x_mean[:, 1], c="b")
                 plt.title(loss_print)
                 plt.pause(0.05)
                 plt.cla()
         x_mean = sess.run(m.qx_mean)
-        plt.plot(x_mean[:, 0], x_mean[:, 1])
-        plt.scatter(x_mean[:, 0], x_mean[:, 1])
-        # plt.show()
+        z = sess.run(m.z)
+        plt.scatter(*x_mean[labels == 0].T)
+        plt.scatter(*x_mean[labels == 1].T)
+        plt.scatter(*x_mean[labels == 2].T)
+        plt.scatter(z[:, 0], z[:, 1], c="k", marker="x")
         embed()

@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 
 from .model import Model
-from kernel import RBF
+from ..kernel import RBF
 
 
 class GPLVM(Model):

@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 from matplotlib import pyplot as plt
 
-from model import GP
+from gp.model import GP
 
 if __name__ == "__main__":
     x_train = np.linspace(0, 2 * np.pi, 50)[:, None]
