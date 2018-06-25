@@ -51,7 +51,7 @@ def get_gaussian_data(n_data: int) -> Tuple[np.ndarray, List[Likelihood]]:
 def oilflow(n_data: int = None, *, one_hot_labels: bool = False) -> Tuple[np.ndarray, List[Likelihood], np.ndarray]:
     import pods
     oil = pods.datasets.oil()
-    indices = np.random.permutation(1000)[:None]
+    indices = np.random.permutation(1000)[:n_data]
     data = oil['X'][indices, :]
     labels = oil['Y'][indices, :]
     likelihoods = [distributions.normal for _ in range(data.shape[1])]
