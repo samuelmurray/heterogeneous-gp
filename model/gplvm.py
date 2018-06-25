@@ -1,10 +1,11 @@
 import tensorflow as tf
 import numpy as np
 
+from .model import Model
 from kernel import RBF
 
 
-class GPLVM:
+class GPLVM(Model):
     HALF_LN2PI = 0.5 * tf.log(2 * np.pi)
 
     def __init__(self, y: tf.Tensor, xdim: int) -> None:
@@ -12,9 +13,7 @@ class GPLVM:
         self.x = tf.get_variable("x", shape=[y.get_shape().as_list()[0], xdim],
                                  initializer=tf.random_normal_initializer())
         self.kern = RBF(0.1, eps=0.1)
-        self._xdim = self.x.get_shape().as_list()[1]
-        self._ydim = self.y.get_shape().as_list()[1]
-        self._num_data = self.x.get_shape().as_list()[0]
+        super().__init__(xdim, y.shape.as_list()[1], y.shape.as_list()[0])
 
     def log_likelihood(self) -> tf.Tensor:
         k_xx = self.kern(self.x)
@@ -38,15 +37,3 @@ class GPLVM:
         log_likelihood = self.log_likelihood()
         log_prior = self.log_prior()
         return log_likelihood + log_prior
-
-    @property
-    def xdim(self) -> int:
-        return self._xdim
-
-    @property
-    def ydim(self) -> int:
-        return self._ydim
-
-    @property
-    def num_data(self) -> int:
-        return self._num_data

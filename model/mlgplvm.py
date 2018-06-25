@@ -5,16 +5,18 @@ import tensorflow.contrib.distributions as ds
 import tensorflow.contrib.bayesflow as bf
 import numpy as np
 
+from .inducing_points_model import InducingPointsModel
 from kernel import RBF
 
 
-class MLGPLVM:
+class MLGPLVM(InducingPointsModel):
     Likelihood = Callable[[tf.Tensor], ds.Distribution]
 
     def __init__(self, y: tf.Tensor, xdim: int, *,
                  x: np.ndarray = None,
                  num_inducing: int = 50,
                  likelihoods: List[Likelihood]) -> None:
+
         if x is None:
             x = np.random.normal(size=(y.shape.as_list()[0], xdim))
         elif x.shape[0] != y.shape.as_list()[0]:
@@ -26,11 +28,8 @@ class MLGPLVM:
                 f"but len(likelihoods)={len(likelihoods)} and shape(y)={y.shape.as_list()}")
         self.kern = RBF()
         self._likelihoods = likelihoods
-        self._xdim = x.shape[1]
-        self._ydim = y.shape.as_list()[1]
-        self._num_inducing = num_inducing
-        self._num_data = y.shape.as_list()[0]
         self.y = y
+        super().__init__(xdim, y.shape.as_list()[1], y.shape.as_list()[0], num_inducing)
 
         with tf.variable_scope("qx"):
             self.qx_mean = tf.get_variable("mean", shape=[self.num_data, self.xdim],
@@ -129,19 +128,3 @@ class MLGPLVM:
                                tf.multiply(tf.expand_dims(tf.sqrt(b), 1), e_f),
                                name="f_samples")
         return f_samples
-
-    @property
-    def xdim(self) -> int:
-        return self._xdim
-
-    @property
-    def ydim(self) -> int:
-        return self._ydim
-
-    @property
-    def num_inducing(self) -> int:
-        return self._num_inducing
-
-    @property
-    def num_data(self) -> int:
-        return self._num_data
