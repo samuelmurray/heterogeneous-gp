@@ -3,8 +3,7 @@ import numpy as np
 
 
 class RBF:
-
-    def __init__(self, variance: float = 1., gamma: float = 0.5, *, eps: float = 1e-4):
+    def __init__(self, variance: float = 1., gamma: float = 0.5, *, eps: float = 1e-4) -> None:
         with tf.variable_scope("kern"):
             self._log_variance = tf.get_variable("log_variance", shape=[1],
                                                  initializer=tf.constant_initializer(np.log(variance)))
