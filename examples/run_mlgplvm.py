@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from IPython import embed
 
-from data import get_circle_data, get_gaussian_data
+from util.data import get_gaussian_data
 from model import MLGPLVM
 
 if __name__ == "__main__":
