@@ -1,81 +1,52 @@
 import tensorflow as tf
 import numpy as np
-from matplotlib import pyplot as plt
-from IPython import embed
 
-from data import get_circle_data
-
-
-def RBF(X1, X2) -> tf.Tensor:
-    variance = 0.1
-    X1s = tf.reduce_sum(tf.square(X1), 1)
-    X2s = tf.reduce_sum(tf.square(X2), 1)
-    return tf.multiply(variance, tf.exp(
-        -(-2.0 * tf.matmul(X1, tf.transpose(X2)) + tf.reshape(X1s, (-1, 1)) + tf.reshape(X2s, (1, -1))) / 2))
+from kernel import RBF
 
 
 class GPLVM:
-    def __init__(self, y: tf.Tensor):
+    HALF_LN2PI = 0.5 * tf.log(2 * np.pi)
+
+    def __init__(self, y: tf.Tensor, xdim: int):
         self.y = y
-        self.x = tf.get_variable("weights", [y.get_shape().as_list()[0], 2], initializer=tf.random_normal_initializer())
+        self.x = tf.get_variable("x", shape=[y.get_shape().as_list()[0], xdim],
+                                 initializer=tf.random_normal_initializer())
+        self.kern = RBF(0.1, eps=0.1)
+        self._xdim = self.x.get_shape().as_list()[1]
+        self._ydim = self.y.get_shape().as_list()[1]
+        self._num_data = self.x.get_shape().as_list()[0]
 
     def log_likelihood(self):
-        K = tf.add(RBF(self.x, self.x), tf.eye(self.n) * 0.1)
-        L = None
+        k_xx = self.kern(self.x)
+        L: tf.Tensor
         try:
-            L = tf.linalg.cholesky(K)
+            L = tf.cholesky(k_xx)
         except Exception:
-            print("WHOOOOOW")
-            L = tf.linalg.cholesky(K + 1e-10 * tf.eye(self.n))
-        a = tf.linalg.solve(tf.transpose(L), tf.linalg.solve(L, self.y))
-        log_likelihood = - 0.5 * tf.trace(tf.matmul(tf.transpose(self.y), a)) - self.ydim * tf.reduce_sum(
-            tf.log(tf.diag_part(L))) - self.ydim * self.n * self.half_ln2pi
+            print("Cholesky decomposition failed")
+            L = tf.cholesky(k_xx + 1e-10 * tf.eye(self.num_data))
+        a = tf.matrix_solve(tf.transpose(L), tf.matrix_solve(L, self.y))
+        log_likelihood = (- 0.5 * tf.trace(tf.matmul(self.y, a, transpose_a=True))
+                          - self.ydim * tf.reduce_sum(tf.log(tf.diag_part(L)))
+                          - self.ydim * self.num_data * self.HALF_LN2PI)
         return log_likelihood
+
+    def log_prior(self):
+        log_prior = - 0.5 * tf.reduce_sum(tf.square(self.x)) - self.xdim * self.num_data * self.HALF_LN2PI
+        return log_prior
 
     def log_joint(self):
         log_likelihood = self.log_likelihood()
-        log_prior = - 0.5 * tf.reduce_sum(tf.square(self.x)) - self.xdim * self.n * self.half_ln2pi
+        log_prior = self.log_prior()
         return log_likelihood + log_prior
 
     @property
     def xdim(self):
-        return self.x.get_shape().as_list()[1]
+        return self._xdim
 
     @property
     def ydim(self):
-        return self.y.get_shape().as_list()[1]
+        return self._ydim
 
     @property
-    def n(self):
-        return self.x.get_shape().as_list()[0]
-
-    @property
-    def half_ln2pi(self):
-        return 0.5 * tf.log(2 * np.pi)
-
-
-if __name__ == "__main__":
-
-    y_train, _ = get_circle_data(50, 10)
-
-    y = tf.convert_to_tensor(y_train, dtype=tf.float32)
-
-    gplvm = GPLVM(y)
-
-    loss = -gplvm.log_likelihood()
-    learning_rate = 0.1
-    optimizer = tf.train.AdamOptimizer(learning_rate)
-    train = optimizer.minimize(loss)
-    init = tf.global_variables_initializer()
-    with tf.Session() as sess:
-        sess.run(init)
-
-        for i in range(3000):
-            sess.run(train)
-            if i % 100 == 0:
-                print(f"Step {i} - Log joint: {sess.run(gplvm.log_joint())}")
-
-        x = sess.run(gplvm.x)
-        plt.plot(x[:, 0], x[:, 1])
-        plt.scatter(x[:, 0], x[:, 1])
-        plt.show()
+    def num_data(self) -> int:
+        return self._num_data
