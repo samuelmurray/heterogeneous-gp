@@ -4,7 +4,7 @@ import tensorflow as tf
 import tensorflow.contrib.distributions as ds
 import numpy as np
 
-from util import distributions
+from . import distributions
 
 Likelihood = Callable[[tf.Tensor], ds.Distribution]
 
@@ -46,3 +46,15 @@ def get_gaussian_data(n_data: int) -> Tuple[np.ndarray, List[Likelihood]]:
     y[mid:, 2] = np.random.binomial(1, 0.3, size=mid)
     likelihoods = [distributions.normal, distributions.normal, distributions.bernoulli]
     return y, likelihoods
+
+
+def oilflow(n_data: int = None, *, one_hot_labels: bool = False) -> Tuple[np.ndarray, List[Likelihood], np.ndarray]:
+    import pods
+    oil = pods.datasets.oil()
+    indices = np.random.permutation(1000)[:None]
+    data = oil['X'][indices, :]
+    labels = oil['Y'][indices, :]
+    likelihoods = [distributions.normal for _ in range(data.shape[1])]
+    if not one_hot_labels:
+        labels = np.argmax(labels, axis=1)
+    return data, likelihoods, labels
