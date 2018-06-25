@@ -37,7 +37,6 @@ class GPLVM:
     def log_joint(self) -> tf.Tensor:
         log_likelihood = self.log_likelihood()
         log_prior = self.log_prior()
-        print(type(log_likelihood))
         return log_likelihood + log_prior
 
     @property

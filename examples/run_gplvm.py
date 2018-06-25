@@ -24,7 +24,7 @@ if __name__ == "__main__":
         for i in range(n_iter):
             sess.run(train)
             if i % 100 == 0:
-                print(f"Step {i} - Log joint: {sess.run(gplvm.log_joint())}")
+                print(f"Step {i} - Loss: {sess.run(loss)}")
                 x = sess.run(gplvm.x)
                 plt.plot(*x.T)
                 plt.scatter(*x.T)
