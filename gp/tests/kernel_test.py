@@ -1,7 +1,7 @@
-from kernel import RBF
-
 import tensorflow as tf
 import numpy as np
+
+from gp.kernel import RBF
 
 
 class TestRBF(tf.test.TestCase):
