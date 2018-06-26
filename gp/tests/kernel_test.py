@@ -15,12 +15,12 @@ class TestRBF(tf.test.TestCase):
         k = self.kern(a)
         self.assertShapeEqual(np.empty([10, 10]), k)
 
-    def test_RBF_2(self):
+    def test_RBF_dimensions(self):
         a = tf.convert_to_tensor(np.random.normal(size=(2, 10, 5)), dtype=tf.float32)
         k = self.kern(a)
         self.assertShapeEqual(np.empty([2, 10, 10]), k)
 
-    def test_RBF(self):
+    def test_RBF_full(self):
         a = tf.convert_to_tensor(np.random.normal(size=(2, 10, 5)), dtype=tf.float32)
         b = tf.convert_to_tensor(np.random.normal(size=(2, 12, 5)), dtype=tf.float32)
         k = self.kern(a, b)
