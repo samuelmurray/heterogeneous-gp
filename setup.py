@@ -9,6 +9,7 @@ EMAIL = "samuelmu@kth.se"
 AUTHOR = "Samuel Murray"
 REQUIRES_PYTHON = ">=3.6.0"
 LICENSE = "GNU General Public License v3.0"
+TEST_DIR = "tests"
 
 REQUIRED = [
     "numpy",
@@ -31,7 +32,8 @@ setup(
     author_email=EMAIL,
     python_requires=REQUIRES_PYTHON,
     url=URL,
-    packages=find_packages(exclude=('tests',)),
+    packages=find_packages(exclude=(TEST_DIR,)),
+    test_suite=NAME + "." + TEST_DIR,
     install_requires=REQUIRED,
     include_package_data=True,
     license=LICENSE,
