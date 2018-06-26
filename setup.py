@@ -13,8 +13,6 @@ TEST_DIR = "tests"
 
 REQUIRED = [
     "numpy",
-    "tensorflow",
-    "matplotlib",
 ]
 
 # Read version number
@@ -35,6 +33,13 @@ setup(
     packages=find_packages(exclude=(TEST_DIR,)),
     test_suite=NAME + "." + TEST_DIR,
     install_requires=REQUIRED,
+    extras_require={
+        "plotting": ["matplotlib",
+                     "jupyter",
+                     ],
+        "tf": ["tensorflow>=1.0.0"],
+        "tf_gpu": ["tensorflow-gpu>=1.0.0"],
+    },
     include_package_data=True,
     license=LICENSE,
     classifiers=[
