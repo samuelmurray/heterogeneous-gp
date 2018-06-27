@@ -6,7 +6,7 @@ from gp.util.data import get_circle_data
 from gp.model import GPLVM
 
 if __name__ == "__main__":
-    y_train, _ = get_circle_data(50, 10)
+    y_train, _, _ = get_circle_data(50, 10)
     y = tf.convert_to_tensor(y_train, dtype=tf.float32)
 
     gplvm = GPLVM(y, 2)
