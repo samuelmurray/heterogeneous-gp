@@ -34,9 +34,14 @@ setup(
     test_suite=NAME + "." + TEST_DIR,
     install_requires=REQUIRED,
     extras_require={
-        "plotting": ["matplotlib",
-                     "jupyter",
-                     ],
+        "examples": [
+            "matplotlib",
+            "jupyter",
+            "IPython",
+            "pandas",
+            "scikit-learn",
+            "pods",
+        ],
         "tf": ["tensorflow>=1.0.0"],
         "tf_gpu": ["tensorflow-gpu>=1.0.0"],
     },
