@@ -13,8 +13,6 @@ if __name__ == "__main__":
     print("Generating data...")
     num_data = 100
     latent_dim = 2
-    # y_obs, likelihoods = get_gaussian_data(num_data)
-    # y_obs, likelihoods = get_circle_data(100, 10)
     y_obs, likelihoods, labels = oilflow(num_data)
     y = tf.convert_to_tensor(y_obs, dtype=tf.float32)
 
@@ -71,21 +69,15 @@ if __name__ == "__main__":
                 print(loss_print)
                 x_mean = sess.run(m.qx_mean)
                 z = sess.run(m.z)
-                plt.scatter(*x_mean[labels == 0].T)
-                plt.scatter(*x_mean[labels == 1].T)
-                plt.scatter(*x_mean[labels == 2].T)
-                # plt.scatter(x_mean[:num_data // 2, 0], x_mean[:num_data // 2, 1])
-                # plt.scatter(x_mean[num_data // 2:, 0], x_mean[num_data // 2:, 1])
-
-                plt.scatter(z[:, 0], z[:, 1], c="k", marker="x")
-                # plt.plot(x_mean[:, 0], x_mean[:, 1], c="b")
+                for c in np.unique(labels):
+                    plt.scatter(*x_mean[labels == c].T)
+                plt.scatter(*z.T, c="k", marker="x")
                 plt.title(loss_print)
                 plt.pause(0.05)
                 plt.cla()
         x_mean = sess.run(m.qx_mean)
         z = sess.run(m.z)
-        plt.scatter(*x_mean[labels == 0].T)
-        plt.scatter(*x_mean[labels == 1].T)
-        plt.scatter(*x_mean[labels == 2].T)
-        plt.scatter(z[:, 0], z[:, 1], c="k", marker="x")
+        for c in np.unique(labels):
+            plt.scatter(*x_mean[labels == c].T)
+        plt.scatter(*z.T, c="k", marker="x")
         embed()
