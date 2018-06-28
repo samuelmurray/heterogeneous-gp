@@ -11,8 +11,8 @@ from . import distributions
 Likelihood = Callable[[tf.Tensor], ds.Distribution]
 
 
-def get_circle_data(num_data: int, output_dim: int,
-                    gaussian: bool = True) -> Tuple[np.ndarray, List[Likelihood], np.ndarray]:
+def circle_data(num_data: int, output_dim: int,
+                gaussian: bool = True) -> Tuple[np.ndarray, List[Likelihood], np.ndarray]:
     t = np.linspace(0, 2 * np.pi, num_data, endpoint=False)
     x = np.array([np.cos(t), np.sin(t)]).T
     mean = np.zeros(num_data)
@@ -34,7 +34,7 @@ def get_circle_data(num_data: int, output_dim: int,
     return y, likelihoods, labels
 
 
-def get_gaussian_data(num_data: int) -> Tuple[np.ndarray, List[Likelihood], np.ndarray]:
+def gaussian_data(num_data: int) -> Tuple[np.ndarray, List[Likelihood], np.ndarray]:
     y = np.empty((num_data, 3))
     labels = np.empty(num_data)
     half_data = num_data // 2

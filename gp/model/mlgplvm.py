@@ -55,7 +55,7 @@ class MLGPLVM(InducingPointsModel):
         return loss
 
     def elbo(self) -> tf.Tensor:
-        elbo = tf.identity(-self.kl_qx_px() - self.kl_qu_pu() + self.mc_expectation(), name="elbo")
+        elbo = tf.identity(self.mc_expectation() - self.kl_qx_px() - self.kl_qu_pu(), name="elbo")
         return elbo
 
     def kl_qx_px(self) -> tf.Tensor:
