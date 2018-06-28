@@ -44,6 +44,7 @@ setup(
         ],
         "tf": ["tensorflow>=1.0.0"],
         "tf_gpu": ["tensorflow-gpu>=1.0.0"],
+        "test": ["scikit-learn"],
     },
     include_package_data=True,
     license=LICENSE,
