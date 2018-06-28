@@ -5,9 +5,9 @@ from .kernel import Kernel
 
 
 class RBF(Kernel):
-    def __init__(self, variance: float = 1., gamma: float = 0.5, *, eps: float = 1e-4) -> None:
+    def __init__(self, variance: float = 1., gamma: float = 0.5, *, eps: float = 1e-4, name: str = "") -> None:
         super().__init__()
-        with tf.variable_scope("kern"):
+        with tf.variable_scope(name):
             self._log_variance = tf.get_variable("log_variance", shape=[1],
                                                  initializer=tf.constant_initializer(np.log(variance)))
             self._variance = tf.exp(self._log_variance, name="variance")

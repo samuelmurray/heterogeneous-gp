@@ -26,7 +26,7 @@ class MLGPLVM(InducingPointsModel):
             raise ValueError(
                 f"Must provide one distribution per y dimension, "
                 f"but len(likelihoods)={len(likelihoods)} and shape(y)={y.shape.as_list()}")
-        self.kern = RBF()
+        self.kern = RBF(name="kern")
         self._likelihoods = likelihoods
         self.y = y
         super().__init__(xdim, y.shape.as_list()[1], y.shape.as_list()[0], num_inducing)
