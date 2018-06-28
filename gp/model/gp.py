@@ -14,11 +14,11 @@ class GP(Model):
         super().__init__(x.shape.as_list()[1], y.shape.as_list()[1], x.shape.as_list()[0])
         self.x = x
         self.y = y
-        self.kern = RBF()
-        self.k_xx = self.kern(x)
+        self.kernel = RBF()
+        self.k_xx = self.kernel(x)
         self.k_xx_inv = tf.matrix_inverse(self.k_xx)
 
     def predict(self, z: np.ndarray) -> tf.Tensor:
-        k_zx = self.kern(tf.convert_to_tensor(z, dtype=tf.float32), self.x)
+        k_zx = self.kernel(tf.convert_to_tensor(z, dtype=tf.float32), self.x)
         mean = tf.matmul(tf.matmul(k_zx, self.k_xx_inv), self.y)
         return mean

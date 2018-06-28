@@ -14,26 +14,26 @@ class MLGPLVM(InducingPointsModel):
     Likelihood = Callable[[tf.Tensor], ds.Distribution]
 
     def __init__(self, y: tf.Tensor, xdim: int, *,
-                 kern: Kernel = None,
+                 kernel: Kernel = None,
                  x: np.ndarray = None,
                  num_inducing: int = 50,
                  likelihoods: List[Likelihood]) -> None:
-
+        super().__init__(xdim, y.shape.as_list()[1], y.shape.as_list()[0], num_inducing)
         if x is None:
-            x = np.random.normal(size=(y.shape.as_list()[0], xdim))
-        elif x.shape[0] != y.shape.as_list()[0]:
+            x = np.random.normal(size=(self.num_data, self.xdim))
+        elif x.shape[0] != self.num_data:
             raise ValueError(
                 f"First dimension of x and y must match, but shape(x)={list(x.shape)} and shape(y)={y.shape.as_list()}")
+        z = np.random.permutation(x.copy())[:self.num_inducing]
+        self.y = y
         if len(likelihoods) != y.shape.as_list()[1]:
             raise ValueError(
                 f"Must provide one distribution per y dimension, "
                 f"but len(likelihoods)={len(likelihoods)} and shape(y)={y.shape.as_list()}")
-        if kern is None:
-            kern = RBF(name="kern")
-        self.kern = kern
         self._likelihoods = likelihoods
-        self.y = y
-        super().__init__(xdim, y.shape.as_list()[1], y.shape.as_list()[0], num_inducing)
+        if kernel is None:
+            kernel = RBF(name="kern")
+        self.kernel = kernel
 
         with tf.variable_scope("qx"):
             self.qx_mean = tf.get_variable("mean", shape=[self.num_data, self.xdim],
@@ -41,11 +41,7 @@ class MLGPLVM(InducingPointsModel):
             self.qx_log_std = tf.get_variable("log_std", shape=[self.num_data, self.xdim],
                                               initializer=tf.constant_initializer(np.log(0.1)))
             self.qx_std = tf.exp(self.qx_log_std, name="std")
-
-        self.z = tf.get_variable("z", shape=[self.num_inducing, self.xdim],
-                                 initializer=tf.constant_initializer(
-                                     np.random.permutation(x.copy())[:self.num_inducing]))
-
+        self.z = tf.get_variable("z", shape=[self.num_inducing, self.xdim], initializer=tf.constant_initializer(z))
         with tf.variable_scope("qu"):
             self.qu_mean = tf.get_variable("mean", shape=[self.ydim, self.num_inducing],
                                            initializer=tf.random_normal_initializer(0.01))
@@ -73,9 +69,9 @@ class MLGPLVM(InducingPointsModel):
         with tf.name_scope("kl_qu_pu"):
             # TODO: Figure out why nodes pu_2, qu_2, normal and normal_2 are created. Done by MultivariateNormalTriL?
             qu = ds.MultivariateNormalTriL(self.qu_mean, self.qu_scale, name="qu")
-            k_zz = self.kern(self.z, name="k_zz")
-            l_zz = tf.tile(tf.expand_dims(tf.cholesky(k_zz), axis=0), multiples=[self.ydim, 1, 1], name="l_zz")
-            pu = ds.MultivariateNormalTriL(tf.zeros([self.ydim, self.num_inducing]), l_zz, name="pu")
+            k_zz = self.kernel(self.z, name="k_zz")
+            chol_zz = tf.tile(tf.expand_dims(tf.cholesky(k_zz), axis=0), multiples=[self.ydim, 1, 1], name="chol_zz")
+            pu = ds.MultivariateNormalTriL(tf.zeros([self.ydim, self.num_inducing]), chol_zz, name="pu")
             kl = tf.reduce_sum(ds.kl_divergence(qu, pu, allow_nan_stats=False), axis=0, name="kl")
         return kl
 
@@ -95,7 +91,7 @@ class MLGPLVM(InducingPointsModel):
 
     def sample_f(self, num_samples: int) -> tf.Tensor:
         with tf.name_scope("sample_f"):
-            k_zz = self.kern(self.z, name="k_zz")
+            k_zz = self.kernel(self.z, name="k_zz")
             k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
 
             # x = qx_mean + qx_std * e_x, e_x ~ N(0,1)
@@ -108,11 +104,11 @@ class MLGPLVM(InducingPointsModel):
             u_sample = tf.add(self.qu_mean, tf.einsum("ijk,tik->tij", self.qu_scale, e_u), name="u_sample")
             assert u_sample.shape.as_list() == [num_samples, self.ydim, self.num_inducing]
 
-            k_zx = self.kern(tf.tile(tf.expand_dims(self.z, axis=0), multiples=[num_samples, 1, 1]),
-                             x_sample,
-                             name="k_zx")
+            k_zx = self.kernel(tf.tile(tf.expand_dims(self.z, axis=0), multiples=[num_samples, 1, 1]),
+                               x_sample,
+                               name="k_zx")
             assert k_zx.shape.as_list() == [num_samples, self.num_inducing, self.num_data]
-            k_xx = self.kern(x_sample, name="k_xx")
+            k_xx = self.kernel(x_sample, name="k_xx")
             assert k_xx.shape.as_list() == [num_samples, self.num_data, self.num_data]
 
             # a = Kzz^(-1) * Kzx
