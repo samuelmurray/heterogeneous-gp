@@ -51,7 +51,7 @@ class MLGPLVM(InducingPointsModel):
 
     def loss(self) -> tf.Tensor:
         loss = tf.negative(self.elbo(), name="loss")
-        #tf.losses.add_loss(loss)  # TODO: What does this do?
+        # tf.losses.add_loss(loss)  # TODO: What does this do?
         return loss
 
     def elbo(self) -> tf.Tensor:
