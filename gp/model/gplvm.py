@@ -6,7 +6,7 @@ from ..kernel import RBF
 
 
 class GPLVM(Model):
-    HALF_LN2PI = 0.5 * tf.log(2 * np.pi)
+    _HALF_LN2PI = 0.5 * tf.log(2 * np.pi)
 
     def __init__(self, y: tf.Tensor, xdim: int) -> None:
         super().__init__(xdim, y.shape.as_list()[1], y.shape.as_list()[0])
@@ -21,11 +21,11 @@ class GPLVM(Model):
         a = tf.matrix_solve(tf.transpose(chol_xx), tf.matrix_solve(chol_xx, self.y))
         log_likelihood = (- 0.5 * tf.trace(tf.matmul(self.y, a, transpose_a=True))
                           - self.ydim * tf.reduce_sum(tf.log(tf.diag_part(chol_xx)))
-                          - self.ydim * self.num_data * self.HALF_LN2PI)
+                          - self.ydim * self.num_data * self._HALF_LN2PI)
         return log_likelihood
 
     def log_prior(self) -> tf.Tensor:
-        log_prior = - 0.5 * tf.reduce_sum(tf.square(self.x)) - self.xdim * self.num_data * self.HALF_LN2PI
+        log_prior = - 0.5 * tf.reduce_sum(tf.square(self.x)) - self.xdim * self.num_data * self._HALF_LN2PI
         return log_prior
 
     def log_joint(self) -> tf.Tensor:
