@@ -1,4 +1,4 @@
-from typing import List, Callable
+from typing import List
 
 import tensorflow as tf
 import tensorflow.contrib.distributions as ds
@@ -8,11 +8,10 @@ import numpy as np
 from .inducing_points_model import InducingPointsModel
 from ..kernel import Kernel
 from ..kernel import RBF
+from ..util.distributions import Likelihood
 
 
 class MLGPLVM(InducingPointsModel):
-    Likelihood = Callable[[tf.Tensor], ds.Distribution]
-
     def __init__(self, y: tf.Tensor, xdim: int, *,
                  kernel: Kernel = None,
                  x: np.ndarray = None,
@@ -52,6 +51,7 @@ class MLGPLVM(InducingPointsModel):
 
     def loss(self) -> tf.Tensor:
         loss = tf.negative(self.elbo(), name="loss")
+        #tf.losses.add_loss(loss)  # TODO: What does this do?
         return loss
 
     def elbo(self) -> tf.Tensor:
@@ -128,3 +128,17 @@ class MLGPLVM(InducingPointsModel):
                                tf.multiply(tf.expand_dims(tf.sqrt(b), 1), e_f),
                                name="f_samples")
         return f_samples
+
+    def create_summaries(self) -> None:
+        tf.summary.scalar("kl_qx_px", self.kl_qx_px(), family="Loss")
+        tf.summary.scalar("kl_qu_pu", self.kl_qu_pu(), family="Loss")
+        tf.summary.scalar("expectation", self.mc_expectation(), family="Loss")
+        tf.summary.scalar("training_loss", self.loss(), family="Loss")
+        tf.summary.histogram("qx_mean", self.qx_mean)
+        tf.summary.histogram("qx_std", self.qx_std)
+        tf.summary.histogram("z", self.z)
+        tf.summary.histogram("qu_mean", self.qu_mean)
+        tf.summary.histogram("qu_scale", self.qu_scale)
+        self.kernel.create_summaries()
+        for likelihood in self._likelihoods:
+            likelihood.create_summaries()

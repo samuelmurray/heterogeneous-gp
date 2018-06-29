@@ -22,3 +22,6 @@ class GP(Model):
         k_zx = self.kernel(tf.convert_to_tensor(z, dtype=tf.float32), self.x)
         mean = tf.matmul(tf.matmul(k_zx, self.k_xx_inv), self.y)
         return mean
+
+    def create_summaries(self):
+        pass

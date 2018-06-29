@@ -32,3 +32,10 @@ class GPLVM(Model):
         log_likelihood = self.log_likelihood()
         log_prior = self.log_prior()
         return log_likelihood + log_prior
+
+    def create_summaries(self):
+        tf.summary.scalar("log_likelihood", self.log_likelihood(), family="Loss")
+        tf.summary.scalar("log_prior", self.log_prior(), family="Loss")
+        tf.summary.scalar("log_joint", self.log_joint(), family="Loss")
+        tf.summary.histogram("z", self.x)
+        self.kernel.create_summaries()
