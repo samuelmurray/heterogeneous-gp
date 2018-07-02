@@ -138,7 +138,7 @@ class MLGPLVM(InducingPointsModel):
         tf.summary.histogram("qx_std", self.qx_std)
         tf.summary.histogram("z", self.z)
         tf.summary.histogram("qu_mean", self.qu_mean)
-        tf.summary.histogram("qu_scale", self.qu_scale)
+        tf.summary.histogram("qu_scale", tf.exp(self.qu_log_scale))
         self.kernel.create_summaries()
         for likelihood in self._likelihoods:
             likelihood.create_summaries()
