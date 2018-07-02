@@ -3,8 +3,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 from IPython import embed
 
-from gp.util.data import circle_data, gaussian_data, oilflow
-from gp.model import GPLVM
+from tfgp.util.data import circle_data, gaussian_data, oilflow
+from tfgp.model import GPLVM
 
 if __name__ == "__main__":
     # y_train, _, _ = circle_data(50, 10)

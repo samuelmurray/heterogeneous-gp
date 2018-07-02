@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 from sklearn.metrics.pairwise import rbf_kernel
 
-from gp.kernel import RBF, ARDRBF
+from tfgp.kernel import RBF, ARDRBF
 
 
 class TestRBF(tf.test.TestCase):

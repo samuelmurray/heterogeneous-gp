@@ -2,7 +2,7 @@ import os
 
 from setuptools import setup, find_packages
 
-NAME = "tf-gp"
+NAME = "tfgp"
 DESCRIPTION = "MLGPLVM implementation in TF"
 URL = "https://github.com/samuelmurray/TF-GP"
 EMAIL = "samuelmu@kth.se"

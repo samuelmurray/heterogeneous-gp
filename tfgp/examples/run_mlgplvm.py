@@ -5,8 +5,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 from IPython import embed
 
-from gp.util.data import circle_data, gaussian_data, oilflow
-from gp.model import MLGPLVM
+from tfgp.util.data import circle_data, gaussian_data, oilflow
+from tfgp.model import MLGPLVM
 
 if __name__ == "__main__":
     np.random.seed(1)
