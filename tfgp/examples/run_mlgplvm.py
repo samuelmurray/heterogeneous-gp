@@ -21,45 +21,29 @@ if __name__ == "__main__":
 
     print("Building graph...")
     loss = m.loss()
-
     learning_rate = 5e-4
     with tf.name_scope("train"):
-        with tf.variable_scope("", reuse=tf.AUTO_REUSE):
-            u_vars = [tf.get_variable("qu/mean"), tf.get_variable("qu/log_scale")]
-            non_u_vars = [tf.get_variable("z"), tf.get_variable("qx/mean"), tf.get_variable("qx/log_std"),
-                          tf.get_variable("kern/log_variance"), tf.get_variable("kern/log_gamma")]
-            train_x = tf.train.RMSPropOptimizer(learning_rate).minimize(loss, var_list=non_u_vars, name="train_x")
-            train_u = tf.train.RMSPropOptimizer(learning_rate).minimize(loss, var_list=u_vars, name="train_u")
-
+        trainable_vars = tf.trainable_variables()
+        train_all = tf.train.RMSPropOptimizer(learning_rate).minimize(loss, var_list=trainable_vars, name="RMSProp")
     with tf.name_scope("summary"):
-        tf.summary.scalar("kl_qx_px", m.kl_qx_px(), collections=["training"])
-        tf.summary.scalar("kl_qu_pu", m.kl_qu_pu(), collections=["training"])
-        tf.summary.scalar("expectation", m.mc_expectation(), collections=["training"])
-        tf.summary.scalar("training_loss", loss, collections=["training"])
-        tf.summary.scalar("kern_var", tf.squeeze(m.kernel._variance), collections=["training"])
-        tf.summary.scalar("kern_gamma", tf.squeeze(m.kernel._gamma), collections=["training"])
-        tf.summary.histogram("qx_mean", m.qx_mean, collections=["training"])
-        tf.summary.histogram("qx_std", m.qx_std, collections=["training"])
-        tf.summary.histogram("z", m.z, collections=["training"])
-        tf.summary.histogram("qu_mean", m.qu_mean, collections=["training"])
-        tf.summary.histogram("qu_scale", m.qu_scale, collections=["training"])
-        merged_summary = tf.summary.merge_all("training")
-    log_dir = f"../../log/{time.strftime('%Y%m%d%H%M%S')}"
-
+        m.create_summaries()
+        merged_summary = tf.summary.merge_all()
     init = tf.global_variables_initializer()
+
     plt.axis([-5, 5, -5, 5])
     plt.ion()
     with tf.Session() as sess:
+        log_dir = f"../../log/{time.strftime('%Y%m%d%H%M%S')}"
         summary_writer = tf.summary.FileWriter(log_dir, sess.graph)
         print("Initializing variables...")
         sess.run(init)
         print(f"Initial loss: {sess.run(loss)}")
         print("Starting training...")
         n_iter = 50000
+        n_print = 200
         for i in range(n_iter):
-            sess.run(train_x)
-            sess.run(train_u)
-            if i % 100 == 0:
+            sess.run(train_all)
+            if i % n_print == 0:
                 run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
                 run_metadata = tf.RunMetadata()
                 train_loss, summary = sess.run([loss, merged_summary], options=run_options, run_metadata=run_metadata)

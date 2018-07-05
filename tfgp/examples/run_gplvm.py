@@ -4,14 +4,18 @@ from matplotlib import pyplot as plt
 from IPython import embed
 
 from tfgp.util.data import circle_data, gaussian_data, oilflow
+from tfgp.util import PCA_reduce
 from tfgp.model import GPLVM
 
 if __name__ == "__main__":
-    # y_train, _, _ = circle_data(50, 10)
-    y_train, _, labels = oilflow(100)
-    y = tf.convert_to_tensor(y_train, dtype=tf.float32)
+    num_data = 100
+    latent_dim = 2
+    output_dim = 5
+    y_obs, _, labels = oilflow(num_data, output_dim)
+    x = PCA_reduce(y_obs, latent_dim)
+    y = tf.convert_to_tensor(y_obs, dtype=tf.float32)
 
-    gplvm = GPLVM(y, 2)
+    gplvm = GPLVM(y, latent_dim, x=x)
 
     loss = -gplvm.log_joint()
     learning_rate = 0.1
