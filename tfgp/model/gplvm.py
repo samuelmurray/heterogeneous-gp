@@ -26,27 +26,35 @@ class GPLVM(Model):
         self.y = y
         self.kernel = kernel if (kernel is not None) else RBF(0.1, eps=0.1, name="rbf")
 
+    def loss(self) -> tf.Tensor:
+        loss = tf.negative(self.log_joint(), name="loss")
+        return loss
+
+    def log_joint(self) -> tf.Tensor:
+        log_joint = tf.add(self.log_likelihood(), self.log_prior(), name="log_joint")
+        return log_joint
+
     def log_likelihood(self) -> tf.Tensor:
-        k_xx = self.kernel(self.x)
-        chol_xx = tf.cholesky(k_xx)
-        a = tf.matrix_solve(tf.transpose(chol_xx), tf.matrix_solve(chol_xx, self.y))
-        log_likelihood = (- 0.5 * tf.trace(tf.matmul(self.y, a, transpose_a=True))
-                          - self.ydim * tf.reduce_sum(tf.log(tf.diag_part(chol_xx)))
-                          - self.ydim * self.num_data * self._HALF_LN2PI)
+        with tf.name_scope("log_likelihood"):
+            k_xx = self.kernel(self.x, name="k_xx")
+            chol_xx = tf.cholesky(k_xx, name="chol_xx")
+            a = tf.matrix_solve(tf.transpose(chol_xx), tf.matrix_solve(chol_xx, self.y), name="a")
+            y_transp_a = tf.multiply(0.5, tf.trace(tf.matmul(self.y, a, transpose_a=True)), name="t_transp_a")
+            chol_trace = tf.identity(self.ydim * tf.reduce_sum(tf.log(tf.diag_part(chol_xx))), name="chol_trace")
+            const = tf.identity(self.ydim * self.num_data * self._HALF_LN2PI, name="const")
+            log_likelihood = tf.negative(y_transp_a + chol_trace + const, name="log_lik")
         return log_likelihood
 
     def log_prior(self) -> tf.Tensor:
-        log_prior = - 0.5 * tf.reduce_sum(tf.square(self.x)) - self.xdim * self.num_data * self._HALF_LN2PI
+        with tf.name_scope("log_prior"):
+            x_square_sum = tf.multiply(0.5, tf.reduce_sum(tf.square(self.x)), name="x_square_sum")
+            const = tf.identity(self.xdim * self.num_data * self._HALF_LN2PI, name="const")
+            log_prior = tf.negative(x_square_sum + const, name="log_prior")
         return log_prior
 
-    def log_joint(self) -> tf.Tensor:
-        log_likelihood = self.log_likelihood()
-        log_prior = self.log_prior()
-        return log_likelihood + log_prior
-
-    def create_summaries(self):
+    def create_summaries(self) -> None:
         tf.summary.scalar("log_likelihood", self.log_likelihood(), family="Loss")
         tf.summary.scalar("log_prior", self.log_prior(), family="Loss")
         tf.summary.scalar("log_joint", self.log_joint(), family="Loss")
-        tf.summary.histogram("z", self.x)
+        tf.summary.histogram("x", self.x)
         self.kernel.create_summaries()
