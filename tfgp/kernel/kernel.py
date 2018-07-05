@@ -2,7 +2,7 @@ import tensorflow as tf
 
 
 class Kernel:
-    def __init__(self, name) -> None:
+    def __init__(self, name: str) -> None:
         self._summary_family = "Kernel"
         self._name = name
         pass

@@ -5,8 +5,11 @@ from .kernel import Kernel
 
 
 class ARDRBF(Kernel):
-    def __init__(self, variance: float = 1., gamma: float = 0.5, *, xdim: int, eps: float = 1e-4,
-                 name: str = "") -> None:
+    def __init__(self, variance: float = 1., gamma: float = 0.5, *,
+                 xdim: int,
+                 eps: float = 1e-4,
+                 name: str = "",
+                 ) -> None:
         super().__init__(name)
         with tf.variable_scope(name):
             self._xdim = xdim
