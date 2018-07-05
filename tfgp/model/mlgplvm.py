@@ -13,16 +13,20 @@ from ..util.distributions import Likelihood
 
 class MLGPLVM(InducingPointsModel):
     def __init__(self, y: tf.Tensor, xdim: int, *,
-                 kernel: Kernel = None,
                  x: np.ndarray = None,
+                 kernel: Kernel = None,
                  num_inducing: int = 50,
-                 likelihoods: List[Likelihood]) -> None:
+                 likelihoods: List[Likelihood],
+                 ) -> None:
         super().__init__(xdim, y.shape.as_list()[1], y.shape.as_list()[0], num_inducing)
         if x is None:
             x = np.random.normal(size=(self.num_data, self.xdim))
         elif x.shape[0] != self.num_data:
             raise ValueError(
                 f"First dimension of x and y must match, but shape(x)={list(x.shape)} and shape(y)={y.shape.as_list()}")
+        elif x.shape[1] != self.xdim:
+            raise ValueError(
+                f"Second dimension of x must be xdim, but shape(x)={list(x.shape)} and xdim={self.xdim}")
         z = np.random.permutation(x.copy())[:self.num_inducing]
         self.y = y
         if len(likelihoods) != y.shape.as_list()[1]:
@@ -30,9 +34,7 @@ class MLGPLVM(InducingPointsModel):
                 f"Must provide one distribution per y dimension, "
                 f"but len(likelihoods)={len(likelihoods)} and shape(y)={y.shape.as_list()}")
         self._likelihoods = likelihoods
-        if kernel is None:
-            kernel = RBF(name="kern")
-        self.kernel = kernel
+        self.kernel = kernel if (kernel is not None) else RBF(name="rbf")
 
         with tf.variable_scope("qx"):
             self.qx_mean = tf.get_variable("mean", shape=[self.num_data, self.xdim],
