@@ -24,5 +24,5 @@ class GP(Model):
         mean = tf.matmul(tf.matmul(k_zx, self.k_xx_inv), self.y)
         return mean
 
-    def create_summaries(self):
+    def create_summaries(self) -> None:
         pass
