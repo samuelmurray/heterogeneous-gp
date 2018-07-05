@@ -2,18 +2,29 @@ import tensorflow as tf
 import numpy as np
 
 from .model import Model
+from ..kernel import Kernel
 from ..kernel import RBF
 
 
 class GPLVM(Model):
     _HALF_LN2PI = 0.5 * tf.log(2 * np.pi)
 
-    def __init__(self, y: tf.Tensor, xdim: int) -> None:
+    def __init__(self, y: tf.Tensor, xdim: int, *,
+                 x: np.ndarray = None,
+                 kernel: Kernel = None,
+                 ) -> None:
         super().__init__(xdim, y.shape.as_list()[1], y.shape.as_list()[0])
+        if x is None:
+            x = np.random.normal(size=(self.num_data, self.xdim))
+        elif x.shape[0] != self.num_data:
+            raise ValueError(
+                f"First dimension of x and y must match, but shape(x)={list(x.shape)} and shape(y)={y.shape.as_list()}")
+        elif x.shape[1] != self.xdim:
+            raise ValueError(
+                f"Second dimension of x must be xdim, but shape(x)={list(x.shape)} and xdim={self.xdim}")
+        self.x = tf.get_variable("x", shape=[self.num_data, self.xdim], initializer=tf.constant_initializer(x))
         self.y = y
-        self.x = tf.get_variable("x", shape=[self.num_data, self.xdim],
-                                 initializer=tf.random_normal_initializer())
-        self.kernel = RBF(0.1, eps=0.1)
+        self.kernel = kernel if (kernel is not None) else RBF(0.1, eps=0.1, name="rbf")
 
     def log_likelihood(self) -> tf.Tensor:
         k_xx = self.kernel(self.x)
