@@ -7,7 +7,7 @@ import pods
 from . import distributions
 
 
-def circle_data(num_data: int, output_dim: int,
+def circle_data(num_data: int, output_dim: int, *,
                 gaussian: bool = True) -> Tuple[np.ndarray, List[distributions.Likelihood], np.ndarray]:
     t = np.linspace(0, 2 * np.pi, num_data, endpoint=False)
     x = np.array([np.cos(t), np.sin(t)]).T
@@ -48,12 +48,13 @@ def gaussian_data(num_data: int) -> Tuple[np.ndarray, List[distributions.Likelih
     return y, likelihoods, labels
 
 
-def oilflow(num_data: int = None, *,
+def oilflow(num_data: int = None, output_dim: int = None, *,
             one_hot_labels: bool = False) -> Tuple[np.ndarray, List[distributions.Likelihood], np.ndarray]:
     oil = pods.datasets.oil()
-    indices = np.random.permutation(1000)[:num_data]
-    y = oil['X'][indices, :]
-    labels = oil['Y'][indices, :]
+    data_indices = np.random.permutation(1000)[:num_data]
+    dim_indices = np.random.permutation(12)[:output_dim]
+    y = oil['X'][data_indices[:, None], dim_indices]
+    labels = oil['Y'][data_indices, :]
     likelihoods = [distributions.Normal() for _ in range(y.shape[1])]
     if not one_hot_labels:
         labels = np.argmax(labels, axis=1)
