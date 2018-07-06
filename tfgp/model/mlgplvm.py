@@ -50,24 +50,24 @@ class MLGPLVM(InducingPointsModel):
                                                 shape=[self.ydim, self.num_inducing * (self.num_inducing + 1) / 2],
                                                 initializer=tf.zeros_initializer())
             self.qu_scale = ds.fill_triangular(tf.exp(self.qu_log_scale, name="scale"))
+        tf.losses.add_loss(self._loss())
 
-    def loss(self) -> tf.Tensor:
-        loss = tf.negative(self.elbo(), name="loss")
-        # tf.losses.add_loss(loss)  # TODO: What does this do?
+    def _loss(self) -> tf.Tensor:
+        loss = tf.negative(self._elbo(), name="elbo_loss")
         return loss
 
-    def elbo(self) -> tf.Tensor:
-        elbo = tf.identity(self.mc_expectation() - self.kl_qx_px() - self.kl_qu_pu(), name="elbo")
+    def _elbo(self) -> tf.Tensor:
+        elbo = tf.identity(self._mc_expectation() - self._kl_qx_px() - self._kl_qu_pu(), name="elbo")
         return elbo
 
-    def kl_qx_px(self) -> tf.Tensor:
+    def _kl_qx_px(self) -> tf.Tensor:
         with tf.name_scope("kl_qx_px"):
             qx = ds.Normal(self.qx_mean, self.qx_std, name="qx")
             px = ds.Normal(0., 1., name="px")
             kl = tf.reduce_sum(ds.kl_divergence(qx, px, allow_nan_stats=False), axis=[0, 1], name="kl")
         return kl
 
-    def kl_qu_pu(self) -> tf.Tensor:
+    def _kl_qu_pu(self) -> tf.Tensor:
         with tf.name_scope("kl_qu_pu"):
             # TODO: Figure out why nodes pu_2, qu_2, normal and normal_2 are created. Done by MultivariateNormalTriL?
             qu = ds.MultivariateNormalTriL(self.qu_mean, self.qu_scale, name="qu")
@@ -77,21 +77,21 @@ class MLGPLVM(InducingPointsModel):
             kl = tf.reduce_sum(ds.kl_divergence(qu, pu, allow_nan_stats=False), axis=0, name="kl")
         return kl
 
-    def mc_expectation(self) -> tf.Tensor:
+    def _mc_expectation(self) -> tf.Tensor:
         with tf.name_scope("mc_expectation"):
             num_samples = int(1e1)
-            approx_exp_all = bf.monte_carlo.expectation(f=self.log_prob, samples=self.sample_f(num_samples),
+            approx_exp_all = bf.monte_carlo.expectation(f=self._log_prob, samples=self._sample_f(num_samples),
                                                         name="approx_exp_all")
             approx_exp = tf.reduce_sum(approx_exp_all, axis=[0, 1], name="approx_exp")
         return approx_exp
 
-    def log_prob(self, f: tf.Tensor) -> tf.Tensor:
+    def _log_prob(self, f: tf.Tensor) -> tf.Tensor:
         with tf.name_scope("log_prob"):
             log_prob = tf.stack([self._likelihoods[i](f[:, i, :]).log_prob(tf.transpose(self.y[:, i]))
                                  for i in range(self.ydim)], axis=1)
         return log_prob
 
-    def sample_f(self, num_samples: int) -> tf.Tensor:
+    def _sample_f(self, num_samples: int) -> tf.Tensor:
         with tf.name_scope("sample_f"):
             k_zz = self.kernel(self.z, name="k_zz")
             k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
@@ -132,10 +132,10 @@ class MLGPLVM(InducingPointsModel):
         return f_samples
 
     def create_summaries(self) -> None:
-        tf.summary.scalar("kl_qx_px", self.kl_qx_px(), family="Loss")
-        tf.summary.scalar("kl_qu_pu", self.kl_qu_pu(), family="Loss")
-        tf.summary.scalar("expectation", self.mc_expectation(), family="Loss")
-        tf.summary.scalar("training_loss", self.loss(), family="Loss")
+        tf.summary.scalar("kl_qx_px", self._kl_qx_px(), family="Model")
+        tf.summary.scalar("kl_qu_pu", self._kl_qu_pu(), family="Model")
+        tf.summary.scalar("expectation", self._mc_expectation(), family="Model")
+        tf.summary.scalar("elbo_loss", self._loss(), family="Loss")
         tf.summary.histogram("qx_mean", self.qx_mean)
         tf.summary.histogram("qx_std", self.qx_std)
         tf.summary.histogram("z", self.z)
