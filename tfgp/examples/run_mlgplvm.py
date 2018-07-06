@@ -5,6 +5,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from IPython import embed
 
+import tfgp
 from tfgp.util.data import circle_data, gaussian_data, oilflow
 from tfgp.model import MLGPLVM
 
@@ -14,19 +15,26 @@ if __name__ == "__main__":
     num_data = 100
     latent_dim = 2
     y_obs, likelihoods, labels = oilflow(num_data)
+    x = tfgp.util.PCA_reduce(y_obs, latent_dim)
     y = tf.convert_to_tensor(y_obs, dtype=tf.float32)
 
     print("Creating model...")
-    m = MLGPLVM(y, latent_dim, likelihoods=likelihoods)
+    kernel = tfgp.kernel.ARDRBF(xdim=latent_dim, name="ardrbf")
+    m = MLGPLVM(y, latent_dim, x=x, kernel=kernel, likelihoods=likelihoods)
 
     print("Building graph...")
-    loss = m.loss()
+    loss = tf.losses.get_total_loss()
     learning_rate = 5e-4
     with tf.name_scope("train"):
-        trainable_vars = tf.trainable_variables()
-        train_all = tf.train.RMSPropOptimizer(learning_rate).minimize(loss, var_list=trainable_vars, name="RMSProp")
+        optimizer = tf.train.RMSPropOptimizer(learning_rate, name="RMSProp")
+        train_all = optimizer.minimize(loss, var_list=tf.trainable_variables(),
+                                       global_step=tf.train.create_global_step(),
+                                       name="train")
     with tf.name_scope("summary"):
         m.create_summaries()
+        tf.summary.scalar("total_loss", loss, family="Loss")
+        for reg_loss in tf.losses.get_regularization_losses():
+            tf.summary.scalar(f"{reg_loss.name}", reg_loss, family="Loss")
         merged_summary = tf.summary.merge_all()
     init = tf.global_variables_initializer()
 
