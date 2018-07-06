@@ -36,6 +36,7 @@ if __name__ == "__main__":
         for reg_loss in tf.losses.get_regularization_losses():
             tf.summary.scalar(f"{reg_loss.name}", reg_loss, family="Loss")
         merged_summary = tf.summary.merge_all()
+
     init = tf.global_variables_initializer()
 
     plt.axis([-5, 5, -5, 5])
