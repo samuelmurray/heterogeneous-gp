@@ -4,11 +4,12 @@ import numpy as np
 from sklearn.metrics.pairwise import rbf_kernel
 import pods
 
-from . import distributions
+from tfgp import likelihood
+
+DataTuple = Tuple[np.ndarray, List[likelihood.Likelihood], np.ndarray]
 
 
-def circle_data(num_data: int, output_dim: int, *,
-                gaussian: bool = True) -> Tuple[np.ndarray, List[distributions.Likelihood], np.ndarray]:
+def circle_data(num_data: int, output_dim: int, *, gaussian: bool = True) -> DataTuple:
     t = np.linspace(0, 2 * np.pi, num_data, endpoint=False)
     x = np.array([np.cos(t), np.sin(t)]).T
     mean = np.zeros(num_data)
@@ -19,18 +20,18 @@ def circle_data(num_data: int, output_dim: int, *,
     y = np.empty((num_data, output_dim))
     if gaussian:
         y = np.random.normal(f, var_y)
-        likelihoods = [distributions.Normal() for _ in range(output_dim)]
+        likelihoods = [likelihood.Normal() for _ in range(output_dim)]
     else:
         half_output = output_dim // 2
         y[:, :half_output] = np.random.normal(f[:, :half_output], var_y)
         y[:, half_output:] = np.random.binomial(1, 1 / (1 + np.exp(-f[:, half_output:])))
-        likelihoods = ([distributions.Normal() for _ in range(half_output)] +
-                       [distributions.Bernoulli() for _ in range(output_dim - half_output)])
+        likelihoods = ([likelihood.Normal() for _ in range(half_output)] +
+                       [likelihood.Bernoulli() for _ in range(output_dim - half_output)])
     labels = np.zeros(num_data)
     return y, likelihoods, labels
 
 
-def gaussian_data(num_data: int) -> Tuple[np.ndarray, List[distributions.Likelihood], np.ndarray]:
+def gaussian_data(num_data: int) -> DataTuple:
     y = np.empty((num_data, 3))
     labels = np.empty(num_data)
     half_data = num_data // 2
@@ -44,18 +45,17 @@ def gaussian_data(num_data: int) -> Tuple[np.ndarray, List[distributions.Likelih
     y[half_data:, 2] = np.random.binomial(1, 0.3, size=num_data - half_data)
     labels[half_data:] = np.ones(num_data - half_data)
 
-    likelihoods = [distributions.Normal(), distributions.Normal(), distributions.Bernoulli()]
+    likelihoods = [likelihood.Normal(), likelihood.Normal(), likelihood.Bernoulli()]
     return y, likelihoods, labels
 
 
-def oilflow(num_data: int = None, output_dim: int = None, *,
-            one_hot_labels: bool = False) -> Tuple[np.ndarray, List[distributions.Likelihood], np.ndarray]:
+def oilflow(num_data: int = None, output_dim: int = None, *, one_hot_labels: bool = False) -> DataTuple:
     oil = pods.datasets.oil()
     data_indices = np.random.permutation(1000)[:num_data]
     dim_indices = np.random.permutation(12)[:output_dim]
     y = oil['X'][data_indices[:, None], dim_indices]
     labels = oil['Y'][data_indices, :]
-    likelihoods = [distributions.Normal() for _ in range(y.shape[1])]
+    likelihoods = [likelihood.Normal() for _ in range(y.shape[1])]
     if not one_hot_labels:
         labels = np.argmax(labels, axis=1)
     return y, likelihoods, labels

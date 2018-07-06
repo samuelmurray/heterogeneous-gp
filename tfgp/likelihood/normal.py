@@ -1,16 +1,7 @@
 import tensorflow as tf
 import numpy as np
 
-
-class Likelihood:
-    def __init__(self):
-        self._summary_family = "Likelihood"
-
-    def __call__(self, f: tf.Tensor) -> tf.distributions.Distribution:
-        raise NotImplementedError
-
-    def create_summaries(self) -> None:
-        raise NotImplementedError
+from . import Likelihood
 
 
 class Normal(Likelihood):
@@ -34,19 +25,3 @@ class Normal(Likelihood):
     def __get_id(cls) -> int:
         cls.__count += 1
         return cls.__count
-
-
-class Bernoulli(Likelihood):
-    def __call__(self, f: tf.Tensor) -> tf.distributions.Bernoulli:
-        return tf.distributions.Bernoulli(logits=f)
-
-    def create_summaries(self) -> None:
-        pass
-
-
-class Poisson(Likelihood):
-    def __call__(self, f: tf.Tensor) -> tf.contrib.distributions.Poisson:
-        return tf.contrib.distributions.Poisson(log_rate=f)
-
-    def create_summaries(self) -> None:
-        pass

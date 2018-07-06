@@ -8,7 +8,7 @@ import numpy as np
 from .inducing_points_model import InducingPointsModel
 from ..kernel import Kernel
 from ..kernel import RBF
-from ..util.distributions import Likelihood
+from ..likelihood import Likelihood
 
 
 class MLGPLVM(InducingPointsModel):
