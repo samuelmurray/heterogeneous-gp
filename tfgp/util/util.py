@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def pca_reduce(x: np.ndarray, latent_dim: int, whiten: bool = False):
+def pca_reduce(x: np.ndarray, latent_dim: int, *, whiten: bool = False):
     """
     Reduce the dimensionality of x to latent_dim with PCA.
     :param x: data array of size N (number of points) x D (dimensions)
