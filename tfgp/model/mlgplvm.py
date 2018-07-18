@@ -29,7 +29,7 @@ class MLGPLVM(InducingPointsModel):
                 f"Second dimension of x must be xdim, but x.shape={x.shape} and xdim={self.xdim}")
         inducing_indices = np.random.permutation(self.num_inducing)
         z = x[inducing_indices]
-        u = y[inducing_indices]
+        # u = y[inducing_indices]  # Oops, this only works with Gaussian Likelihood
         self.y = tf.convert_to_tensor(y, dtype=tf.float32)
         if len(likelihoods) != self.ydim:
             raise ValueError(
@@ -47,7 +47,7 @@ class MLGPLVM(InducingPointsModel):
         self.z = tf.get_variable("z", shape=[self.num_inducing, self.xdim], initializer=tf.constant_initializer(z))
         with tf.variable_scope("qu"):
             self.qu_mean = tf.get_variable("mean", shape=[self.ydim, self.num_inducing],
-                                           initializer=tf.constant_initializer(u))
+                                           initializer=tf.random_normal_initializer(0.01))
             self.qu_log_scale = tf.get_variable("log_scale",
                                                 shape=[self.ydim, self.num_inducing * (self.num_inducing + 1) / 2],
                                                 initializer=tf.zeros_initializer())
