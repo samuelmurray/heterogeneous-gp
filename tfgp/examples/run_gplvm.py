@@ -1,12 +1,11 @@
 import time
 
 import tensorflow as tf
-import numpy as np
 from matplotlib import pyplot as plt
 import seaborn as sns
 from IPython import embed
 
-from tfgp.util.data import circle_data, gaussian_data, oilflow
+from tfgp.util import data
 from tfgp.util import PCA_reduce
 from tfgp.model import GPLVM
 
@@ -16,7 +15,7 @@ if __name__ == "__main__":
     num_data = 100
     latent_dim = 2
     output_dim = 5
-    y_obs, _, labels = oilflow(num_data, output_dim)
+    y_obs, _, labels = data.make_gaussian_blobs(num_data, output_dim, 3)
     x = PCA_reduce(y_obs, latent_dim)
     y = tf.convert_to_tensor(y_obs, dtype=tf.float32)
 

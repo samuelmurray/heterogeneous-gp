@@ -7,7 +7,7 @@ import seaborn as sns
 from IPython import embed
 
 import tfgp
-from tfgp.util.data import circle_data, gaussian_data, oilflow
+from tfgp.util import data
 from tfgp.model import MLGPLVM
 
 if __name__ == "__main__":
@@ -16,7 +16,7 @@ if __name__ == "__main__":
     print("Generating data...")
     num_data = 100
     latent_dim = 2
-    y_obs, likelihoods, labels = oilflow(num_data)
+    y_obs, likelihoods, labels = data.make_oilflow(num_data)
     x = tfgp.util.PCA_reduce(y_obs, latent_dim)
     y = tf.convert_to_tensor(y_obs, dtype=tf.float32)
 
