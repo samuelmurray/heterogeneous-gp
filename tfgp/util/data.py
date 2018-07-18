@@ -3,6 +3,7 @@ from typing import Tuple, List
 import numpy as np
 from sklearn.metrics.pairwise import rbf_kernel
 from sklearn.datasets import make_blobs
+import pandas as pd
 import pods
 
 from tfgp import likelihood
@@ -65,4 +66,26 @@ def make_oilflow(num_data: int = None, output_dim: int = None, *, one_hot_labels
     likelihoods = [likelihood.Normal() for _ in range(y.shape[1])]
     if not one_hot_labels:
         labels = np.argmax(labels, axis=1)
+    return y, likelihoods, labels
+
+
+def make_titanic(num_data: int = None) -> DataTuple:
+    try:
+        train_df = pd.read_csv("~/.kaggle/competitions/titanic/train.csv")
+    except FileNotFoundError as e:
+        print("You must manually download the Titanic competition using Kaggle before calling this function")
+        raise e
+    train_df = train_df.drop(["PassengerId", "Pclass", "Name", "Ticket", "Embarked", "Cabin"], axis=1)
+    # TODO: Pclass would be nice, but it requires categorical likelihood (ordinal data)
+    train_df["Sex"] = train_df["Sex"].map({"male": 0, "female": 1}).astype(int)
+    train_df = train_df.dropna()
+    # Data come as:           Sex,    Age,  SibSp, Parch, Fare
+    # The respective type is: Binary, Cont, Disc,  Disc,  Cont
+    print(train_df)
+    data_indices = np.random.permutation(714)[:num_data]
+
+    y = train_df.drop(["Survived"], axis=1).values[data_indices]
+    likelihoods = [likelihood.Bernoulli(), likelihood.Normal(), likelihood.Poisson(), likelihood.Poisson(),
+                   likelihood.Normal()]
+    labels = train_df["Survived"].values[data_indices]
     return y, likelihoods, labels
