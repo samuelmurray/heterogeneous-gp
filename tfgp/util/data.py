@@ -79,13 +79,12 @@ def make_titanic(num_data: int = None) -> DataTuple:
     # TODO: Pclass would be nice, but it requires categorical likelihood (ordinal data)
     train_df["Sex"] = train_df["Sex"].map({"male": 0, "female": 1}).astype(int)
     train_df = train_df.dropna()
+
+    data_indices = np.random.permutation(714)[:num_data]
+    y = train_df.drop(["Survived"], axis=1).values[data_indices]
     # Data come as:           Sex,    Age,  SibSp, Parch, Fare
     # The respective type is: Binary, Cont, Disc,  Disc,  Cont
-    print(train_df)
-    data_indices = np.random.permutation(714)[:num_data]
-
-    y = train_df.drop(["Survived"], axis=1).values[data_indices]
-    likelihoods = [likelihood.Bernoulli(), likelihood.Normal(), likelihood.Poisson(), likelihood.Poisson(),
-                   likelihood.Normal()]
+    likelihoods = [
+        likelihood.Bernoulli(), likelihood.Normal(), likelihood.Poisson(), likelihood.Poisson(), likelihood.Normal()]
     labels = train_df["Survived"].values[data_indices]
     return y, likelihoods, labels
