@@ -7,7 +7,7 @@ import seaborn as sns
 from IPython import embed
 
 import tfgp
-from tfgp.util import data
+from tfgp.util import data, pca_reduce
 from tfgp.model import MLGPLVM
 
 if __name__ == "__main__":

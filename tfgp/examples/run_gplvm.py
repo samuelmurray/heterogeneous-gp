@@ -5,8 +5,7 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 from IPython import embed
 
-from tfgp.util import data
-from tfgp.util import pca_reduce
+from tfgp.util import data, pca_reduce
 from tfgp.model import GPLVM
 
 if __name__ == "__main__":
