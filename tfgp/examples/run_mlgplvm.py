@@ -16,9 +16,9 @@ if __name__ == "__main__":
     print("Generating data...")
     num_data = 100
     latent_dim = 2
-    y_obs, likelihoods, labels = data.make_oilflow(num_data)
-    x = tfgp.util.PCA_reduce(y_obs, latent_dim)
-    y = tf.convert_to_tensor(y_obs, dtype=tf.float32)
+    output_dim = 5
+    y, likelihoods, labels = data.make_gaussian_blobs(num_data, output_dim, num_classes=3)
+    x = tfgp.util.PCA_reduce(y, latent_dim)
 
     print("Creating model...")
     kernel = tfgp.kernel.ARDRBF(xdim=latent_dim, name="ardrbf")
@@ -44,7 +44,7 @@ if __name__ == "__main__":
     plt.axis([-5, 5, -5, 5])
     plt.ion()
     with tf.Session() as sess:
-        log_dir = f"../../log/{time.strftime('%Y%m%d%H%M%S')}"
+        log_dir = f"../../log/mlgplvm/{time.strftime('%Y%m%d%H%M%S')}"
         summary_writer = tf.summary.FileWriter(log_dir, sess.graph)
         print("Initializing variables...")
         sess.run(init)
