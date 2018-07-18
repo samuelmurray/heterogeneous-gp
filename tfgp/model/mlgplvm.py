@@ -12,27 +12,29 @@ from ..likelihood import Likelihood
 
 
 class MLGPLVM(InducingPointsModel):
-    def __init__(self, y: tf.Tensor, xdim: int, *,
+    def __init__(self, y: np.ndarray, xdim: int, *,
                  x: np.ndarray = None,
                  kernel: Kernel = None,
                  num_inducing: int = 50,
                  likelihoods: List[Likelihood],
                  ) -> None:
-        super().__init__(xdim, y.shape.as_list()[1], y.shape.as_list()[0], num_inducing)
+        super().__init__(xdim, y.shape[1], y.shape[0], num_inducing)
         if x is None:
             x = np.random.normal(size=(self.num_data, self.xdim))
         elif x.shape[0] != self.num_data:
             raise ValueError(
-                f"First dimension of x and y must match, but shape(x)={list(x.shape)} and shape(y)={y.shape.as_list()}")
+                f"First dimension of x and y must match, but x.shape={x.shape} and y.shape={y.shape}")
         elif x.shape[1] != self.xdim:
             raise ValueError(
-                f"Second dimension of x must be xdim, but shape(x)={list(x.shape)} and xdim={self.xdim}")
-        z = np.random.permutation(x.copy())[:self.num_inducing]
-        self.y = y
-        if len(likelihoods) != y.shape.as_list()[1]:
+                f"Second dimension of x must be xdim, but x.shape={x.shape} and xdim={self.xdim}")
+        inducing_indices = np.random.permutation(self.num_inducing)
+        z = x[inducing_indices]
+        u = y[inducing_indices]
+        self.y = tf.convert_to_tensor(y, dtype=tf.float32)
+        if len(likelihoods) != self.ydim:
             raise ValueError(
                 f"Must provide one distribution per y dimension, "
-                f"but len(likelihoods)={len(likelihoods)} and shape(y)={y.shape.as_list()}")
+                f"but len(likelihoods)={len(likelihoods)} and y.shape={y.shape}")
         self._likelihoods = likelihoods
         self.kernel = kernel if (kernel is not None) else RBF(name="rbf")
 
@@ -45,7 +47,7 @@ class MLGPLVM(InducingPointsModel):
         self.z = tf.get_variable("z", shape=[self.num_inducing, self.xdim], initializer=tf.constant_initializer(z))
         with tf.variable_scope("qu"):
             self.qu_mean = tf.get_variable("mean", shape=[self.ydim, self.num_inducing],
-                                           initializer=tf.random_normal_initializer(0.01))
+                                           initializer=tf.constant_initializer(u))
             self.qu_log_scale = tf.get_variable("log_scale",
                                                 shape=[self.ydim, self.num_inducing * (self.num_inducing + 1) / 2],
                                                 initializer=tf.zeros_initializer())
@@ -69,7 +71,6 @@ class MLGPLVM(InducingPointsModel):
 
     def _kl_qu_pu(self) -> tf.Tensor:
         with tf.name_scope("kl_qu_pu"):
-            # TODO: Figure out why nodes pu_2, qu_2, normal and normal_2 are created. Done by MultivariateNormalTriL?
             qu = ds.MultivariateNormalTriL(self.qu_mean, self.qu_scale, name="qu")
             k_zz = self.kernel(self.z, name="k_zz")
             chol_zz = tf.tile(tf.expand_dims(tf.cholesky(k_zz), axis=0), multiples=[self.ydim, 1, 1], name="chol_zz")
