@@ -18,7 +18,7 @@ if __name__ == "__main__":
     latent_dim = 2
     output_dim = 5
     y, likelihoods, labels = data.make_gaussian_blobs(num_data, output_dim, num_classes=3)
-    x = tfgp.util.PCA_reduce(y, latent_dim)
+    x = tfgp.util.pca_reduce(y, latent_dim)
 
     print("Creating model...")
     kernel = tfgp.kernel.ARDRBF(xdim=latent_dim, name="ardrbf")

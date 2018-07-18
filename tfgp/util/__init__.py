@@ -2,4 +2,4 @@
 Utility functions for GP
 """
 
-from .util import PCA_reduce
+from .util import pca_reduce

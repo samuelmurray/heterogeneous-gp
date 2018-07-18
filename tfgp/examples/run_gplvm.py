@@ -6,7 +6,7 @@ import seaborn as sns
 from IPython import embed
 
 from tfgp.util import data
-from tfgp.util import PCA_reduce
+from tfgp.util import pca_reduce
 from tfgp.model import GPLVM
 
 if __name__ == "__main__":
@@ -16,7 +16,7 @@ if __name__ == "__main__":
     latent_dim = 2
     output_dim = 5
     y, _, labels = data.make_gaussian_blobs(num_data, output_dim, 3)
-    x = PCA_reduce(y, latent_dim)
+    x = pca_reduce(y, latent_dim)
 
     print("Creating model...")
     m = GPLVM(y, latent_dim, x=x)
