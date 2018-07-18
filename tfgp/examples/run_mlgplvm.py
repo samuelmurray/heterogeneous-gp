@@ -3,6 +3,7 @@ import time
 import tensorflow as tf
 import numpy as np
 from matplotlib import pyplot as plt
+import seaborn as sns
 from IPython import embed
 
 import tfgp
@@ -10,6 +11,7 @@ from tfgp.util.data import circle_data, gaussian_data, oilflow
 from tfgp.model import MLGPLVM
 
 if __name__ == "__main__":
+    sns.set()
     np.random.seed(1)
     print("Generating data...")
     num_data = 100
@@ -62,15 +64,13 @@ if __name__ == "__main__":
                 print(loss_print)
                 x_mean = sess.run(m.qx_mean)
                 z = sess.run(m.z)
-                for c in np.unique(labels):
-                    plt.scatter(*x_mean[labels == c].T)
+                plt.scatter(*x_mean.T, c=labels, cmap="Paired", edgecolors='k')
                 plt.scatter(*z.T, c="k", marker="x")
                 plt.title(loss_print)
                 plt.pause(0.05)
                 plt.cla()
         x_mean = sess.run(m.qx_mean)
         z = sess.run(m.z)
-        for c in np.unique(labels):
-            plt.scatter(*x_mean[labels == c].T)
+        plt.scatter(*x_mean.T, c=labels, cmap="Paired", edgecolors='k')
         plt.scatter(*z.T, c="k", marker="x")
         embed()

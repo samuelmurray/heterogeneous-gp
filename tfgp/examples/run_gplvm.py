@@ -3,6 +3,7 @@ import time
 import tensorflow as tf
 import numpy as np
 from matplotlib import pyplot as plt
+import seaborn as sns
 from IPython import embed
 
 from tfgp.util.data import circle_data, gaussian_data, oilflow
@@ -10,6 +11,7 @@ from tfgp.util import PCA_reduce
 from tfgp.model import GPLVM
 
 if __name__ == "__main__":
+    sns.set()
     print("Generating data...")
     num_data = 100
     latent_dim = 2
@@ -53,11 +55,9 @@ if __name__ == "__main__":
                 summary_writer.add_summary(summary, i)
                 print(f"Step {i} - Loss: {sess.run(loss)}")
                 x = sess.run(m.x)
-                for c in np.unique(labels):
-                    plt.scatter(*x[labels == c].T)
+                plt.scatter(*x.T, c=labels, cmap="Paired", edgecolors='k')
                 plt.pause(0.05)
                 plt.cla()
         x = sess.run(m.x)
-        for c in np.unique(labels):
-            plt.scatter(*x[labels == c].T)
+        plt.scatter(*x.T, c=labels, cmap="Paired", edgecolors='k')
         embed()
