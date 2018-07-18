@@ -40,6 +40,7 @@ setup(
             "IPython",
             "pandas",
             "pods",
+            "seaborn",
         ],
         "tf": ["tensorflow>=1.0.0"],
         "tf_gpu": ["tensorflow-gpu>=1.0.0"],
