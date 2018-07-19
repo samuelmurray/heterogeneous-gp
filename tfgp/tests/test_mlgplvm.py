@@ -1,6 +1,7 @@
 import tensorflow as tf
+from sklearn.datasets import make_blobs
 
-from tfgp.util import data
+from tfgp.likelihood import Normal
 from tfgp.model import MLGPLVM
 from tfgp.kernel import RBF
 
@@ -16,7 +17,8 @@ class TestMLGPLVM(tf.test.TestCase):
             latent_dim = 2
             output_dim = 5
             num_classes = 3
-            y, likelihoods, labels = data.make_gaussian_blobs(num_data, output_dim, num_classes)
+            y, _ = make_blobs(num_data, output_dim, num_classes)
+            likelihoods = [Normal() for _ in range(output_dim)]
 
             m = MLGPLVM(y, latent_dim, kernel=self.kernel, likelihoods=likelihoods)
 
