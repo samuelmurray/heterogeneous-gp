@@ -22,11 +22,12 @@ class MLGPLVM(InducingPointsModel):
         if x is None:
             x = np.random.normal(size=(self.num_data, self.xdim))
         elif x.shape[0] != self.num_data:
-            raise ValueError(
-                f"First dimension of x and y must match, but x.shape={x.shape} and y.shape={y.shape}")
+            raise ValueError(f"First dimension of x and y must match, but x.shape={x.shape} and y.shape={y.shape}")
         elif x.shape[1] != self.xdim:
-            raise ValueError(
-                f"Second dimension of x must be xdim, but x.shape={x.shape} and xdim={self.xdim}")
+            raise ValueError(f"Second dimension of x must be xdim, but x.shape={x.shape} and xdim={self.xdim}")
+        if self.num_inducing > self.num_data:
+            raise ValueError(f"Can't have more inducing points than data, "
+                             f"but num_inducing={self.num_inducing} and y.shape={y.shape}")
         inducing_indices = np.random.permutation(self.num_inducing)
         z = x[inducing_indices]
         # u = y[inducing_indices]  # Oops, this only works with Gaussian Likelihood
@@ -36,7 +37,7 @@ class MLGPLVM(InducingPointsModel):
                 f"Must provide one distribution per y dimension, "
                 f"but len(likelihoods)={len(likelihoods)} and y.shape={y.shape}")
         self._likelihoods = likelihoods
-        self.kernel = kernel if (kernel is not None) else RBF(name="rbf")
+        self.kernel = kernel if (kernel is not None) else RBF()
 
         with tf.variable_scope("qx"):
             self.qx_mean = tf.get_variable("mean", shape=[self.num_data, self.xdim],

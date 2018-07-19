@@ -17,14 +17,12 @@ class GPLVM(Model):
         if x is None:
             x = np.random.normal(size=(self.num_data, self.xdim))
         elif x.shape[0] != self.num_data:
-            raise ValueError(
-                f"First dimension of x and y must match, but x.shape={x.shape} and y.shape={y.shape}")
+            raise ValueError(f"First dimension of x and y must match, but x.shape={x.shape} and y.shape={y.shape}")
         elif x.shape[1] != self.xdim:
-            raise ValueError(
-                f"Second dimension of x must be xdim, but x.shape={x.shape} and xdim={self.xdim}")
+            raise ValueError(f"Second dimension of x must be xdim, but x.shape={x.shape} and xdim={self.xdim}")
         self.y = tf.convert_to_tensor(y, dtype=tf.float32)
         self.x = tf.get_variable("x", shape=[self.num_data, self.xdim], initializer=tf.constant_initializer(x))
-        self.kernel = kernel if (kernel is not None) else RBF(0.1, eps=0.1, name="rbf")
+        self.kernel = kernel if (kernel is not None) else RBF(0.1, eps=0.1)
 
     def loss(self) -> tf.Tensor:
         loss = tf.negative(self.log_joint(), name="loss")
