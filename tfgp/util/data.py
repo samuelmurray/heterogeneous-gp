@@ -31,6 +31,37 @@ def make_sin_binary(num_data: int) -> DataTuple:
     return x, likelihoods, y
 
 
+def make_sin_count(num_data: int) -> DataTuple:
+    x = np.linspace(0, 2 * np.pi, num_data)[:, None]
+    rate = np.exp(2 * np.sin(x))
+    y = np.random.poisson(rate)
+    likelihoods = [likelihood.Poisson()]
+    return x, likelihoods, y
+
+
+def make_xcos(num_data: int) -> DataTuple:
+    x = np.linspace(-2 * np.pi, 2 * np.pi, num_data)[:, None]
+    y = x * np.cos(x)
+    likelihoods = [likelihood.Normal()]
+    return x, likelihoods, y
+
+
+def make_xcos_binary(num_data: int) -> DataTuple:
+    x = np.linspace(-2 * np.pi, 2 * np.pi, num_data)[:, None]
+    p = expit(x * np.cos(x))
+    y = np.random.binomial(1, p)
+    likelihoods = [likelihood.Bernoulli()]
+    return x, likelihoods, y
+
+
+def make_xsin_count(num_data: int) -> DataTuple:
+    x = np.linspace(-np.pi, np.pi, num_data)[:, None]
+    rate = np.exp(x * np.sin(x))
+    y = np.random.poisson(rate)
+    likelihoods = [likelihood.Poisson()]
+    return x, likelihoods, y
+
+
 ################
 # UNSUPERVISED #
 ################
