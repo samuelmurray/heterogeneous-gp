@@ -3,6 +3,7 @@ from typing import Tuple, List
 import numpy as np
 from sklearn.metrics.pairwise import rbf_kernel
 from sklearn.datasets import make_blobs
+from scipy.special import expit
 import pandas as pd
 import pods
 
@@ -10,6 +11,29 @@ from tfgp import likelihood
 
 DataTuple = Tuple[np.ndarray, List[likelihood.Likelihood], np.ndarray]
 
+
+##############
+# SUPERVISED #
+##############
+
+def make_sin(num_data: int) -> DataTuple:
+    x = np.linspace(0, 2 * np.pi, num_data)[:, None]
+    y = np.sin(x)
+    likelihoods = [likelihood.Normal()]
+    return x, likelihoods, y
+
+
+def make_sin_binary(num_data: int) -> DataTuple:
+    x = np.linspace(0, 2 * np.pi, num_data)[:, None]
+    p = expit(2 * np.sin(x))
+    y = np.random.binomial(1, p)
+    likelihoods = [likelihood.Bernoulli()]
+    return x, likelihoods, y
+
+
+################
+# UNSUPERVISED #
+################
 
 def make_gaussian_blobs(num_data: int, output_dim: int, num_classes: int) -> DataTuple:
     y, labels = make_blobs(num_data, output_dim, num_classes)
