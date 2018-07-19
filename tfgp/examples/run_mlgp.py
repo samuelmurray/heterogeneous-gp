@@ -3,18 +3,18 @@ import time
 import tensorflow as tf
 import numpy as np
 from matplotlib import pyplot as plt
-
-from tfgp import likelihood
-from tfgp.model import MLGP
-
+import seaborn as sns
 from IPython import embed
 
+from tfgp.util import data
+from tfgp.model import MLGP
+
 if __name__ == "__main__":
+    sns.set()
     print("Generating data...")
-    x = np.linspace(0, 2 * np.pi, 20)[:, None]
-    y = np.sin(x)
-    likelihoods = [likelihood.Normal()]
-    num_inducing = 10
+    num_data = 40
+    x, likelihoods, y = data.make_sin_count(num_data)
+    num_inducing = 20
 
     print("Creating model...")
     m = MLGP(x, y, likelihoods=likelihoods, num_inducing=num_inducing)
@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     plt.axis([-5, 5, -5, 5])
     plt.ion()
-    x_test = np.linspace(-2, 2 * np.pi + 2, 30)[:, None]
+    x_test = np.linspace(np.min(x) - 1, np.max(x) + 1, 30)[:, None]
     with tf.Session() as sess:
         log_dir = f"../../log/mlgp/{time.strftime('%Y%m%d%H%M%S')}"
         summary_writer = tf.summary.FileWriter(log_dir, sess.graph)
@@ -59,11 +59,12 @@ if __name__ == "__main__":
                 loss_print = f"Step {i} - Loss: {train_loss}"
                 print(loss_print)
                 z = sess.run(m.z)
-                u = sess.run(m.qu_mean)
-                y_pred = sess.run(m.predict(x_test))
+                y_mean, y_std = sess.run(m.predict(x_test))
                 plt.scatter(x, y, marker="o")
-                plt.scatter(z, u, c="k", marker="x")
-                plt.plot(x_test, y_pred)
+                plt.scatter(z, np.zeros(z.shape), c="k", marker="x")
+                plt.plot(x_test, y_mean, c="k")
+                plt.plot(x_test, y_mean + y_std, "k--")
+                plt.plot(x_test, y_mean - y_std, "k--")
                 plt.title(loss_print)
                 plt.pause(0.05)
                 plt.cla()
