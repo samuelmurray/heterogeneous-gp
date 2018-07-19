@@ -131,6 +131,7 @@ class MLGPLVM(InducingPointsModel):
             f_samples = tf.add(tf.matmul(u_sample, a),
                                tf.multiply(tf.expand_dims(tf.sqrt(b), 1), e_f),
                                name="f_samples")
+            assert f_samples.shape.as_list() == [num_samples, self.ydim, self.num_data]
         return f_samples
 
     def create_summaries(self) -> None:
