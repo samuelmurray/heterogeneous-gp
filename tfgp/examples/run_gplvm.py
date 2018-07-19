@@ -21,7 +21,7 @@ if __name__ == "__main__":
     m = GPLVM(y, latent_dim, x=x)
 
     print("Building graph...")
-    loss = m.loss()
+    loss = tf.losses.get_total_loss()
     learning_rate = 0.1
     with tf.name_scope("train"):
         optimizer = tf.train.RMSPropOptimizer(learning_rate, name="RMSProp")
