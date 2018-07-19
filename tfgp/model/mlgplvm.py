@@ -28,7 +28,7 @@ class MLGPLVM(InducingPointsModel):
         if self.num_inducing > self.num_data:
             raise ValueError(f"Can't have more inducing points than data, "
                              f"but num_inducing={self.num_inducing} and y.shape={y.shape}")
-        inducing_indices = np.random.permutation(self.num_inducing)
+        inducing_indices = np.random.permutation(self.num_data)[:self.num_inducing]
         z = x[inducing_indices]
         # u = y[inducing_indices]  # Oops, this only works with Gaussian Likelihood
         self.y = tf.convert_to_tensor(y, dtype=tf.float32)
