@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-from tfgp.util import data
+from tfgp.util.data import make_gaussian_blobs
 from tfgp.model import GPLVM
 from tfgp.kernel import RBF
 
@@ -16,7 +16,7 @@ class TestGPLVM(tf.test.TestCase):
             latent_dim = 2
             output_dim = 5
             num_classes = 3
-            y, _, labels = data.make_gaussian_blobs(num_data, output_dim, num_classes)
+            y, _, labels = make_gaussian_blobs(num_data, output_dim, num_classes)
 
             m = GPLVM(y, latent_dim, kernel=self.kernel)
 
