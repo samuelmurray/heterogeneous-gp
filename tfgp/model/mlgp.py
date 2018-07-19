@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 
 import tensorflow as tf
 import tensorflow.contrib.distributions as ds
@@ -112,12 +112,15 @@ class MLGP(InducingPointsModel):
             assert f_samples.shape.as_list() == [num_samples, self.ydim, self.num_data], f"{f_samples.shape.as_list()}"
         return f_samples
 
-    def predict(self, x_test: np.ndarray) -> tf.Tensor:
+    def predict(self, x_test: np.ndarray) -> Tuple[tf.Tensor, tf.Tensor]:
         k_zz = self.kernel(self.z)
         k_zz_inv = tf.matrix_inverse(k_zz)
         k_x_test_z = self.kernel(tf.convert_to_tensor(x_test, dtype=tf.float32), self.z)
-        mean = tf.matmul(tf.matmul(k_x_test_z, k_zz_inv), self.qu_mean, transpose_b=True)
-        return mean
+        f_mean = tf.matmul(tf.matmul(k_x_test_z, k_zz_inv), self.qu_mean, transpose_b=True)
+        mean = tf.stack([self._likelihoods[i](f_mean[:, i]).mean() for i in range(self.ydim)], axis=1)
+        std = tf.stack([self._likelihoods[i](f_mean[:, i]).stddev() for i in range(self.ydim)], axis=1)
+        # TODO: This might not be the correct way to calculate stddev for non-Gaussian distributions
+        return mean, std
 
     def create_summaries(self) -> None:
         tf.summary.scalar("kl_qu_pu", self._kl_qu_pu(), family="Model")
