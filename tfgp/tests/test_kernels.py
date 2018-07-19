@@ -2,7 +2,20 @@ import tensorflow as tf
 import numpy as np
 from sklearn.metrics.pairwise import rbf_kernel
 
-from tfgp.kernel import RBF, ARDRBF
+from tfgp.kernel import Kernel, RBF, ARDRBF
+
+
+class TestKernel(tf.test.TestCase):
+    def setUp(self):
+        pass
+
+    def test_abc(self):
+        exception_thrown = False
+        try:
+            ker = Kernel("kernel")
+        except TypeError:
+            exception_thrown = True
+        self.assertTrue(exception_thrown)
 
 
 class TestRBF(tf.test.TestCase):
