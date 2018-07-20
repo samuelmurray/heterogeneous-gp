@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import tensorflow as tf
 import numpy as np
 
@@ -16,12 +18,17 @@ class GP(Model):
         self.y = y
         self.kernel = kernel if (kernel is not None) else RBF()
         self.k_xx = self.kernel(x)
-        self.k_xx_inv = tf.matrix_inverse(self.k_xx)
+        self.chol_xx = tf.cholesky(self.k_xx)
+        self.a = tf.matrix_solve(tf.transpose(self.chol_xx), tf.matrix_solve(self.chol_xx, self.y))
 
-    def predict(self, z: np.ndarray) -> tf.Tensor:
-        k_zx = self.kernel(tf.convert_to_tensor(z, dtype=tf.float32), self.x)
-        mean = tf.matmul(tf.matmul(k_zx, self.k_xx_inv), self.y)
-        return mean
+    def predict(self, z: np.ndarray) -> Tuple[tf.Tensor, tf.Tensor]:
+        z = tf.convert_to_tensor(z, dtype=tf.float32)
+        k_zx = self.kernel(z, self.x)
+        k_zz = self.kernel(z, z)
+        mean = tf.matmul(k_zx, self.a)
+        v = tf.matrix_solve(self.chol_xx, tf.transpose(k_zx))
+        cov = k_zz - tf.matmul(v, v, transpose_a=True)
+        return mean, cov
 
     def create_summaries(self) -> None:
         pass
