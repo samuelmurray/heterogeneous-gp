@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     plt.axis([-5, 5, -5, 5])
     plt.ion()
-    x_test = np.linspace(np.min(x) - 1, np.max(x) + 1, 30)[:, None]
+    x_test = np.linspace(np.min(x) - 1, np.max(x) + 1, 100)[:, None]
     with tf.Session() as sess:
         log_dir = f"../../log/mlgp/{time.strftime('%Y%m%d%H%M%S')}"
         summary_writer = tf.summary.FileWriter(log_dir, sess.graph)
@@ -59,12 +59,12 @@ if __name__ == "__main__":
                 loss_print = f"Step {i} - Loss: {train_loss}"
                 print(loss_print)
                 z = sess.run(m.z)
-                y_mean, y_std = sess.run(m.predict(x_test))
+                mean, std = sess.run(m.predict(x_test))
                 plt.scatter(x, y, marker="o")
                 plt.scatter(z, np.zeros(z.shape), c="k", marker="x")
-                plt.plot(x_test, y_mean, c="k")
-                plt.plot(x_test, y_mean + y_std, "k--")
-                plt.plot(x_test, y_mean - y_std, "k--")
+                plt.plot(x_test, mean, c="k")
+                plt.plot(x_test, mean + std, c="k--")
+                plt.plot(x_test, mean - std, c="k--")
                 plt.title(loss_print)
                 plt.pause(0.05)
                 plt.cla()
