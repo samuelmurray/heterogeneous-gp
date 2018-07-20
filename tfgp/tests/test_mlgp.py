@@ -32,8 +32,9 @@ class TestMLGP(tf.test.TestCase):
                 initial_loss = sess.run(loss)
                 sess.run(train_all)
                 second_loss = sess.run(loss)
-                mean = sess.run(m.predict(x_test))
-            self.assertEqual(mean.shape, (30, 1))
+                mean, std = m.predict(x_test)
+            self.assertShapeEqual(np.empty([30, 1]), mean)
+            self.assertShapeEqual(np.empty([30, 1]), std)
             self.assertLess(second_loss, initial_loss)
 
 
