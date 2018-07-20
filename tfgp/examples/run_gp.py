@@ -22,7 +22,7 @@ if __name__ == "__main__":
         y_test_mean, y_test_cov = sess.run(m.predict(x_test))
         y_test_std = np.sqrt(np.diag(y_test_cov))[:, None]
         plt.scatter(x_train, y_train, marker="o")
-        plt.plot(x_test, y_test_mean)
-        plt.plot(x_test, y_test_mean + y_test_std, "b--")
-        plt.plot(x_test, y_test_mean - y_test_std, "b--")
+        plt.plot(x_test, y_test_mean, "k")
+        plt.plot(x_test, y_test_mean + y_test_std, "k--")
+        plt.plot(x_test, y_test_mean - y_test_std, "k--")
         plt.show()
