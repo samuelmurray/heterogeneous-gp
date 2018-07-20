@@ -9,7 +9,9 @@ from ..kernel import RBF
 
 
 class GP(Model):
-    def __init__(self, x: tf.Tensor, y: tf.Tensor, kernel: Kernel = None) -> None:
+    def __init__(self, x: tf.Tensor, y: tf.Tensor, *,
+                 kernel: Kernel = None
+                 ) -> None:
         super().__init__(x.shape.as_list()[1], y.shape.as_list()[1], x.shape.as_list()[0])
         if x.shape.as_list()[0] != y.shape.as_list()[0]:
             raise ValueError(f"First dimension of x and y must match, "
