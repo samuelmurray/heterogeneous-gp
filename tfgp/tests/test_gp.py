@@ -21,8 +21,9 @@ class TestGP(tf.test.TestCase):
             with tf.Session() as sess:
                 sess.run(init)
                 x_test = np.linspace(0, 2 * np.pi, 50)[:, None]
-                y_pred = sess.run(m.predict(x_test))
-            self.assertEqual(y_pred.shape, (50, 1))
+                y_mean, y_cov = sess.run(m.predict(x_test))
+            self.assertEqual(y_mean.shape, (50, 1))
+            self.assertEqual(y_cov.shape, (50, 50))
 
 
 if __name__ == "__main__":
