@@ -112,14 +112,24 @@ class MLGP(InducingPointsModel):
             assert f_samples.shape.as_list() == [num_samples, self.ydim, self.num_data], f"{f_samples.shape.as_list()}"
         return f_samples
 
-    def predict(self, x_test: np.ndarray) -> Tuple[tf.Tensor, tf.Tensor]:
+    def predict(self, xs: np.ndarray) -> Tuple[tf.Tensor, tf.Tensor]:
+        # TODO: Not clear how to report the variances.
+        # Should we use qu_scale? Do we in the end want mean and std of f(x), h(f(x)) or p(y|x)=ExpFam(h(f(x)))?
+        # For now, we just report mean and std of ExpFam(h(f_mean(x)))
+        xs = tf.convert_to_tensor(xs, dtype=tf.float32)
         k_zz = self.kernel(self.z)
         k_zz_inv = tf.matrix_inverse(k_zz)
-        k_x_test_z = self.kernel(tf.convert_to_tensor(x_test, dtype=tf.float32), self.z)
-        f_mean = tf.matmul(tf.matmul(k_x_test_z, k_zz_inv), self.qu_mean, transpose_b=True)
+        k_xs_z = self.kernel(xs, self.z)
+        f_mean = tf.matmul(tf.matmul(k_xs_z, k_zz_inv), self.qu_mean, transpose_b=True)
         mean = tf.stack([self._likelihoods[i](f_mean[:, i]).mean() for i in range(self.ydim)], axis=1)
         std = tf.stack([self._likelihoods[i](f_mean[:, i]).stddev() for i in range(self.ydim)], axis=1)
-        # TODO: This might not be the correct way to calculate stddev for non-Gaussian distributions
+
+        """
+        k_xsxs = self.kernel(xs)
+        f_cov = k_xsxs - tf.matmul(tf.matmul(k_xs_z, k_zz_inv), k_xs_z, transpose_b=True)
+        f_cov_pos = tf.maximum(f_cov, 0.)
+        f_std = tf.expand_dims(tf.sqrt(tf.matrix_diag_part(f_cov_pos)), axis=-1)
+        """
         return mean, std
 
     def create_summaries(self) -> None:
