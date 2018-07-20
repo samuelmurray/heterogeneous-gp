@@ -3,20 +3,22 @@ import time
 import tensorflow as tf
 import numpy as np
 from matplotlib import pyplot as plt
+import seaborn as sns
 from IPython import embed
 
 import tfgp
-from tfgp.util.data import circle_data, gaussian_data, oilflow
+from tfgp.util import data, pca_reduce
 from tfgp.model import MLGPLVM
 
 if __name__ == "__main__":
+    sns.set()
     np.random.seed(1)
     print("Generating data...")
     num_data = 100
     latent_dim = 2
-    y_obs, likelihoods, labels = oilflow(num_data)
-    x = tfgp.util.PCA_reduce(y_obs, latent_dim)
-    y = tf.convert_to_tensor(y_obs, dtype=tf.float32)
+    output_dim = 5
+    y, likelihoods, labels = data.make_gaussian_blobs(num_data, output_dim, num_classes=3)
+    x = tfgp.util.pca_reduce(y, latent_dim)
 
     print("Creating model...")
     kernel = tfgp.kernel.ARDRBF(xdim=latent_dim, name="ardrbf")
@@ -42,7 +44,7 @@ if __name__ == "__main__":
     plt.axis([-5, 5, -5, 5])
     plt.ion()
     with tf.Session() as sess:
-        log_dir = f"../../log/{time.strftime('%Y%m%d%H%M%S')}"
+        log_dir = f"../../log/mlgplvm/{time.strftime('%Y%m%d%H%M%S')}"
         summary_writer = tf.summary.FileWriter(log_dir, sess.graph)
         print("Initializing variables...")
         sess.run(init)
@@ -62,15 +64,13 @@ if __name__ == "__main__":
                 print(loss_print)
                 x_mean = sess.run(m.qx_mean)
                 z = sess.run(m.z)
-                for c in np.unique(labels):
-                    plt.scatter(*x_mean[labels == c].T)
+                plt.scatter(*x_mean.T, c=labels, cmap="Paired", edgecolors='k')
                 plt.scatter(*z.T, c="k", marker="x")
                 plt.title(loss_print)
                 plt.pause(0.05)
                 plt.cla()
         x_mean = sess.run(m.qx_mean)
         z = sess.run(m.z)
-        for c in np.unique(labels):
-            plt.scatter(*x_mean[labels == c].T)
+        plt.scatter(*x_mean.T, c=labels, cmap="Paired", edgecolors='k')
         plt.scatter(*z.T, c="k", marker="x")
         embed()

@@ -9,32 +9,31 @@ from ..kernel import RBF
 class GPLVM(Model):
     _HALF_LN2PI = 0.5 * tf.log(2 * np.pi)
 
-    def __init__(self, y: tf.Tensor, xdim: int, *,
+    def __init__(self, y: np.ndarray, xdim: int, *,
                  x: np.ndarray = None,
                  kernel: Kernel = None,
                  ) -> None:
-        super().__init__(xdim, y.shape.as_list()[1], y.shape.as_list()[0])
+        super().__init__(xdim, y.shape[1], y.shape[0])
         if x is None:
             x = np.random.normal(size=(self.num_data, self.xdim))
         elif x.shape[0] != self.num_data:
-            raise ValueError(
-                f"First dimension of x and y must match, but shape(x)={list(x.shape)} and shape(y)={y.shape.as_list()}")
+            raise ValueError(f"First dimension of x and y must match, but x.shape={x.shape} and y.shape={y.shape}")
         elif x.shape[1] != self.xdim:
-            raise ValueError(
-                f"Second dimension of x must be xdim, but shape(x)={list(x.shape)} and xdim={self.xdim}")
+            raise ValueError(f"Second dimension of x must be xdim, but x.shape={x.shape} and xdim={self.xdim}")
+        self.y = tf.convert_to_tensor(y, dtype=tf.float32)
         self.x = tf.get_variable("x", shape=[self.num_data, self.xdim], initializer=tf.constant_initializer(x))
-        self.y = y
-        self.kernel = kernel if (kernel is not None) else RBF(0.1, eps=0.1, name="rbf")
+        self.kernel = kernel if (kernel is not None) else RBF(0.1, eps=0.1)
+        tf.losses.add_loss(self._loss())
 
-    def loss(self) -> tf.Tensor:
-        loss = tf.negative(self.log_joint(), name="loss")
+    def _loss(self) -> tf.Tensor:
+        loss = tf.negative(self._log_joint(), name="loss")
         return loss
 
-    def log_joint(self) -> tf.Tensor:
-        log_joint = tf.add(self.log_likelihood(), self.log_prior(), name="log_joint")
+    def _log_joint(self) -> tf.Tensor:
+        log_joint = tf.add(self._log_likelihood(), self._log_prior(), name="log_joint")
         return log_joint
 
-    def log_likelihood(self) -> tf.Tensor:
+    def _log_likelihood(self) -> tf.Tensor:
         with tf.name_scope("log_likelihood"):
             k_xx = self.kernel(self.x, name="k_xx")
             chol_xx = tf.cholesky(k_xx, name="chol_xx")
@@ -45,7 +44,7 @@ class GPLVM(Model):
             log_likelihood = tf.negative(y_transp_a + chol_trace + const, name="log_lik")
         return log_likelihood
 
-    def log_prior(self) -> tf.Tensor:
+    def _log_prior(self) -> tf.Tensor:
         with tf.name_scope("log_prior"):
             x_square_sum = tf.multiply(0.5, tf.reduce_sum(tf.square(self.x)), name="x_square_sum")
             const = tf.identity(self.xdim * self.num_data * self._HALF_LN2PI, name="const")
@@ -53,8 +52,8 @@ class GPLVM(Model):
         return log_prior
 
     def create_summaries(self) -> None:
-        tf.summary.scalar("log_likelihood", self.log_likelihood(), family="Loss")
-        tf.summary.scalar("log_prior", self.log_prior(), family="Loss")
-        tf.summary.scalar("log_joint", self.log_joint(), family="Loss")
+        tf.summary.scalar("log_likelihood", self._log_likelihood(), family="Loss")
+        tf.summary.scalar("log_prior", self._log_prior(), family="Loss")
+        tf.summary.scalar("log_joint", self._log_joint(), family="Loss")
         tf.summary.histogram("x", self.x)
         self.kernel.create_summaries()

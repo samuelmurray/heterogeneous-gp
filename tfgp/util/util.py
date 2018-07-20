@@ -1,15 +1,18 @@
 import numpy as np
 
 
-def PCA_reduce(X, Q):
+def pca_reduce(x: np.ndarray, latent_dim: int, *, whiten: bool = False) -> np.ndarray:
     """
-    A helpful function for linearly reducing the dimensionality of the data X
-    to Q.
-    :param X: data array of size N (number of points) x D (dimensions)
-    :param Q: Number of latent dimensions, Q < D
-    :return: PCA projection array of size N x Q.
+    Reduce the dimensionality of x to latent_dim with PCA.
+    :param x: data array of size N (number of points) x D (dimensions)
+    :param latent_dim: Number of latent dimensions (< D)
+    :param whiten: if True, also scales the data so that each dimension has unit variance
+    :return: PCA projection array of size N x latent_dim.
     """
-    assert Q <= X.shape[1], 'Cannot have more latent dimensions than observed'
-    _, evecs = np.linalg.eigh(np.cov(X.T))
-    W = evecs[:, -Q:]
-    return (X - X.mean(0)).dot(W)
+    assert latent_dim <= x.shape[1], "Cannot have more latent dimensions than observed"
+    _, eigen_vecs = np.linalg.eigh(np.cov(x.T))
+    w = eigen_vecs[:, -latent_dim:]
+    x_reduced = (x - x.mean(0)).dot(w)
+    if whiten:
+        x_reduced /= x_reduced.std(axis=0)
+    return x_reduced

@@ -1,28 +1,27 @@
 import time
 
 import tensorflow as tf
+import numpy as np
 from matplotlib import pyplot as plt
 import seaborn as sns
 from IPython import embed
 
-from tfgp.util import data, pca_reduce
-from tfgp.model import GPLVM
+from tfgp.util import data
+from tfgp.model import MLGP
 
 if __name__ == "__main__":
     sns.set()
     print("Generating data...")
-    num_data = 100
-    latent_dim = 2
-    output_dim = 5
-    y, _, labels = data.make_gaussian_blobs(num_data, output_dim, 3)
-    x = pca_reduce(y, latent_dim)
+    num_data = 40
+    x, likelihoods, y = data.make_sin_count(num_data)
+    num_inducing = 20
 
     print("Creating model...")
-    m = GPLVM(y, latent_dim, x=x)
+    m = MLGP(x, y, likelihoods=likelihoods, num_inducing=num_inducing)
 
     print("Building graph...")
     loss = tf.losses.get_total_loss()
-    learning_rate = 0.1
+    learning_rate = 5e-4
     with tf.name_scope("train"):
         optimizer = tf.train.RMSPropOptimizer(learning_rate, name="RMSProp")
         train_all = optimizer.minimize(loss, var_list=tf.trainable_variables(),
@@ -34,19 +33,21 @@ if __name__ == "__main__":
         for reg_loss in tf.losses.get_regularization_losses():
             tf.summary.scalar(f"{reg_loss.name}", reg_loss, family="Loss")
         merged_summary = tf.summary.merge_all()
+
     init = tf.global_variables_initializer()
 
     plt.axis([-5, 5, -5, 5])
     plt.ion()
+    x_test = np.linspace(np.min(x) - 1, np.max(x) + 1, 100)[:, None]
     with tf.Session() as sess:
-        log_dir = f"../../log/gplvm/{time.strftime('%Y%m%d%H%M%S')}"
+        log_dir = f"../../log/mlgp/{time.strftime('%Y%m%d%H%M%S')}"
         summary_writer = tf.summary.FileWriter(log_dir, sess.graph)
         print("Initializing variables...")
         sess.run(init)
         print(f"Initial loss: {sess.run(loss)}")
         print("Starting training...")
-        n_iter = 10000
-        n_print = 200
+        n_iter = 50000
+        n_print = 300
         for i in range(n_iter):
             sess.run(train_all)
             if i % n_print == 0:
@@ -57,11 +58,16 @@ if __name__ == "__main__":
                 summary_writer.add_summary(summary, i)
                 loss_print = f"Step {i} - Loss: {train_loss}"
                 print(loss_print)
-                x = sess.run(m.x)
-                plt.scatter(*x.T, c=labels, cmap="Paired", edgecolors='k')
+                z = sess.run(m.z)
+                mean, std = sess.run(m.predict(x_test))
+                plt.scatter(x, y, marker="o")
+                plt.scatter(z, np.zeros(z.shape), c="k", marker="x")
+                plt.plot(x_test, mean, c="k")
+                plt.plot(x_test, mean + std, c="k--")
+                plt.plot(x_test, mean - std, c="k--")
                 plt.title(loss_print)
                 plt.pause(0.05)
                 plt.cla()
-        x = sess.run(m.x)
-        plt.scatter(*x.T, c=labels, cmap="Paired", edgecolors='k')
+        z = sess.run(m.z)
+        plt.scatter(*z.T, c="k", marker="x")
         embed()
