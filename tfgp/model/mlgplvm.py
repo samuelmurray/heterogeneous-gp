@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 
 import tensorflow as tf
 import tensorflow.contrib.distributions as ds
@@ -133,6 +133,26 @@ class MLGPLVM(InducingPointsModel):
                                name="f_samples")
             assert f_samples.shape.as_list() == [num_samples, self.ydim, self.num_data]
         return f_samples
+
+    def predict(self, xs: np.ndarray) -> Tuple[tf.Tensor, tf.Tensor]:
+        # TODO: Not clear how to report the variances.
+        # Should we use qu_scale? Do we in the end want mean and std of f(x), h(f(x)) or p(y|x)=ExpFam(h(f(x)))?
+        # For now, we just report mean and std of ExpFam(h(f_mean(x)))
+        xs = tf.convert_to_tensor(xs, dtype=tf.float32)
+        k_zz = self.kernel(self.z)
+        k_zz_inv = tf.matrix_inverse(k_zz)
+        k_xs_z = self.kernel(xs, self.z)
+        f_mean = tf.matmul(tf.matmul(k_xs_z, k_zz_inv), self.qu_mean, transpose_b=True)
+        mean = tf.stack([self._likelihoods[i](f_mean[:, i]).mean() for i in range(self.ydim)], axis=1)
+        std = tf.stack([self._likelihoods[i](f_mean[:, i]).stddev() for i in range(self.ydim)], axis=1)
+
+        """
+        k_xsxs = self.kernel(xs)
+        f_cov = k_xsxs - tf.matmul(tf.matmul(k_xs_z, k_zz_inv), k_xs_z, transpose_b=True)
+        f_cov_pos = tf.maximum(f_cov, 0.)
+        f_std = tf.expand_dims(tf.sqrt(tf.matrix_diag_part(f_cov_pos)), axis=-1)
+        """
+        return mean, std
 
     def create_summaries(self) -> None:
         tf.summary.scalar("kl_qx_px", self._kl_qx_px(), family="Model")
