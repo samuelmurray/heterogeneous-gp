@@ -75,8 +75,11 @@ class MLGPLVM(InducingPointsModel):
         with tf.name_scope("kl_qu_pu"):
             qu = ds.MultivariateNormalTriL(self.qu_mean, self.qu_scale, name="qu")
             k_zz = self.kernel(self.z, name="k_zz")
-            chol_zz = tf.cholesky(k_zz, name="chol_zz")
-            pu = ds.MultivariateNormalTriL(tf.zeros(self.num_inducing), chol_zz, name="pu")
+            # FIXME: The fix below does not seem to work on remote Linux computer, (because of TF<1.8>?)
+            # chol_zz = tf.cholesky(k_zz, name="chol_zz")
+            # pu = ds.MultivariateNormalTriL(tf.zeros(self.num_inducing), chol_zz, name="pu")
+            chol_zz = tf.tile(tf.expand_dims(tf.cholesky(k_zz, name="chol_zz"), axis=0), multiples=[self.ydim, 1, 1])
+            pu = ds.MultivariateNormalTriL(tf.zeros([self.ydim, self.num_inducing]), chol_zz, name="pu")
             kl = tf.reduce_sum(ds.kl_divergence(qu, pu, allow_nan_stats=False), axis=0, name="kl")
         return kl
 
