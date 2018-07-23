@@ -54,14 +54,14 @@ class MLGP(InducingPointsModel):
         with tf.name_scope("kl_qu_pu"):
             qu = ds.MultivariateNormalTriL(self.qu_mean, self.qu_scale, name="qu")
             k_zz = self.kernel(self.z, name="k_zz")
-            chol_zz = tf.tile(tf.expand_dims(tf.cholesky(k_zz), axis=0), multiples=[self.ydim, 1, 1], name="chol_zz")
-            pu = ds.MultivariateNormalTriL(tf.zeros([self.ydim, self.num_inducing]), chol_zz, name="pu")
+            chol_zz = tf.cholesky(k_zz, name="chol_zz")
+            pu = ds.MultivariateNormalTriL(tf.zeros(self.num_inducing), chol_zz, name="pu")
             kl = tf.reduce_sum(ds.kl_divergence(qu, pu, allow_nan_stats=False), axis=0, name="kl")
         return kl
 
     def _mc_expectation(self) -> tf.Tensor:
         with tf.name_scope("mc_expectation"):
-            num_samples = int(1e1)
+            num_samples = 10
             approx_exp_all = bf.monte_carlo.expectation(f=self._log_prob, samples=self._sample_f(num_samples),
                                                         name="approx_exp_all")
             approx_exp = tf.reduce_sum(approx_exp_all, axis=[0, 1], name="approx_exp")
@@ -107,7 +107,7 @@ class MLGP(InducingPointsModel):
             # f = a.T * u + sqrt(b) * e_f, e_f ~ N(0,1)
             e_f = tf.random_normal(shape=[num_samples, self.ydim, self.num_data], name="e_f")
             ua = tf.matmul(u_sample, a)
-            bef = tf.multiply(tf.expand_dims(tf.sqrt(b), 1), e_f)
+            bef = tf.multiply(tf.expand_dims(tf.sqrt(b), axis=1), e_f)
             f_samples = tf.add(ua, bef, name="f_samples")
             assert f_samples.shape.as_list() == [num_samples, self.ydim, self.num_data], f"{f_samples.shape.as_list()}"
         return f_samples

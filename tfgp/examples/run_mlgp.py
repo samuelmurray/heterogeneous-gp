@@ -13,7 +13,7 @@ if __name__ == "__main__":
     sns.set()
     print("Generating data...")
     num_data = 40
-    x, likelihoods, y = data.make_sin_count(num_data)
+    x, likelihoods, y = data.make_sin(num_data)
     num_inducing = 20
 
     print("Creating model...")
@@ -63,8 +63,8 @@ if __name__ == "__main__":
                 plt.scatter(x, y, marker="o")
                 plt.scatter(z, np.zeros(z.shape), c="k", marker="x")
                 plt.plot(x_test, mean, c="k")
-                plt.plot(x_test, mean + std, c="k--")
-                plt.plot(x_test, mean - std, c="k--")
+                plt.plot(x_test, mean + std, c="k", linestyle="--")
+                plt.plot(x_test, mean - std, c="k", linestyle="--")
                 plt.title(loss_print)
                 plt.pause(0.05)
                 plt.cla()
