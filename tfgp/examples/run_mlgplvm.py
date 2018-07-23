@@ -7,7 +7,7 @@ import seaborn as sns
 from IPython import embed
 
 import tfgp
-from tfgp.util import data, pca_reduce
+from tfgp.util import data
 from tfgp.model import MLGPLVM
 
 if __name__ == "__main__":
@@ -62,14 +62,14 @@ if __name__ == "__main__":
                 summary_writer.add_summary(summary, i)
                 loss_print = f"Step {i} - Loss: {train_loss}"
                 print(loss_print)
-                x_mean = sess.run(m.qx_mean)
+                x_mean = sess.run(m.qx_mean).T
                 z = sess.run(m.z)
                 plt.scatter(*x_mean.T, c=labels, cmap="Paired", edgecolors='k')
                 plt.scatter(*z.T, c="k", marker="x")
                 plt.title(loss_print)
                 plt.pause(0.05)
                 plt.cla()
-        x_mean = sess.run(m.qx_mean)
+        x_mean = sess.run(m.qx_mean).T
         z = sess.run(m.z)
         plt.scatter(*x_mean.T, c=labels, cmap="Paired", edgecolors='k')
         plt.scatter(*z.T, c="k", marker="x")
