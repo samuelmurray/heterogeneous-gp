@@ -31,7 +31,7 @@ class MLGPLVM(InducingPointsModel):
         inducing_indices = np.random.permutation(self.num_data)[:self.num_inducing]
         z = x[inducing_indices]  #TODO: Maybe this should not be done if x is initialised randomly?
         # u = y[inducing_indices].T  #TODO: This only works with Gaussian Likelihood
-        assert u.shape == np.empty((self.ydim, self.num_inducing)).shape, f"{u.shape} != {(self.ydim, self.num_inducing)}"
+        # assert u.shape == np.empty((self.ydim, self.num_inducing)).shape, f"{u.shape} != {(self.ydim, self.num_inducing)}"
         self.y = tf.convert_to_tensor(y, dtype=tf.float32)
         if len(likelihoods) != self.ydim:
             raise ValueError(
