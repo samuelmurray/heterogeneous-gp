@@ -2,6 +2,10 @@ log/
 output/
 save/
 
+# Data files
+*.mat
+*.csv
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
