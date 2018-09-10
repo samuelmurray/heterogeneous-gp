@@ -143,3 +143,19 @@ def make_titanic(num_data: int = None) -> DataTuple:
         likelihood.Bernoulli(), likelihood.Normal(), likelihood.Poisson(), likelihood.Poisson(), likelihood.Normal()]
     labels = train_df["Survived"].values[data_indices]
     return y, likelihoods, labels
+
+
+def make_alphadigits(num_data: int = None, num_classes: int = None) -> DataTuple:
+    data_per_class = 30
+    try:
+        y = np.loadtxt("../../util/binaryalphadigs_train.csv", delimiter=",")
+    except FileNotFoundError as e:
+        print("You must run the Matlab script to download the Alphadigits data set before calling this function")
+        raise e
+    y = y[:data_per_class * num_classes]
+    labels = np.array([[i] * data_per_class for i in range(num_classes)]).flatten()
+    data_indices = np.random.permutation(data_per_class * num_classes)[:num_data]
+    y = y[data_indices]
+    labels = labels[data_indices]
+    likelihoods = [likelihood.Bernoulli() for _ in range(y.shape[1])]
+    return y, likelihoods, labels
