@@ -1,9 +1,9 @@
 clear
 
-if ~exist('binaryalphadigs.mat', 'file') == 2
-    urlwrite('https://cs.nyu.edu/~roweis/data/binaryalphadigs.mat', 'binaryalphadigs.mat')
+if exist('binaryalphadigits.mat', 'file') ~= 2
+    urlwrite('https://cs.nyu.edu/~roweis/data/binaryalphadigs.mat', 'binaryalphadigits.mat');
 end
-load('binaryalphadigs.mat')
+load('binaryalphadigits.mat')
 
 num_per_class = 39;
 num_train = 30;
@@ -36,5 +36,5 @@ for i=1:num_classes
     end
 end
 
-csvwrite('binaryalphadigs_train.csv', train_arr)
-csvwrite('binaryalphadigs_test.csv', test_arr)
+csvwrite('binaryalphadigits_train.csv', train_arr)
+csvwrite('binaryalphadigits_test.csv', test_arr)
