@@ -41,18 +41,24 @@ class MLGPLVM(InducingPointsModel):
         with tf.variable_scope("qx"):
             self.qx_mean = tf.get_variable("mean", shape=[self.xdim, self.num_data],
                                            initializer=tf.constant_initializer(x.T))
-            self.qx_log_scale = tf.get_variable("log_scale",
-                                                shape=[self.xdim, self.num_data * (self.num_data + 1) / 2],
-                                                initializer=tf.constant_initializer(0.1))
-            self.qx_scale = ds.fill_triangular(tf.exp(self.qx_log_scale, name="scale"))
+            self.qx_log_scale_vec = tf.get_variable("log_scale_vec",
+                                                    shape=[self.xdim, self.num_data * (self.num_data + 1) / 2],
+                                                    initializer=tf.constant_initializer(0.1))
+            self.qx_log_scale = ds.fill_triangular(self.qx_log_scale_vec, name="log_scale")
+            self.qx_scale = tf.identity(self.qx_log_scale
+                                        - tf.matrix_diag(tf.matrix_diag_part(self.qx_log_scale))
+                                        + tf.matrix_diag(tf.exp(tf.matrix_diag_part(self.qx_log_scale))), name="scale")
         self.z = tf.get_variable("z", shape=[self.num_inducing, self.xdim], initializer=tf.constant_initializer(z))
         with tf.variable_scope("qu"):
             self.qu_mean = tf.get_variable("mean", shape=[self.ydim, self.num_inducing],
                                            initializer=tf.random_normal_initializer(0.01))
-            self.qu_log_scale = tf.get_variable("log_scale",
-                                                shape=[self.ydim, self.num_inducing * (self.num_inducing + 1) / 2],
-                                                initializer=tf.zeros_initializer())
-            self.qu_scale = ds.fill_triangular(tf.exp(self.qu_log_scale, name="scale"))
+            self.qu_log_scale_vec = tf.get_variable("log_scale_vec",
+                                                    shape=[self.ydim, self.num_inducing * (self.num_inducing + 1) / 2],
+                                                    initializer=tf.zeros_initializer())
+            self.qu_log_scale = ds.fill_triangular(self.qu_log_scale_vec, name="log_scale")
+            self.qu_scale = tf.identity(self.qu_log_scale
+                                        - tf.matrix_diag(tf.matrix_diag_part(self.qu_log_scale))
+                                        + tf.matrix_diag(tf.exp(tf.matrix_diag_part(self.qu_log_scale))), name="scale")
         tf.losses.add_loss(self._loss())
 
     def _loss(self) -> tf.Tensor:
@@ -164,10 +170,10 @@ class MLGPLVM(InducingPointsModel):
         tf.summary.scalar("expectation", self._mc_expectation(), family="Model")
         tf.summary.scalar("elbo_loss", self._loss(), family="Loss")
         tf.summary.histogram("qx_mean", self.qx_mean)
-        tf.summary.histogram("qx_scale", self.qx_scale)
+        tf.summary.histogram("qx_scale", ds.fill_triangular_inverse(self.qx_scale))
         tf.summary.histogram("z", self.z)
         tf.summary.histogram("qu_mean", self.qu_mean)
-        tf.summary.histogram("qu_scale", tf.exp(self.qu_log_scale))
+        tf.summary.histogram("qu_scale", ds.fill_triangular_inverse(self.qu_scale))
         self.kernel.create_summaries()
         for likelihood in self._likelihoods:
             likelihood.create_summaries()

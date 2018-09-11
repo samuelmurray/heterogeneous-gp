@@ -36,10 +36,13 @@ class MLGP(InducingPointsModel):
         with tf.variable_scope("qu"):
             self.qu_mean = tf.get_variable("mean", shape=[self.ydim, self.num_inducing],
                                            initializer=tf.random_normal_initializer(0.01))
-            self.qu_log_scale = tf.get_variable("log_scale",
-                                                shape=[self.ydim, self.num_inducing * (self.num_inducing + 1) / 2],
-                                                initializer=tf.zeros_initializer())
-            self.qu_scale = ds.fill_triangular(tf.exp(self.qu_log_scale, name="scale"))
+            self.qu_log_scale_vec = tf.get_variable("log_scale_vec",
+                                                    shape=[self.ydim, self.num_inducing * (self.num_inducing + 1) / 2],
+                                                    initializer=tf.zeros_initializer())
+            self.qu_log_scale = ds.fill_triangular(self.qu_log_scale_vec, name="log_scale")
+            self.qu_scale = tf.identity(self.qu_log_scale
+                                        - tf.matrix_diag(tf.matrix_diag_part(self.qu_log_scale))
+                                        + tf.matrix_diag(tf.exp(tf.matrix_diag_part(self.qu_log_scale))), name="scale")
         tf.losses.add_loss(self._loss())
 
     def _loss(self) -> tf.Tensor:
@@ -138,7 +141,7 @@ class MLGP(InducingPointsModel):
         tf.summary.scalar("elbo_loss", self._loss(), family="Loss")
         tf.summary.histogram("z", self.z)
         tf.summary.histogram("qu_mean", self.qu_mean)
-        tf.summary.histogram("qu_scale", tf.exp(self.qu_log_scale))
+        tf.summary.histogram("qu_scale", ds.fill_triangular_inverse(self.qu_scale))
         self.kernel.create_summaries()
         for likelihood in self._likelihoods:
             likelihood.create_summaries()
