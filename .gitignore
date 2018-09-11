@@ -5,6 +5,7 @@ save/
 # Data files
 *.mat
 *.csv
+*.eps
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
