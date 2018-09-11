@@ -1,8 +1,7 @@
 from typing import List, Tuple
 
 import tensorflow as tf
-import tensorflow.contrib.distributions as ds
-import tensorflow.contrib.bayesflow as bf
+import tensorflow_probability as tfp
 import numpy as np
 
 from .mlgplvm import InducingPointsModel
@@ -39,7 +38,7 @@ class MLGP(InducingPointsModel):
             self.qu_log_scale_vec = tf.get_variable("log_scale_vec",
                                                     shape=[self.ydim, self.num_inducing * (self.num_inducing + 1) / 2],
                                                     initializer=tf.zeros_initializer())
-            self.qu_log_scale = ds.fill_triangular(self.qu_log_scale_vec, name="log_scale")
+            self.qu_log_scale = tfp.distributions.fill_triangular(self.qu_log_scale_vec, name="log_scale")
             self.qu_scale = tf.identity(self.qu_log_scale
                                         - tf.matrix_diag(tf.matrix_diag_part(self.qu_log_scale))
                                         + tf.matrix_diag(tf.exp(tf.matrix_diag_part(self.qu_log_scale))), name="scale")
@@ -55,17 +54,17 @@ class MLGP(InducingPointsModel):
 
     def _kl_qu_pu(self) -> tf.Tensor:
         with tf.name_scope("kl_qu_pu"):
-            qu = ds.MultivariateNormalTriL(self.qu_mean, self.qu_scale, name="qu")
+            qu = tfp.distributions.MultivariateNormalTriL(self.qu_mean, self.qu_scale, name="qu")
             k_zz = self.kernel(self.z, name="k_zz")
             chol_zz = tf.cholesky(k_zz, name="chol_zz")
-            pu = ds.MultivariateNormalTriL(tf.zeros(self.num_inducing), chol_zz, name="pu")
-            kl = tf.reduce_sum(ds.kl_divergence(qu, pu, allow_nan_stats=False), axis=0, name="kl")
+            pu = tfp.distributions.MultivariateNormalTriL(tf.zeros(self.num_inducing), chol_zz, name="pu")
+            kl = tf.reduce_sum(tfp.distributions.kl_divergence(qu, pu, allow_nan_stats=False), axis=0, name="kl")
         return kl
 
     def _mc_expectation(self) -> tf.Tensor:
         with tf.name_scope("mc_expectation"):
             num_samples = 10
-            approx_exp_all = bf.monte_carlo.expectation(f=self._log_prob, samples=self._sample_f(num_samples),
+            approx_exp_all = tfp.monte_carlo.expectation(f=self._log_prob, samples=self._sample_f(num_samples),
                                                         name="approx_exp_all")
             approx_exp = tf.reduce_sum(approx_exp_all, axis=[0, 1], name="approx_exp")
         return approx_exp
@@ -141,7 +140,7 @@ class MLGP(InducingPointsModel):
         tf.summary.scalar("elbo_loss", self._loss(), family="Loss")
         tf.summary.histogram("z", self.z)
         tf.summary.histogram("qu_mean", self.qu_mean)
-        tf.summary.histogram("qu_scale", ds.fill_triangular_inverse(self.qu_scale))
+        tf.summary.histogram("qu_scale", tfp.distributions.fill_triangular_inverse(self.qu_scale))
         self.kernel.create_summaries()
         for likelihood in self._likelihoods:
             likelihood.create_summaries()

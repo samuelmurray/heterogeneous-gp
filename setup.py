@@ -42,8 +42,14 @@ setup(
             "pods",
             "seaborn",
         ],
-        "tf": ["tensorflow>=1.0.0"],
-        "tf_gpu": ["tensorflow-gpu>=1.0.0"],
+        "tf": [
+            "tensorflow>=1.0.0",
+            "tensorflow-probability>=0.3.0",
+        ],
+        "tf_gpu": [
+            "tensorflow-gpu>=1.0.0",
+            "tensorflow-probability-gpu>=0.3.0",
+        ],
         "test": [
             "scipy",
             "scikit-learn",

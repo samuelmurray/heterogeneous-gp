@@ -1,8 +1,7 @@
 from typing import List, Tuple
 
 import tensorflow as tf
-import tensorflow.contrib.distributions as ds
-import tensorflow.contrib.bayesflow as bf
+import tensorflow_probability as tfp
 import numpy as np
 
 from .inducing_points_model import InducingPointsModel
@@ -44,7 +43,7 @@ class MLGPLVM(InducingPointsModel):
             self.qx_log_scale_vec = tf.get_variable("log_scale_vec",
                                                     shape=[self.xdim, self.num_data * (self.num_data + 1) / 2],
                                                     initializer=tf.constant_initializer(0.1))
-            self.qx_log_scale = ds.fill_triangular(self.qx_log_scale_vec, name="log_scale")
+            self.qx_log_scale = tfp.distributions.fill_triangular(self.qx_log_scale_vec, name="log_scale")
             self.qx_scale = tf.identity(self.qx_log_scale
                                         - tf.matrix_diag(tf.matrix_diag_part(self.qx_log_scale))
                                         + tf.matrix_diag(tf.exp(tf.matrix_diag_part(self.qx_log_scale))), name="scale")
@@ -55,7 +54,7 @@ class MLGPLVM(InducingPointsModel):
             self.qu_log_scale_vec = tf.get_variable("log_scale_vec",
                                                     shape=[self.ydim, self.num_inducing * (self.num_inducing + 1) / 2],
                                                     initializer=tf.zeros_initializer())
-            self.qu_log_scale = ds.fill_triangular(self.qu_log_scale_vec, name="log_scale")
+            self.qu_log_scale = tfp.distributions.fill_triangular(self.qu_log_scale_vec, name="log_scale")
             self.qu_scale = tf.identity(self.qu_log_scale
                                         - tf.matrix_diag(tf.matrix_diag_part(self.qu_log_scale))
                                         + tf.matrix_diag(tf.exp(tf.matrix_diag_part(self.qu_log_scale))), name="scale")
@@ -71,27 +70,27 @@ class MLGPLVM(InducingPointsModel):
 
     def _kl_qx_px(self) -> tf.Tensor:
         with tf.name_scope("kl_qx_px"):
-            qx = ds.MultivariateNormalTriL(self.qx_mean, self.qx_scale, name="qx")
-            px = ds.MultivariateNormalDiag(tf.zeros(self.num_data), tf.ones(self.num_data), name="px")
-            kl = tf.reduce_sum(ds.kl_divergence(qx, px, allow_nan_stats=False), axis=0, name="kl")
+            qx = tfp.distributions.MultivariateNormalTriL(self.qx_mean, self.qx_scale, name="qx")
+            px = tfp.distributions.MultivariateNormalDiag(tf.zeros(self.num_data), tf.ones(self.num_data), name="px")
+            kl = tf.reduce_sum(tfp.distributions.kl_divergence(qx, px, allow_nan_stats=False), axis=0, name="kl")
         return kl
 
     def _kl_qu_pu(self) -> tf.Tensor:
         with tf.name_scope("kl_qu_pu"):
-            qu = ds.MultivariateNormalTriL(self.qu_mean, self.qu_scale, name="qu")
+            qu = tfp.distributions.MultivariateNormalTriL(self.qu_mean, self.qu_scale, name="qu")
             k_zz = self.kernel(self.z, name="k_zz")
             # FIXME: The fix below does not seem to work on remote Linux computer, (because of TF<1.8>?)
             # chol_zz = tf.cholesky(k_zz, name="chol_zz")
-            # pu = ds.MultivariateNormalTriL(tf.zeros(self.num_inducing), chol_zz, name="pu")
+            # pu = tfp.distributions.MultivariateNormalTriL(tf.zeros(self.num_inducing), chol_zz, name="pu")
             chol_zz = tf.tile(tf.expand_dims(tf.cholesky(k_zz, name="chol_zz"), axis=0), multiples=[self.ydim, 1, 1])
-            pu = ds.MultivariateNormalTriL(tf.zeros([self.ydim, self.num_inducing]), chol_zz, name="pu")
-            kl = tf.reduce_sum(ds.kl_divergence(qu, pu, allow_nan_stats=False), axis=0, name="kl")
+            pu = tfp.distributions.MultivariateNormalTriL(tf.zeros([self.ydim, self.num_inducing]), chol_zz, name="pu")
+            kl = tf.reduce_sum(tfp.distributions.kl_divergence(qu, pu, allow_nan_stats=False), axis=0, name="kl")
         return kl
 
     def _mc_expectation(self) -> tf.Tensor:
         with tf.name_scope("mc_expectation"):
             num_samples = int(1e1)
-            approx_exp_all = bf.monte_carlo.expectation(f=self._log_prob, samples=self._sample_f(num_samples),
+            approx_exp_all = tfp.monte_carlo.expectation(f=self._log_prob, samples=self._sample_f(num_samples),
                                                         name="approx_exp_all")
             approx_exp = tf.reduce_sum(approx_exp_all, axis=[0, 1], name="approx_exp")
         return approx_exp
@@ -170,10 +169,10 @@ class MLGPLVM(InducingPointsModel):
         tf.summary.scalar("expectation", self._mc_expectation(), family="Model")
         tf.summary.scalar("elbo_loss", self._loss(), family="Loss")
         tf.summary.histogram("qx_mean", self.qx_mean)
-        tf.summary.histogram("qx_scale", ds.fill_triangular_inverse(self.qx_scale))
+        tf.summary.histogram("qx_scale", tfp.distributions.fill_triangular_inverse(self.qx_scale))
         tf.summary.histogram("z", self.z)
         tf.summary.histogram("qu_mean", self.qu_mean)
-        tf.summary.histogram("qu_scale", ds.fill_triangular_inverse(self.qu_scale))
+        tf.summary.histogram("qu_scale", tfp.distributions.fill_triangular_inverse(self.qu_scale))
         self.kernel.create_summaries()
         for likelihood in self._likelihoods:
             likelihood.create_summaries()
