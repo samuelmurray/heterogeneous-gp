@@ -29,9 +29,7 @@ class MLGPLVM(InducingPointsModel):
             raise ValueError(f"Can't have more inducing points than data, "
                              f"but num_inducing={self.num_inducing} and y.shape={y.shape}")
         inducing_indices = np.random.permutation(self.num_data)[:self.num_inducing]
-        z = x[inducing_indices]  #TODO: Maybe this should not be done if x is initialised randomly?
-        # u = y[inducing_indices].T  #TODO: This only works with Gaussian Likelihood
-        # assert u.shape == np.empty((self.ydim, self.num_inducing)).shape, f"{u.shape} != {(self.ydim, self.num_inducing)}"
+        z = x[inducing_indices]  # TODO: Maybe this should not be done if x is initialised randomly?
         self.y = tf.convert_to_tensor(y, dtype=tf.float32)
         if len(likelihoods) != self.ydim:
             raise ValueError(
