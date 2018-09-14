@@ -65,14 +65,14 @@ class MLGP(InducingPointsModel):
         with tf.name_scope("mc_expectation"):
             num_samples = 10
             approx_exp_all = tfp.monte_carlo.expectation(f=self._log_prob, samples=self._sample_f(num_samples),
-                                                        name="approx_exp_all")
+                                                         name="approx_exp_all")
             approx_exp = tf.reduce_sum(approx_exp_all, axis=[0, 1], name="approx_exp")
         return approx_exp
 
     def _log_prob(self, f: tf.Tensor) -> tf.Tensor:
         with tf.name_scope("log_prob"):
-            log_prob = tf.stack([self._likelihoods[i](f[:, i, :]).log_prob(tf.transpose(self.y[:, i]))
-                                 for i in range(self.ydim)], axis=1)
+            log_prob = tf.stack([likelihood(f[:, i, :]).log_prob(tf.transpose(self.y[:, i]))
+                                 for i, likelihood in enumerate(self._likelihoods)], axis=1)
         return log_prob
 
     def _sample_f(self, num_samples: int) -> tf.Tensor:
@@ -123,8 +123,8 @@ class MLGP(InducingPointsModel):
         k_zz_inv = tf.matrix_inverse(k_zz)
         k_xs_z = self.kernel(xs, self.z)
         f_mean = tf.matmul(tf.matmul(k_xs_z, k_zz_inv), self.qu_mean, transpose_b=True)
-        mean = tf.stack([self._likelihoods[i](f_mean[:, i]).mean() for i in range(self.ydim)], axis=1)
-        std = tf.stack([self._likelihoods[i](f_mean[:, i]).stddev() for i in range(self.ydim)], axis=1)
+        mean = tf.stack([likelihood(f_mean[:, i]).mean() for i, likelihood in enumerate(self._likelihoods)], axis=1)
+        std = tf.stack([likelihood(f_mean[:, i]).stddev() for i, likelihood in enumerate(self._likelihoods)], axis=1)
 
         """
         k_xsxs = self.kernel(xs)
