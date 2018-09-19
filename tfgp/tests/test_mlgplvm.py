@@ -18,7 +18,7 @@ class TestMLGPLVM(tf.test.TestCase):
             output_dim = 5
             num_classes = 3
             y, _ = make_blobs(num_data, output_dim, num_classes)
-            likelihoods = [Normal(slice(i, i+1)) for i in range(output_dim)]
+            likelihoods = [Normal(slice(i, i + 1)) for i in range(output_dim)]
 
             m = MLGPLVM(y, latent_dim, kernel=self.kernel, likelihoods=likelihoods)
 
