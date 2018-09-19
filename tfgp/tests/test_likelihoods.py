@@ -7,7 +7,7 @@ class TestLikelihood(tf.test.TestCase):
     def test_abc(self):
         exception_thrown = False
         try:
-            _ = Likelihood()
+            _ = Likelihood(slice(0))
         except TypeError:
             exception_thrown = True
         finally:
@@ -16,22 +16,22 @@ class TestLikelihood(tf.test.TestCase):
 
 class TestBernoulli(tf.test.TestCase):
     def test_create(self):
-        _ = Bernoulli()
+        _ = Bernoulli(slice(0))
 
 
 class TestNormal(tf.test.TestCase):
     def test_create(self):
-        _ = Normal()
+        _ = Normal(slice(0))
 
 
 class TestPoisson(tf.test.TestCase):
     def test_create(self):
-        _ = Poisson()
+        _ = Poisson(slice(0))
 
 
 class TestQuantizedNormal(tf.test.TestCase):
     def test_create(self):
-        _ = QuantizedNormal()
+        _ = QuantizedNormal(slice(0))
 
 
 if __name__ == "__main__":

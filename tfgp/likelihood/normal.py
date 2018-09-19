@@ -7,8 +7,8 @@ from . import Likelihood
 class Normal(Likelihood):
     __count = 0
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, dimensions: slice) -> None:
+        super().__init__(dimensions)
         self._id = self.__get_id()
         with tf.variable_scope("likelihood"):
             self._log_scale = tf.get_variable(f"normal_log_scale_{self._id}", shape=[1],

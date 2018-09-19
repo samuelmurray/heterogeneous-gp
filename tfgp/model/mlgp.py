@@ -69,10 +69,11 @@ class MLGP(InducingPointsModel):
             approx_exp = tf.reduce_sum(approx_exp_all, axis=[0, 1], name="approx_exp")
         return approx_exp
 
-    def _log_prob(self, f: tf.Tensor) -> tf.Tensor:
+    def _log_prob(self, samples: tf.Tensor) -> tf.Tensor:
         with tf.name_scope("log_prob"):
-            log_prob = tf.stack([likelihood(f[:, i, :]).log_prob(tf.transpose(self.y[:, i]))
-                                 for i, likelihood in enumerate(self._likelihoods)], axis=1)
+            log_probs = [tf.squeeze(likelihood(samples[:, likelihood.dimensions, :]).log_prob(
+                tf.transpose(self.y[:, likelihood.dimensions])), axis=1) for likelihood in self._likelihoods]
+            log_prob = tf.stack(log_probs, axis=1)
         return log_prob
 
     def _sample_f(self, num_samples: int) -> tf.Tensor:

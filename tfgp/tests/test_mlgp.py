@@ -3,7 +3,7 @@ import numpy as np
 
 from tfgp.model import MLGP
 from tfgp.kernel import RBF
-from tfgp.likelihood import Normal
+from tfgp.util import data
 
 
 class TestMLGP(tf.test.TestCase):
@@ -11,11 +11,10 @@ class TestMLGP(tf.test.TestCase):
         with tf.variable_scope("mlgp", reuse=tf.AUTO_REUSE):
             self.kernel = RBF()
 
-    def test_GP(self):
+    def test_MLGP(self):
         with tf.variable_scope("mlgp", reuse=tf.AUTO_REUSE):
-            x = np.linspace(0, 2 * np.pi, 20)[:, None]
-            y = np.sin(x)
-            likelihoods = [Normal()]
+            num_data = 40
+            x, likelihoods, y = data.make_sin(num_data)
             num_inducing = 10
             m = MLGP(x, y, likelihoods=likelihoods, kernel=self.kernel, num_inducing=num_inducing)
 
