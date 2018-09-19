@@ -1,4 +1,4 @@
-from typing import Tuple, List
+from typing import Tuple
 
 import numpy as np
 from sklearn.metrics.pairwise import rbf_kernel
@@ -7,9 +7,9 @@ from scipy.special import expit
 import pandas as pd
 import pods
 
-from tfgp import likelihood
+from tfgp.likelihood import Bernoulli, MixedLikelihoodWrapper, Normal, Poisson
 
-DataTuple = Tuple[np.ndarray, List[likelihood.Likelihood], np.ndarray]
+DataTuple = Tuple[np.ndarray, MixedLikelihoodWrapper, np.ndarray]
 
 
 ##############
@@ -19,47 +19,47 @@ DataTuple = Tuple[np.ndarray, List[likelihood.Likelihood], np.ndarray]
 def make_sin(num_data: int) -> DataTuple:
     x = np.linspace(0, 2 * np.pi, num_data)[:, None]
     y = np.sin(x)
-    likelihoods = [likelihood.Normal(slice(0, 1))]
-    return x, likelihoods, y
+    likelihood = MixedLikelihoodWrapper([Normal()])
+    return x, likelihood, y
 
 
 def make_sin_binary(num_data: int) -> DataTuple:
     x = np.linspace(0, 2 * np.pi, num_data)[:, None]
     p = expit(2 * np.sin(x))
     y = np.random.binomial(1, p)
-    likelihoods = [likelihood.Bernoulli(slice(0, 1))]
-    return x, likelihoods, y
+    likelihood = MixedLikelihoodWrapper([Bernoulli()])
+    return x, likelihood, y
 
 
 def make_sin_count(num_data: int) -> DataTuple:
     x = np.linspace(0, 2 * np.pi, num_data)[:, None]
     rate = np.exp(2 * np.sin(x))
     y = np.random.poisson(rate)
-    likelihoods = [likelihood.Poisson(slice(0, 1))]
-    return x, likelihoods, y
+    likelihood = MixedLikelihoodWrapper([Poisson()])
+    return x, likelihood, y
 
 
 def make_xcos(num_data: int) -> DataTuple:
     x = np.linspace(-2 * np.pi, 2 * np.pi, num_data)[:, None]
     y = x * np.cos(x)
-    likelihoods = [likelihood.Normal(slice(0, 1))]
-    return x, likelihoods, y
+    likelihood = MixedLikelihoodWrapper([Normal()])
+    return x, likelihood, y
 
 
 def make_xcos_binary(num_data: int) -> DataTuple:
     x = np.linspace(-2 * np.pi, 2 * np.pi, num_data)[:, None]
     p = expit(x * np.cos(x))
     y = np.random.binomial(1, p)
-    likelihoods = [likelihood.Bernoulli(slice(0, 1))]
-    return x, likelihoods, y
+    likelihood = MixedLikelihoodWrapper([Bernoulli()])
+    return x, likelihood, y
 
 
 def make_xsin_count(num_data: int) -> DataTuple:
     x = np.linspace(-np.pi, np.pi, num_data)[:, None]
     rate = np.exp(x * np.sin(x))
     y = np.random.poisson(rate)
-    likelihoods = [likelihood.Poisson(slice(0, 1))]
-    return x, likelihoods, y
+    likelihood = MixedLikelihoodWrapper([Poisson()])
+    return x, likelihood, y
 
 
 ################
@@ -68,8 +68,8 @@ def make_xsin_count(num_data: int) -> DataTuple:
 
 def make_gaussian_blobs(num_data: int, output_dim: int, num_classes: int) -> DataTuple:
     y, labels = make_blobs(num_data, output_dim, num_classes)
-    likelihoods = [likelihood.Normal(slice(i, i + 1)) for i in range(output_dim)]
-    return y, likelihoods, labels
+    likelihood = MixedLikelihoodWrapper([Normal() for _ in range(output_dim)])
+    return y, likelihood, labels
 
 
 def make_circle(num_data: int, output_dim: int, *, gaussian: bool = True) -> DataTuple:
@@ -83,17 +83,15 @@ def make_circle(num_data: int, output_dim: int, *, gaussian: bool = True) -> Dat
     y = np.empty((num_data, output_dim))
     if gaussian:
         y = np.random.normal(f, var_y)
-        likelihoods = [likelihood.Normal(slice(i, i + 1)) for i in range(output_dim)]
+        likelihoods = [Normal() for _ in range(output_dim)]
     else:
         half_output = output_dim // 2
         y[:, :half_output] = np.random.normal(f[:, :half_output], var_y)
         y[:, half_output:] = np.random.binomial(1, 1 / (1 + np.exp(-f[:, half_output:])))
-        likelihoods = (
-                [likelihood.Normal(slice(i, i + 1)) for i in range(half_output)] +
-                [likelihood.Bernoulli(slice(half_output + i, half_output + i + 1)) for i in
-                 range(output_dim - half_output)])
+        likelihoods = [Normal() for _ in range(half_output)] + [Bernoulli() for _ in range(output_dim - half_output)]
+    likelihood = MixedLikelihoodWrapper(likelihoods)
     labels = np.zeros(num_data)
-    return y, likelihoods, labels
+    return y, likelihood, labels
 
 
 def make_normal_binary(num_data: int) -> DataTuple:
@@ -110,8 +108,8 @@ def make_normal_binary(num_data: int) -> DataTuple:
     y[half_data:, 2] = np.random.binomial(1, 0.3, size=num_data - half_data)
     labels[half_data:] = np.ones(num_data - half_data)
 
-    likelihoods = [likelihood.Normal(slice(0, 1)), likelihood.Normal(slice(1, 2)), likelihood.Bernoulli(slice(2, 3))]
-    return y, likelihoods, labels
+    likelihood = MixedLikelihoodWrapper([Normal(), Normal(), Bernoulli()])
+    return y, likelihood, labels
 
 
 def make_oilflow(num_data: int = None, output_dim: int = None, *, one_hot_labels: bool = False) -> DataTuple:
@@ -120,10 +118,10 @@ def make_oilflow(num_data: int = None, output_dim: int = None, *, one_hot_labels
     dim_indices = np.random.permutation(12)[:output_dim]
     y = oil['X'][data_indices[:, None], dim_indices]
     labels = oil['Y'][data_indices, :]
-    likelihoods = [likelihood.Normal(slice(i, i + 1)) for i in range(y.shape[1])]
+    likelihood = MixedLikelihoodWrapper([Normal() for _ in range(y.shape[1])])
     if not one_hot_labels:
         labels = np.argmax(labels, axis=1)
-    return y, likelihoods, labels
+    return y, likelihood, labels
 
 
 def make_titanic(num_data: int = None) -> DataTuple:
@@ -141,10 +139,9 @@ def make_titanic(num_data: int = None) -> DataTuple:
     y = train_df.drop(["Survived"], axis=1).values[data_indices]
     # Data come as:           Sex,    Age,  SibSp, Parch, Fare
     # The respective type is: Binary, Cont, Disc,  Disc,  Cont
-    likelihoods = [likelihood.Bernoulli(slice(0, 1)), likelihood.Normal(slice(1, 2)), likelihood.Poisson(slice(2, 3)),
-                   likelihood.Poisson(slice(3, 4)), likelihood.Normal(slice(4, 5))]
+    likelihood = MixedLikelihoodWrapper([Bernoulli(), Normal(), Poisson(), Poisson(), Normal()])
     labels = train_df["Survived"].values[data_indices]
-    return y, likelihoods, labels
+    return y, likelihood, labels
 
 
 def make_binaryalphadigits(num_data: int = None, num_classes: int = None) -> DataTuple:
@@ -159,5 +156,5 @@ def make_binaryalphadigits(num_data: int = None, num_classes: int = None) -> Dat
     data_indices = np.random.permutation(data_per_class * num_classes)[:num_data]
     y = y[data_indices]
     labels = labels[data_indices]
-    likelihoods = [likelihood.Bernoulli(slice(i, i + 1)) for i in range(y.shape[1])]
-    return y, likelihoods, labels
+    likelihood = MixedLikelihoodWrapper([Bernoulli() for _ in range(y.shape[1])])
+    return y, likelihood, labels
