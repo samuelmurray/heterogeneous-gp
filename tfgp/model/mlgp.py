@@ -71,8 +71,13 @@ class MLGP(InducingPointsModel):
 
     def _log_prob(self, samples: tf.Tensor) -> tf.Tensor:
         with tf.name_scope("log_prob"):
-            log_probs = [tf.squeeze(likelihood(samples[:, likelihood.dimensions, :]).log_prob(
-                tf.transpose(self.y[:, likelihood.dimensions])), axis=1) for likelihood in self._likelihoods]
+            log_probs = [
+                tf.reshape(
+                    likelihood(tf.matrix_transpose(samples[:, likelihood.dimensions, :])).log_prob(
+                        self.y[:, likelihood.dimensions]),
+                    shape=[-1, self.num_data]
+                ) for likelihood in self._likelihoods
+            ]
             log_prob = tf.stack(log_probs, axis=1)
         return log_prob
 
