@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-from tfgp.likelihood import Likelihood, Bernoulli, Normal, Poisson, QuantizedNormal
+from tfgp.likelihood import Likelihood, Bernoulli, Categorical, Normal, Poisson, QuantizedNormal
 
 
 class TestLikelihood(tf.test.TestCase):
@@ -17,6 +17,11 @@ class TestLikelihood(tf.test.TestCase):
 class TestBernoulli(tf.test.TestCase):
     def test_create(self):
         _ = Bernoulli(slice(0))
+
+
+class TestCategorical(tf.test.TestCase):
+    def test_create(self):
+        _ = Categorical(slice(0))
 
 
 class TestNormal(tf.test.TestCase):
