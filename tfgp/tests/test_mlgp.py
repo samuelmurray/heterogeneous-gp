@@ -1,9 +1,10 @@
 import tensorflow as tf
 import numpy as np
+from sklearn.datasets import make_regression
 
 from tfgp.model import MLGP
 from tfgp.kernel import RBF
-from tfgp.util import data
+from tfgp.likelihood import Normal
 
 
 class TestMLGP(tf.test.TestCase):
@@ -14,8 +15,13 @@ class TestMLGP(tf.test.TestCase):
     def test_MLGP(self):
         with tf.variable_scope("mlgp", reuse=tf.AUTO_REUSE):
             num_data = 40
-            x, likelihoods, y = data.make_sin(num_data)
+            input_dim = 1
+            output_dim = 1
+            x, y = make_regression(num_data, input_dim, input_dim, output_dim)
+            y = y.reshape(num_data, output_dim)
+            likelihoods = [Normal(slice(i, i + 1)) for i in range(output_dim)]
             num_inducing = 10
+
             m = MLGP(x, y, likelihoods=likelihoods, kernel=self.kernel, num_inducing=num_inducing)
 
             loss = tf.losses.get_total_loss()
