@@ -13,11 +13,11 @@ if __name__ == "__main__":
     sns.set()
     print("Generating data...")
     num_data = 40
-    x, likelihoods, y = data.make_sin(num_data)
+    x, likelihood, y = data.make_sin(num_data)
     num_inducing = 20
 
     print("Creating model...")
-    m = MLGP(x, y, likelihoods=likelihoods, num_inducing=num_inducing)
+    m = MLGP(x, y, likelihood=likelihood, num_inducing=num_inducing)
 
     print("Building graph...")
     loss = tf.losses.get_total_loss()

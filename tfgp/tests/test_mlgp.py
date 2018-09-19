@@ -4,7 +4,7 @@ from sklearn.datasets import make_regression
 
 from tfgp.model import MLGP
 from tfgp.kernel import RBF
-from tfgp.likelihood import Normal
+from tfgp.likelihood import MixedLikelihoodWrapper, Normal
 
 
 class TestMLGP(tf.test.TestCase):
@@ -19,10 +19,10 @@ class TestMLGP(tf.test.TestCase):
             output_dim = 1
             x, y = make_regression(num_data, input_dim, input_dim, output_dim)
             y = y.reshape(num_data, output_dim)
-            likelihoods = [Normal(slice(i, i + 1)) for i in range(output_dim)]
+            likelihood = MixedLikelihoodWrapper([Normal() for _ in range(output_dim)])
             num_inducing = 10
 
-            m = MLGP(x, y, likelihoods=likelihoods, kernel=self.kernel, num_inducing=num_inducing)
+            m = MLGP(x, y, likelihood=likelihood, kernel=self.kernel, num_inducing=num_inducing)
 
             loss = tf.losses.get_total_loss()
             learning_rate = 0.1

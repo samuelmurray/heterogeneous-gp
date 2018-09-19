@@ -1,7 +1,7 @@
 import tensorflow as tf
 from sklearn.datasets import make_blobs
 
-from tfgp.likelihood import Normal
+from tfgp.likelihood import MixedLikelihoodWrapper, Normal
 from tfgp.model import MLGPLVM
 from tfgp.kernel import RBF
 
@@ -18,9 +18,9 @@ class TestMLGPLVM(tf.test.TestCase):
             output_dim = 5
             num_classes = 3
             y, _ = make_blobs(num_data, output_dim, num_classes)
-            likelihoods = [Normal(slice(i, i + 1)) for i in range(output_dim)]
+            likelihood = MixedLikelihoodWrapper([Normal() for _ in range(output_dim)])
 
-            m = MLGPLVM(y, latent_dim, kernel=self.kernel, likelihoods=likelihoods)
+            m = MLGPLVM(y, latent_dim, kernel=self.kernel, likelihood=likelihood)
 
             loss = tf.losses.get_total_loss()
             learning_rate = 0.1
