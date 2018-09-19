@@ -4,13 +4,13 @@ import tensorflow as tf
 
 
 class Likelihood(abc.ABC):
-    def __init__(self, dimensions: slice) -> None:
+    def __init__(self, num_dimensions: int) -> None:
         self._summary_family = "Likelihood"
-        self._dimensions = dimensions
+        self._num_dimensions = num_dimensions
 
     @property
-    def dimensions(self) -> slice:
-        return self._dimensions
+    def num_dimensions(self) -> int:
+        return self._num_dimensions
 
     @abc.abstractmethod
     def __call__(self, f: tf.Tensor) -> tf.distributions.Distribution:
