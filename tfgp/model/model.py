@@ -20,5 +20,9 @@ class Model(abc.ABC):
         return self._num_data
 
     @abc.abstractmethod
+    def initialize(self) -> None:
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def create_summaries(self) -> None:
         raise NotImplementedError

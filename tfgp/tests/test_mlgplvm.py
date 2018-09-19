@@ -21,6 +21,7 @@ class TestMLGPLVM(tf.test.TestCase):
             likelihood = MixedLikelihoodWrapper([Normal() for _ in range(output_dim)])
 
             m = MLGPLVM(y, latent_dim, kernel=self.kernel, likelihood=likelihood)
+            m.initialize()
 
             loss = tf.losses.get_total_loss()
             learning_rate = 0.1

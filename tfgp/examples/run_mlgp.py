@@ -18,6 +18,7 @@ if __name__ == "__main__":
 
     print("Creating model...")
     m = MLGP(x, y, likelihood=likelihood, num_inducing=num_inducing)
+    m.initialize()
 
     print("Building graph...")
     loss = tf.losses.get_total_loss()

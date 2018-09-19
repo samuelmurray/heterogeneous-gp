@@ -24,6 +24,7 @@ if __name__ == "__main__":
     print("Creating model...")
     kernel = tfgp.kernel.ARDRBF(xdim=latent_dim, name="ardrbf")
     m = MLGPLVM(y, latent_dim, x=x, kernel=kernel, likelihood=likelihood)
+    m.initialize()
 
     print("Building graph...")
     loss = tf.losses.get_total_loss()

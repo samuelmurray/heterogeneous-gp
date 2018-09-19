@@ -23,6 +23,7 @@ class TestMLGP(tf.test.TestCase):
             num_inducing = 10
 
             m = MLGP(x, y, likelihood=likelihood, kernel=self.kernel, num_inducing=num_inducing)
+            m.initialize()
 
             loss = tf.losses.get_total_loss()
             learning_rate = 0.1

@@ -4,7 +4,7 @@ import tensorflow as tf
 import tensorflow_probability as tfp
 import numpy as np
 
-from .mlgplvm import InducingPointsModel
+from .inducing_points_model import InducingPointsModel
 from ..kernel import Kernel
 from ..kernel import RBF
 from ..likelihood import MixedLikelihoodWrapper
@@ -42,6 +42,8 @@ class MLGP(InducingPointsModel):
             self.qu_scale = tf.identity(self.qu_log_scale
                                         - tf.matrix_diag(tf.matrix_diag_part(self.qu_log_scale))
                                         + tf.matrix_diag(tf.exp(tf.matrix_diag_part(self.qu_log_scale))), name="scale")
+
+    def initialize(self) -> None:
         tf.losses.add_loss(self._loss())
 
     def _loss(self) -> tf.Tensor:
@@ -122,6 +124,8 @@ class MLGP(InducingPointsModel):
         k_zz_inv = tf.matrix_inverse(k_zz)
         k_xs_z = self.kernel(xs, self.z)
         f_mean = tf.matmul(tf.matmul(k_xs_z, k_zz_inv), self.qu_mean, transpose_b=True)
+
+        # TODO: Below is hack to work with new likelihood
         mean = tf.stack(
             [likelihood(f_mean[:, i]).mean() for i, likelihood in enumerate(self._likelihood._likelihoods)], axis=1)
         std = tf.stack(
