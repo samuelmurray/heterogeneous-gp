@@ -17,12 +17,14 @@ if __name__ == "__main__":
     num_data = 100
     latent_dim = 2
     output_dim = 5
-    y, likelihoods, labels = data.make_gaussian_blobs(num_data, output_dim, num_classes=3)
+    num_classes = 5
+    y, likelihood, labels = data.make_circle(num_data, output_dim)
     x = tfgp.util.pca_reduce(y, latent_dim)
 
     print("Creating model...")
     kernel = tfgp.kernel.ARDRBF(xdim=latent_dim, name="ardrbf")
-    m = MLGPLVM(y, latent_dim, x=x, kernel=kernel, likelihoods=likelihoods)
+    m = MLGPLVM(y, latent_dim, x=x, kernel=kernel, likelihood=likelihood)
+    m.initialize()
 
     print("Building graph...")
     loss = tf.losses.get_total_loss()

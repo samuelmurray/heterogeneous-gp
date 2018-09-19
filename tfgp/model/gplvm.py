@@ -25,6 +25,9 @@ class GPLVM(Model):
         self.kernel = kernel if (kernel is not None) else RBF(0.1, eps=0.1)
         tf.losses.add_loss(self._loss())
 
+    def initialize(self) -> None:
+        tf.losses.add_loss(self._loss())
+
     def _loss(self) -> tf.Tensor:
         loss = tf.negative(self._log_joint(), name="loss")
         return loss

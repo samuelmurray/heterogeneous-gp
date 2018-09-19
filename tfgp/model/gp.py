@@ -32,5 +32,8 @@ class GP(Model):
         cov = k_zz - tf.matmul(v, v, transpose_a=True)
         return mean, cov
 
+    def initialize(self) -> None:
+        pass
+
     def create_summaries(self) -> None:
         pass

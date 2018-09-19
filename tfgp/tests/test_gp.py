@@ -17,6 +17,7 @@ class TestGP(tf.test.TestCase):
             x = tf.convert_to_tensor(x_train, dtype=tf.float32)
             y = tf.convert_to_tensor(y_train, dtype=tf.float32)
             m = GP(x, y, kernel=self.kernel)
+            m.initialize()
             init = tf.global_variables_initializer()
             with tf.Session() as sess:
                 sess.run(init)

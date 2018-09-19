@@ -19,6 +19,7 @@ class TestGPLVM(tf.test.TestCase):
             y, _ = make_blobs(num_data, output_dim, num_classes)
 
             m = GPLVM(y, latent_dim, kernel=self.kernel)
+            m.initialize()
 
             loss = tf.losses.get_total_loss()
             learning_rate = 0.1

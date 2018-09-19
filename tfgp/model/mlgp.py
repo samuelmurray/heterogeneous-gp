@@ -1,20 +1,20 @@
-from typing import List, Tuple
+from typing import Tuple
 
 import tensorflow as tf
 import tensorflow_probability as tfp
 import numpy as np
 
-from .mlgplvm import InducingPointsModel
+from .inducing_points_model import InducingPointsModel
 from ..kernel import Kernel
 from ..kernel import RBF
-from ..likelihood import Likelihood
+from ..likelihood import MixedLikelihoodWrapper
 
 
 class MLGP(InducingPointsModel):
     def __init__(self, x: np.ndarray, y: np.ndarray, *,
                  kernel: Kernel = None,
                  num_inducing: int = 50,
-                 likelihoods: List[Likelihood],
+                 likelihood: MixedLikelihoodWrapper,
                  ) -> None:
         super().__init__(x.shape[1], y.shape[1], y.shape[0], num_inducing)
         if x.shape[0] != y.shape[0]:
@@ -26,10 +26,10 @@ class MLGP(InducingPointsModel):
         z = x[inducing_indices]
         self.x = tf.convert_to_tensor(x, dtype=tf.float32)
         self.y = tf.convert_to_tensor(y, dtype=tf.float32)
-        if len(likelihoods) != self.ydim:
-            raise ValueError(f"Must provide one distribution per y dimension, "
-                             f"but len(likelihoods)={len(likelihoods)} and y.shape={y.shape}")
-        self._likelihoods = likelihoods
+        if likelihood.num_dim != self.ydim:
+            raise ValueError(f"The likelihood must have as many dimensions as y, "
+                             f"but likelihood.num_dim={likelihood.num_dim} and y.shape={y.shape}")
+        self._likelihood = likelihood
         self.kernel = kernel if (kernel is not None) else RBF()
         self.z = tf.get_variable("z", shape=[self.num_inducing, self.xdim], initializer=tf.constant_initializer(z))
         with tf.variable_scope("qu"):
@@ -42,6 +42,8 @@ class MLGP(InducingPointsModel):
             self.qu_scale = tf.identity(self.qu_log_scale
                                         - tf.matrix_diag(tf.matrix_diag_part(self.qu_log_scale))
                                         + tf.matrix_diag(tf.exp(tf.matrix_diag_part(self.qu_log_scale))), name="scale")
+
+    def initialize(self) -> None:
         tf.losses.add_loss(self._loss())
 
     def _loss(self) -> tf.Tensor:
@@ -65,14 +67,13 @@ class MLGP(InducingPointsModel):
         with tf.name_scope("mc_expectation"):
             num_samples = 10
             approx_exp_all = tfp.monte_carlo.expectation(f=self._log_prob, samples=self._sample_f(num_samples),
-                                                        name="approx_exp_all")
+                                                         name="approx_exp_all")
             approx_exp = tf.reduce_sum(approx_exp_all, axis=[0, 1], name="approx_exp")
         return approx_exp
 
-    def _log_prob(self, f: tf.Tensor) -> tf.Tensor:
+    def _log_prob(self, samples: tf.Tensor) -> tf.Tensor:
         with tf.name_scope("log_prob"):
-            log_prob = tf.stack([self._likelihoods[i](f[:, i, :]).log_prob(tf.transpose(self.y[:, i]))
-                                 for i in range(self.ydim)], axis=1)
+            log_prob = self._likelihood.log_prob(tf.matrix_transpose(samples), self.y)
         return log_prob
 
     def _sample_f(self, num_samples: int) -> tf.Tensor:
@@ -123,8 +124,12 @@ class MLGP(InducingPointsModel):
         k_zz_inv = tf.matrix_inverse(k_zz)
         k_xs_z = self.kernel(xs, self.z)
         f_mean = tf.matmul(tf.matmul(k_xs_z, k_zz_inv), self.qu_mean, transpose_b=True)
-        mean = tf.stack([self._likelihoods[i](f_mean[:, i]).mean() for i in range(self.ydim)], axis=1)
-        std = tf.stack([self._likelihoods[i](f_mean[:, i]).stddev() for i in range(self.ydim)], axis=1)
+
+        # TODO: Below is hack to work with new likelihood
+        mean = tf.stack(
+            [likelihood(f_mean[:, i]).mean() for i, likelihood in enumerate(self._likelihood._likelihoods)], axis=1)
+        std = tf.stack(
+            [likelihood(f_mean[:, i]).stddev() for i, likelihood in enumerate(self._likelihood._likelihoods)], axis=1)
 
         """
         k_xsxs = self.kernel(xs)
@@ -142,5 +147,4 @@ class MLGP(InducingPointsModel):
         tf.summary.histogram("qu_mean", self.qu_mean)
         tf.summary.histogram("qu_scale", tfp.distributions.fill_triangular_inverse(self.qu_scale))
         self.kernel.create_summaries()
-        for likelihood in self._likelihoods:
-            likelihood.create_summaries()
+        self._likelihood.create_summaries()

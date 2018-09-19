@@ -12,7 +12,7 @@ class TestKernel(tf.test.TestCase):
     def test_abc(self):
         exception_thrown = False
         try:
-            ker = Kernel("kernel")
+            _ = Kernel("kernel")
         except TypeError:
             exception_thrown = True
         self.assertTrue(exception_thrown)

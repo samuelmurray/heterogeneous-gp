@@ -1,9 +1,10 @@
 import tensorflow as tf
 import numpy as np
+from sklearn.datasets import make_regression
 
 from tfgp.model import MLGP
 from tfgp.kernel import RBF
-from tfgp.likelihood import Normal
+from tfgp.likelihood import MixedLikelihoodWrapper, Normal
 
 
 class TestMLGP(tf.test.TestCase):
@@ -11,13 +12,18 @@ class TestMLGP(tf.test.TestCase):
         with tf.variable_scope("mlgp", reuse=tf.AUTO_REUSE):
             self.kernel = RBF()
 
-    def test_GP(self):
+    def test_MLGP(self):
         with tf.variable_scope("mlgp", reuse=tf.AUTO_REUSE):
-            x = np.linspace(0, 2 * np.pi, 20)[:, None]
-            y = np.sin(x)
-            likelihoods = [Normal()]
+            num_data = 40
+            input_dim = 1
+            output_dim = 1
+            x, y = make_regression(num_data, input_dim, input_dim, output_dim)
+            y = y.reshape(num_data, output_dim)
+            likelihood = MixedLikelihoodWrapper([Normal() for _ in range(output_dim)])
             num_inducing = 10
-            m = MLGP(x, y, likelihoods=likelihoods, kernel=self.kernel, num_inducing=num_inducing)
+
+            m = MLGP(x, y, likelihood=likelihood, kernel=self.kernel, num_inducing=num_inducing)
+            m.initialize()
 
             loss = tf.losses.get_total_loss()
             learning_rate = 0.1
