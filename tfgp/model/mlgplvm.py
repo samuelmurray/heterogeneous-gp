@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import Tuple
 
 import tensorflow as tf
 import tensorflow_probability as tfp
@@ -7,7 +7,7 @@ import numpy as np
 from .inducing_points_model import InducingPointsModel
 from ..kernel import Kernel
 from ..kernel import RBF
-from ..likelihood import Likelihood
+from ..likelihood import MixedLikelihoodWrapper
 
 
 class MLGPLVM(InducingPointsModel):
@@ -15,7 +15,7 @@ class MLGPLVM(InducingPointsModel):
                  x: np.ndarray = None,
                  kernel: Kernel = None,
                  num_inducing: int = 50,
-                 likelihoods: List[Likelihood],
+                 likelihood: MixedLikelihoodWrapper,
                  ) -> None:
         super().__init__(xdim, y.shape[1], y.shape[0], num_inducing)
         if x is None:
@@ -30,11 +30,10 @@ class MLGPLVM(InducingPointsModel):
         inducing_indices = np.random.permutation(self.num_data)[:self.num_inducing]
         z = x[inducing_indices]  # TODO: Maybe this should not be done if x is initialised randomly?
         self.y = tf.convert_to_tensor(y, dtype=tf.float32)
-        if len(likelihoods) != self.ydim:
-            raise ValueError(
-                f"Must provide one distribution per y dimension, "
-                f"but len(likelihoods)={len(likelihoods)} and y.shape={y.shape}")
-        self._likelihoods = likelihoods
+        if likelihood.num_dim != self.ydim:
+            raise ValueError(f"The likelihood must have as many dimensions as y, "
+                             f"but likelihood.num_dim={likelihood.num_dim} and y.shape={y.shape}")
+        self._likelihood = likelihood
         self.kernel = kernel if (kernel is not None) else RBF()
 
         with tf.variable_scope("qx"):
@@ -97,14 +96,7 @@ class MLGPLVM(InducingPointsModel):
 
     def _log_prob(self, samples: tf.Tensor) -> tf.Tensor:
         with tf.name_scope("log_prob"):
-            log_probs = [
-                tf.reshape(
-                    likelihood(tf.matrix_transpose(samples[:, likelihood.dimensions, :])).log_prob(
-                        self.y[:, likelihood.dimensions]),
-                    shape=[-1, self.num_data]
-                ) for likelihood in self._likelihoods
-            ]
-            log_prob = tf.stack(log_probs, axis=1)
+            log_prob = self._likelihood.log_prob(tf.matrix_transpose(samples), self.y)
         return log_prob
 
     def _sample_f(self, num_samples: int) -> tf.Tensor:
@@ -158,8 +150,8 @@ class MLGPLVM(InducingPointsModel):
         k_zz_inv = tf.matrix_inverse(k_zz)
         k_xs_z = self.kernel(xs, self.z)
         f_mean = tf.matmul(tf.matmul(k_xs_z, k_zz_inv), self.qu_mean, transpose_b=True)
-        mean = tf.stack([likelihood(f_mean[:, i]).mean() for i, likelihood in enumerate(self._likelihoods)], axis=1)
-        std = tf.stack([likelihood(f_mean[:, i]).stddev() for i, likelihood in enumerate(self._likelihoods)], axis=1)
+        mean = tf.stack([likelihood(f_mean[:, i]).mean() for i, likelihood in enumerate(self._likelihood)], axis=1)
+        std = tf.stack([likelihood(f_mean[:, i]).stddev() for i, likelihood in enumerate(self._likelihood)], axis=1)
 
         """
         k_xsxs = self.kernel(xs)
@@ -180,5 +172,4 @@ class MLGPLVM(InducingPointsModel):
         tf.summary.histogram("qu_mean", self.qu_mean)
         tf.summary.histogram("qu_scale", tfp.distributions.fill_triangular_inverse(self.qu_scale))
         self.kernel.create_summaries()
-        for likelihood in self._likelihoods:
-            likelihood.create_summaries()
+        self._likelihood.create_summaries()
