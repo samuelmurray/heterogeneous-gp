@@ -7,7 +7,7 @@ from scipy.special import expit
 import pandas as pd
 import pods
 
-from tfgp.likelihood import Bernoulli, MixedLikelihoodWrapper, Normal, Poisson
+from tfgp.likelihood import Bernoulli, Categorical, MixedLikelihoodWrapper, Normal, Poisson
 
 DataTuple = Tuple[np.ndarray, MixedLikelihoodWrapper, np.ndarray]
 
@@ -157,4 +157,33 @@ def make_binaryalphadigits(num_data: int = None, num_classes: int = None) -> Dat
     y = y[data_indices]
     labels = labels[data_indices]
     likelihood = MixedLikelihoodWrapper([Bernoulli() for _ in range(y.shape[1])])
+    return y, likelihood, labels
+
+
+def make_cleveland(num_data: int = None) -> DataTuple:
+    try:
+        data = np.loadtxt("../../util/cleveland_onehot.csv", delimiter=",")
+    except FileNotFoundError as e:
+        print("You need to have the Cleveland dataset")
+        raise e
+    data_indices = np.random.permutation(297)[:num_data]
+    y = data[data_indices, :-1]
+    labels = data[data_indices, -1]
+    likelihood = MixedLikelihoodWrapper(
+        [Normal(), Normal(), Categorical(4), Normal(), Normal(), Bernoulli(), Categorical(3), Normal(), Bernoulli(),
+         Normal(), Categorical(3), Categorical(4), Categorical(3)]
+    )
+    return y, likelihood, labels
+
+
+def make_abalone(num_data: int = None) -> DataTuple:
+    try:
+        data = np.loadtxt("../../util/abalone.csv", delimiter=",")
+    except FileNotFoundError as e:
+        print("You need to have the Abalone dataset")
+        raise e
+    data_indices = np.random.permutation(4177)[:num_data]
+    y = data[data_indices, :-1]
+    labels = data[data_indices, -1]
+    likelihood = MixedLikelihoodWrapper([Categorical(3)] + [Normal() for _ in range(7)])
     return y, likelihood, labels
