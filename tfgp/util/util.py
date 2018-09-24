@@ -2,11 +2,18 @@ import numpy as np
 from sklearn.neighbors import NearestNeighbors
 
 
-def knn_error(x: np.ndarray, labels: np.ndarray, k: int) -> float:
+def knn_abs_error(x: np.ndarray, labels: np.ndarray, k: int) -> float:
     knn = NearestNeighbors(k).fit(x)
     _, indices = knn.kneighbors(x)
     guess = np.mean(labels[indices[:, 1:]], axis=1)
     return np.sum(np.abs(labels - guess))
+
+
+def knn_error(x: np.ndarray, labels: np.ndarray, k: int) -> float:
+    knn = NearestNeighbors(k).fit(x)
+    _, indices = knn.kneighbors(x)
+    guess = np.mean(labels[indices[:, 1:]], axis=1)
+    return np.sum(labels != guess)
 
 
 def knn_rmse(x: np.ndarray, labels: np.ndarray, k: int) -> float:
