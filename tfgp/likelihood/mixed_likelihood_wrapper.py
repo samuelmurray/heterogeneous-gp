@@ -20,9 +20,10 @@ class MixedLikelihoodWrapper:
 
     def log_prob(self, f: tf.Tensor, y: tf.Tensor) -> tf.Tensor:
         log_prob = tf.stack(
-            [tf.reshape(likelihood(f[:, :, dims]).log_prob(y[:, dims]), shape=[-1, y.shape[0]]) for likelihood, dims in
-             zip(self._likelihoods, self._slices)]
-            , axis=2
+            [
+                tf.reshape(likelihood(f[:, :, dims]).log_prob(y[:, dims]), shape=[-1, y.shape[0]]) for likelihood, dims
+                in zip(self._likelihoods, self._slices)
+            ], axis=2
         )
         return log_prob
 
