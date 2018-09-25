@@ -2,6 +2,16 @@
 Module for all supported likelihoods
 """
 
+__all__ = [
+    "Likelihood",
+    "Bernoulli",
+    "MixedLikelihoodWrapper",
+    "Normal",
+    "OneHotCategorical",
+    "Poisson",
+    "QuantizedNormal",
+]
+
 from .likelihood import Likelihood
 from .bernoulli import Bernoulli
 from .mixed_likelihood_wrapper import MixedLikelihoodWrapper
