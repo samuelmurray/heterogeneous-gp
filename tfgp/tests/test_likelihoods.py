@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
 
-from tfgp.likelihood import Likelihood, Bernoulli, Categorical, MixedLikelihoodWrapper, Normal, Poisson, QuantizedNormal
+from tfgp.likelihood import Likelihood, Bernoulli, OneHotCategorical, MixedLikelihoodWrapper, Normal, Poisson, QuantizedNormal
 
 
 class TestLikelihood(tf.test.TestCase):
@@ -22,13 +22,13 @@ class TestBernoulli(tf.test.TestCase):
 
 class TestCategorical(tf.test.TestCase):
     def test_create(self):
-        _ = Categorical(2)
+        _ = OneHotCategorical(2)
 
 
 class TestMixedLikelihoodWrapper(tf.test.TestCase):
     def test_create(self):
         ber = Bernoulli()
-        cat = Categorical(3)
+        cat = OneHotCategorical(3)
         nor = Normal()
         mixed = MixedLikelihoodWrapper([ber, cat, nor])
         f = tf.constant(np.array([[[0.7, 0.4, 0.4, 0.2, 2.]]]), dtype=tf.float32)

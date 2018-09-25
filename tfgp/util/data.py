@@ -7,7 +7,7 @@ from scipy.special import expit
 import pandas as pd
 import pods
 
-from tfgp.likelihood import Bernoulli, Categorical, MixedLikelihoodWrapper, Normal, Poisson
+from tfgp.likelihood import Bernoulli, OneHotCategorical, MixedLikelihoodWrapper, Normal, Poisson
 
 DataTuple = Tuple[np.ndarray, MixedLikelihoodWrapper, np.ndarray]
 
@@ -170,8 +170,8 @@ def make_cleveland(num_data: int = None) -> DataTuple:
     y = data[data_indices, :-1]
     labels = data[data_indices, -1]
     likelihood = MixedLikelihoodWrapper(
-        [Normal(), Normal(), Categorical(4), Normal(), Normal(), Bernoulli(), Categorical(3), Normal(), Bernoulli(),
-         Normal(), Categorical(3), Categorical(4), Categorical(3)]
+        [Normal(), Normal(), OneHotCategorical(4), Normal(), Normal(), Bernoulli(), OneHotCategorical(3), Normal(), Bernoulli(),
+         Normal(), OneHotCategorical(3), OneHotCategorical(4), OneHotCategorical(3)]
     )
     return y, likelihood, labels
 
@@ -185,5 +185,5 @@ def make_abalone(num_data: int = None) -> DataTuple:
     data_indices = np.random.permutation(4177)[:num_data]
     y = data[data_indices, :-1]
     labels = data[data_indices, -1]
-    likelihood = MixedLikelihoodWrapper([Categorical(3)] + [Normal() for _ in range(7)])
+    likelihood = MixedLikelihoodWrapper([OneHotCategorical(3)] + [Normal() for _ in range(7)])
     return y, likelihood, labels
