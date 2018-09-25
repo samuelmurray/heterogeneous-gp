@@ -19,6 +19,15 @@ class MixedLikelihoodWrapper:
         return [likelihood(f[:, :, dims]) for likelihood, dims in zip(self._likelihoods, self._slices)]
 
     def log_prob(self, f: tf.Tensor, y: tf.Tensor) -> tf.Tensor:
+        log_prob = tf.stack(
+            [tf.reshape(likelihood(f[:, :, dims]).log_prob(y[:, dims]), shape=[-1, y.shape[0]]) for likelihood, dims in
+             zip(self._likelihoods, self._slices)]
+            , axis=2
+        )
+        return log_prob
+
+    """
+    def log_prob(self, f: tf.Tensor, y: tf.Tensor) -> tf.Tensor:
         nan_mask = tf.is_nan(y)
         y_ = tf.where(nan_mask, tf.zeros_like(y), y)
         log_prob_with_nans = tf.stack(
@@ -39,7 +48,7 @@ class MixedLikelihoodWrapper:
         # mask_h = tf.cast(mask_h, dtype=log_prob.dtype)
         # return tf.stop_gradient(mask * log_prob) + mask_h * log_prob
         # return log_prob
-
+    """
     """
     def log_prob(self, f: tf.Tensor, y: tf.Tensor) -> tf.Tensor:
         log_prob_with_nans = tf.stack(
