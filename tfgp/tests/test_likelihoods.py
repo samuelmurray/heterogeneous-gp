@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
 
-from tfgp.likelihood import Likelihood, Bernoulli, MixedLikelihoodWrapper, Normal, OneHotCategorical, Poisson, QuantizedNormal
+from tfgp.likelihood import *
 
 
 class TestLikelihood(tf.test.TestCase):
@@ -20,11 +20,6 @@ class TestBernoulli(tf.test.TestCase):
         _ = Bernoulli()
 
 
-class TestOneHotCategorical(tf.test.TestCase):
-    def test_create(self):
-        _ = OneHotCategorical(2)
-
-
 class TestMixedLikelihoodWrapper(tf.test.TestCase):
     def test_create(self):
         ber = Bernoulli()
@@ -39,6 +34,11 @@ class TestMixedLikelihoodWrapper(tf.test.TestCase):
 class TestNormal(tf.test.TestCase):
     def test_create(self):
         _ = Normal()
+
+
+class TestOneHotCategorical(tf.test.TestCase):
+    def test_create(self):
+        _ = OneHotCategorical(2)
 
 
 class TestPoisson(tf.test.TestCase):
