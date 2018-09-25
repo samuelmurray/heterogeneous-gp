@@ -19,11 +19,46 @@ class MixedLikelihoodWrapper:
         return [likelihood(f[:, :, dims]) for likelihood, dims in zip(self._likelihoods, self._slices)]
 
     def log_prob(self, f: tf.Tensor, y: tf.Tensor) -> tf.Tensor:
-        log_prob = tf.stack(
+        nan_mask = tf.is_nan(y)
+        y_ = tf.where(nan_mask, tf.zeros_like(y), y)
+        log_prob_with_nans = tf.stack(
+            [tf.reshape(likelihood(f[:, :, dims]).log_prob(y_[:, dims]), shape=[-1, y.shape[0]]) for likelihood, dims in
+             zip(self._likelihoods, self._slices)]
+        )
+        log_prob = tf.where(tf.expand_dims(tf.transpose(nan_mask), axis=1), tf.zeros_like(log_prob_with_nans),
+                            log_prob_with_nans)
+        return log_prob
+        # ok = tf.boolean_mask(log_prob_with_nans, mask)
+        # idx = tf.to_int32(tf.where(mask))
+        # ans = tf.scatter_nd(idx, ok, tf.shape(mask))
+        # return ans
+        # mask = tf.is_nan(log_prob_with_nans)
+        # mask_h = tf.logical_not(mask)
+        # log_prob = tf.where(mask, tf.zeros_like(log_prob_with_nans), log_prob_with_nans)
+        # mask = tf.cast(mask, dtype=log_prob.dtype)
+        # mask_h = tf.cast(mask_h, dtype=log_prob.dtype)
+        # return tf.stop_gradient(mask * log_prob) + mask_h * log_prob
+        # return log_prob
+
+    """
+    def log_prob(self, f: tf.Tensor, y: tf.Tensor) -> tf.Tensor:
+        log_prob_with_nans = tf.stack(
             [tf.reshape(likelihood(f[:, :, dims]).log_prob(y[:, dims]), shape=[-1, y.shape[0]]) for likelihood, dims in
              zip(self._likelihoods, self._slices)]
         )
-        return log_prob
+        mask = tf.logical_not(tf.is_nan(log_prob_with_nans))
+        ok = tf.boolean_mask(log_prob_with_nans, mask)
+        idx = tf.to_int32(tf.where(mask))
+        ans = tf.scatter_nd(idx, ok, tf.shape(mask))
+        return ans
+        #mask = tf.is_nan(log_prob_with_nans)
+        #mask_h = tf.logical_not(mask)
+        #log_prob = tf.where(mask, tf.zeros_like(log_prob_with_nans), log_prob_with_nans)
+        #mask = tf.cast(mask, dtype=log_prob.dtype)
+        #mask_h = tf.cast(mask_h, dtype=log_prob.dtype)
+        #return tf.stop_gradient(mask * log_prob) + mask_h * log_prob
+        #return log_prob
+    """
 
     @property
     def num_dim(self):
