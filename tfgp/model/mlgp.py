@@ -34,7 +34,7 @@ class MLGP(InducingPointsModel):
         self.z = tf.get_variable("z", shape=[self.num_inducing, self.xdim], initializer=tf.constant_initializer(z))
         with tf.variable_scope("qu"):
             self.qu_mean = tf.get_variable("mean", shape=[self.ydim, self.num_inducing],
-                                           initializer=tf.random_normal_initializer(0.01))
+                                           initializer=tf.random_normal_initializer(stddev=0.01))
             self.qu_log_scale_vec = tf.get_variable("log_scale_vec",
                                                     shape=[self.ydim, self.num_inducing * (self.num_inducing + 1) / 2],
                                                     initializer=tf.zeros_initializer())
