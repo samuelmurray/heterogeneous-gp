@@ -160,6 +160,22 @@ def make_binaryalphadigits(num_data: int = None, num_classes: int = None) -> Dat
     return y, likelihood, labels
 
 
+def make_binaryalphadigits_test(num_data: int = None, num_classes: int = None) -> DataTuple:
+    data_per_class = 9
+    try:
+        y = np.loadtxt("../../util/binaryalphadigits_test.csv", delimiter=",")
+    except FileNotFoundError as e:
+        print("You must run the Matlab script to download the Binary Alphadigits data set before calling this function")
+        raise e
+    y = y[:data_per_class * num_classes]
+    labels = np.array([[i] * data_per_class for i in range(num_classes)]).flatten()
+    data_indices = np.random.permutation(data_per_class * num_classes)[:num_data]
+    y = y[data_indices]
+    labels = labels[data_indices]
+    likelihood = MixedLikelihoodWrapper([Bernoulli() for _ in range(y.shape[1])])
+    return y, likelihood, labels
+
+
 def make_cleveland(num_data: int = None) -> DataTuple:
     try:
         data = np.loadtxt("../../util/cleveland_onehot.csv", delimiter=",")
