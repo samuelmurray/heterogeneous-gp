@@ -79,6 +79,10 @@ class MixedLikelihoodWrapper:
     @property
     def num_dim(self):
         return self._num_dim
+    
+    @property
+    def num_likelihoods(self):
+        return len(self._likelihoods)
 
     def create_summaries(self) -> None:
         for likelihood in self._likelihoods:
