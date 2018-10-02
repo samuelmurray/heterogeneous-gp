@@ -176,7 +176,7 @@ def make_binaryalphadigits_test(num_data: int = None, num_classes: int = None) -
     return y, likelihood, labels
 
 
-def make_cleveland(num_data: int = None) -> DataTuple:
+def make_cleveland_quantized(num_data: int = None) -> DataTuple:
     try:
         data = np.loadtxt("../../util/cleveland_onehot.csv", delimiter=",")
     except FileNotFoundError as e:
@@ -204,6 +204,33 @@ def make_cleveland(num_data: int = None) -> DataTuple:
     )
     return y, likelihood, labels
 
+def make_cleveland(num_data: int = None) -> DataTuple:
+    try:
+        data = np.loadtxt("../../util/cleveland_onehot.csv", delimiter=",")
+    except FileNotFoundError as e:
+        print("You need to have the Cleveland dataset")
+        raise e
+    data_indices = np.random.permutation(297)[:num_data]
+    y = data[data_indices, :-1]
+    labels = data[data_indices, -1]
+    likelihood = MixedLikelihoodWrapper(
+        [
+            Normal(),
+            Bernoulli(),
+            OneHotCategorical(4),
+            Normal(),
+            Normal(),
+            Bernoulli(),
+            OneHotCategorical(3),
+            Normal(),
+            Bernoulli(),
+            Normal(),
+            OneHotCategorical(3),
+            OneHotCategorical(4),
+            OneHotCategorical(3),
+        ]
+    )
+    return y, likelihood, labels
 
 def make_abalone(num_data: int = None) -> DataTuple:
     try:
