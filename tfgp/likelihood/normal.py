@@ -23,6 +23,5 @@ class Normal(Likelihood):
 
     @staticmethod
     def __get_id() -> int:
-        print(Normal.__count)
         Normal.__count += 1
         return Normal.__count
