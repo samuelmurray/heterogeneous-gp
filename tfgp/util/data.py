@@ -186,8 +186,21 @@ def make_cleveland(num_data: int = None) -> DataTuple:
     y = data[data_indices, :-1]
     labels = data[data_indices, -1]
     likelihood = MixedLikelihoodWrapper(
-        [Normal(), Normal(), OneHotCategorical(4), Normal(), Normal(), Bernoulli(), OneHotCategorical(3), Normal(),
-         Bernoulli(), Normal(), OneHotCategorical(3), OneHotCategorical(4), OneHotCategorical(3)]
+        [
+            QuantizedNormal(),
+            Bernoulli(),
+            OneHotCategorical(4),
+            QuantizedNormal(),
+            QuantizedNormal(),
+            Bernoulli(),
+            OneHotCategorical(3),
+            QuantizedNormal(),
+            Bernoulli(),
+            Normal(),
+            OneHotCategorical(3),
+            OneHotCategorical(4),
+            OneHotCategorical(3),
+        ]
     )
     return y, likelihood, labels
 
