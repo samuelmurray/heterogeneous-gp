@@ -21,7 +21,8 @@ class Normal(Likelihood):
     def create_summaries(self) -> None:
         tf.summary.scalar(f"normal_scale_{self._id}", tf.squeeze(self._scale), family=self._summary_family)
 
-    @classmethod
-    def __get_id(cls) -> int:
-        cls.__count += 1
-        return cls.__count
+    @staticmethod
+    def __get_id() -> int:
+        print(Normal.__count)
+        Normal.__count += 1
+        return Normal.__count
