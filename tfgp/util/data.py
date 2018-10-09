@@ -204,6 +204,7 @@ def make_cleveland_quantized(num_data: int = None) -> DataTuple:
     )
     return y, likelihood, labels
 
+
 def make_cleveland(num_data: int = None) -> DataTuple:
     try:
         data = np.loadtxt("../../util/cleveland_onehot.csv", delimiter=",")
@@ -231,6 +232,7 @@ def make_cleveland(num_data: int = None) -> DataTuple:
         ]
     )
     return y, likelihood, labels
+
 
 def make_abalone(num_data: int = None) -> DataTuple:
     try:

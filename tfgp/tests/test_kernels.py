@@ -15,7 +15,8 @@ class TestKernel(tf.test.TestCase):
             _ = Kernel("kernel")
         except TypeError:
             exception_thrown = True
-        self.assertTrue(exception_thrown)
+        finally:
+            self.assertTrue(exception_thrown)
 
 
 class TestRBF(tf.test.TestCase):
@@ -32,7 +33,8 @@ class TestRBF(tf.test.TestCase):
             _ = self.rbf(a, b)
         except ValueError:
             exception_thrown = True
-        self.assertTrue(exception_thrown)
+        finally:
+            self.assertTrue(exception_thrown)
 
     def test_simple(self):
         a = tf.convert_to_tensor(np.random.normal(size=(10, 5)), dtype=tf.float32)
@@ -75,7 +77,8 @@ class TestARDRBF(tf.test.TestCase):
             _ = self.kern(a, b)
         except ValueError:
             exception_thrown = True
-        self.assertTrue(exception_thrown)
+        finally:
+            self.assertTrue(exception_thrown)
 
     def test_equal_to_sklearn(self):
         a = np.random.normal(size=(7, 5))
