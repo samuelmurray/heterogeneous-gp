@@ -11,6 +11,9 @@ REQUIRES_PYTHON = ">=3.6.0"
 LICENSE = "GNU General Public License v3.0"
 TEST_DIR = "tests"
 
+TENSORFLOW_VERSION = ">=1.10.0"
+TENSORFLOW_PROBABILITY_VERSION = ">=0.4.0"
+
 REQUIRED = [
     "numpy",
 ]
@@ -43,12 +46,12 @@ setup(
             "seaborn",
         ],
         "tf": [
-            "tensorflow>=1.0.0",
-            "tensorflow-probability>=0.3.0",
+            "tensorflow" + TENSORFLOW_VERSION,
+            "tensorflow-probability" + TENSORFLOW_PROBABILITY_VERSION,
         ],
         "tf_gpu": [
-            "tensorflow-gpu>=1.0.0",
-            "tensorflow-probability-gpu>=0.3.0",
+            "tensorflow-gpu" + TENSORFLOW_VERSION,
+            "tensorflow-probability-gpu" + TENSORFLOW_PROBABILITY_VERSION,
         ],
         "test": [
             "scipy",
