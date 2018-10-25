@@ -1,4 +1,5 @@
 import tensorflow as tf
+import tensorflow_probability as tfp
 import numpy as np
 
 from . import Likelihood
@@ -15,8 +16,8 @@ class Normal(Likelihood):
                                               initializer=tf.constant_initializer(np.log(0.1)))
         self._scale = tf.exp(self._log_scale, name=f"likelihood/normal_scale_{self._id}")
 
-    def __call__(self, f: tf.Tensor) -> tf.distributions.Normal:
-        return tf.distributions.Normal(loc=f, scale=self._scale)
+    def __call__(self, f: tf.Tensor) -> tfp.distributions.Normal:
+        return tfp.distributions.Normal(loc=f, scale=self._scale)
 
     def create_summaries(self) -> None:
         tf.summary.scalar(f"normal_scale_{self._id}", tf.squeeze(self._scale), family=self._summary_family)

@@ -1,6 +1,7 @@
 import abc
 
 import tensorflow as tf
+import tensorflow_probability as tfp
 
 
 class Likelihood(abc.ABC):
@@ -13,7 +14,7 @@ class Likelihood(abc.ABC):
         return self._num_dimensions
 
     @abc.abstractmethod
-    def __call__(self, f: tf.Tensor) -> tf.distributions.Distribution:
+    def __call__(self, f: tf.Tensor) -> tfp.distributions.Distribution:
         raise NotImplementedError
 
     @abc.abstractmethod
