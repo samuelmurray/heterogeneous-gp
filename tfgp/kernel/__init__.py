@@ -1,5 +1,5 @@
 """
-Module for all supported kernels
+Package for all supported kernels
 """
 
 __all__ = [

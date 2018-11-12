@@ -1,5 +1,5 @@
 """
-Module for all supported likelihoods
+Package for all supported likelihoods
 """
 
 __all__ = [
