@@ -245,3 +245,69 @@ def make_abalone(num_data: int = None) -> DataTuple:
     labels = data[data_indices, -1]
     likelihood = MixedLikelihoodWrapper([OneHotCategorical(3)] + [Normal() for _ in range(7)])
     return y, likelihood, labels
+
+
+def make_mimic(num_data: int = None) -> DataTuple:
+    try:
+        data = np.genfromtxt("../../util/mimic_onehot_train.csv", delimiter=",", filling_values=None)
+    except FileNotFoundError as e:
+        print("You need to have the MIMIC 3 dataset")
+        raise e
+    data_indices = np.random.permutation(17903)[:num_data]
+    y = data[data_indices, :-1]
+    labels = data[data_indices, -1]
+    likelihood = MixedLikelihoodWrapper(
+        [
+            Normal(),
+            Normal(),
+            Normal(),
+            OneHotCategorical(4),
+            OneHotCategorical(6),
+            Normal(),
+            OneHotCategorical(6),
+            Normal(),
+            Normal(),
+            Normal(),
+            Normal(),
+            Normal(),
+            Normal(),
+            Normal(),
+            Normal(),
+            Normal(),
+            Normal(),
+        ]
+    )
+    return y, likelihood, labels
+
+
+def make_mimic_test(num_data: int = None) -> DataTuple:
+    try:
+        data = np.genfromtxt("../../util/mimic_onehot_test.csv", delimiter=",", filling_values=None)
+    except FileNotFoundError as e:
+        print("You need to have the MIMIC 3 dataset")
+        raise e
+    data_indices = np.random.permutation(17903)[:num_data]
+    y = data[data_indices, :-1]
+    labels = data[data_indices, -1]
+    likelihood = MixedLikelihoodWrapper(
+        [
+            Normal(),
+            Normal(),
+            Normal(),
+            OneHotCategorical(4),
+            OneHotCategorical(6),
+            Normal(),
+            OneHotCategorical(6),
+            Normal(),
+            Normal(),
+            Normal(),
+            Normal(),
+            Normal(),
+            Normal(),
+            Normal(),
+            Normal(),
+            Normal(),
+            Normal(),
+        ]
+    )
+    return y, likelihood, labels
