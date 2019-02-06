@@ -24,6 +24,7 @@ class MLGP(InducingPointsModel):
                              f"but num_inducing={self.num_inducing} and y.shape={y.shape}")
         inducing_indices = np.random.permutation(self.num_data)[:self.num_inducing]
         z = x[inducing_indices]
+        # TODO: Try changing to float64 and see if it solves Cholesky inversion problems!
         self.x = tf.convert_to_tensor(x, dtype=tf.float32, name="x")
         self.y = tf.convert_to_tensor(y, dtype=tf.float32, name="y")
         if likelihood.num_dim != self.ydim:
