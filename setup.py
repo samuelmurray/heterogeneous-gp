@@ -51,7 +51,7 @@ setup(
         ],
         "tf_gpu": [
             "tensorflow-gpu" + TENSORFLOW_VERSION,
-            "tensorflow-probability-gpu" + TENSORFLOW_PROBABILITY_VERSION,
+            "tensorflow-probability" + TENSORFLOW_PROBABILITY_VERSION,
         ],
         "test": [
             "scipy",
