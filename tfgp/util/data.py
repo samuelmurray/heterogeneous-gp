@@ -286,7 +286,7 @@ def make_mimic_test(num_data: int = None) -> DataTuple:
     except FileNotFoundError as e:
         print("You need to have the MIMIC 3 dataset")
         raise e
-    data_indices = np.random.permutation(17903)[:num_data]
+    data_indices = np.random.permutation(3236)[:num_data]
     y = data[data_indices, :-1]
     labels = data[data_indices, -1]
     likelihood = MixedLikelihoodWrapper(
