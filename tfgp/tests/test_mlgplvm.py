@@ -1,5 +1,6 @@
-import tensorflow as tf
+import numpy as np
 from sklearn.datasets import make_blobs
+import tensorflow as tf
 
 from tfgp.likelihood import MixedLikelihoodWrapper, Normal
 from tfgp.model import MLGPLVM
@@ -35,6 +36,24 @@ class TestMLGPLVM(tf.test.TestCase):
                 sess.run(train_all)
                 second_loss = sess.run(loss)
             self.assertLess(second_loss, initial_loss)
+
+    def test_impute(self):
+        with tf.variable_scope("mlgplvm", reuse=tf.AUTO_REUSE):
+            num_data = 100
+            latent_dim = 2
+            output_dim = 5
+            num_classes = 3
+            y, _ = make_blobs(num_data, output_dim, num_classes)
+            likelihood = MixedLikelihoodWrapper([Normal() for _ in range(output_dim)])
+
+            m = MLGPLVM(y, latent_dim, kernel=self.kernel, likelihood=likelihood)
+            m.initialize()
+            init = tf.global_variables_initializer()
+
+            with tf.Session() as sess:
+                sess.run(init)
+                y_impute = m.impute()
+            self.assertShapeEqual(np.empty((num_data, output_dim)), y_impute)
 
 
 if __name__ == "__main__":
