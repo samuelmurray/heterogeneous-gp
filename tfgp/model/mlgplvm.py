@@ -102,3 +102,8 @@ class MLGPLVM(MLGP):
         nan_mask = tf.is_nan(self.y)
         imputation = tf.where(nan_mask, modes, self.y)
         return imputation
+
+    def create_summaries(self) -> None:
+        tf.summary.histogram("qx_mean", self.qx_mean)
+        tf.summary.histogram("qx_scale", tfp.distributions.fill_triangular_inverse(self.qx_scale))
+        super().create_summaries()
