@@ -85,3 +85,20 @@ class MLGPLVM(MLGP):
                                name="f_samples")
             assert f_samples.shape.as_list() == [num_samples, self.ydim, self.num_data]
         return f_samples
+
+    def impute(self) -> tf.Tensor:
+        k_zz = self.kernel(self.z)
+        k_zz_inv = tf.matrix_inverse(k_zz)
+        k_xz = self.kernel(tf.matrix_transpose(self.qx_mean), self.z)
+        f_mean = tf.matmul(tf.matmul(k_xz, k_zz_inv), self.qu_mean, transpose_b=True)
+        posteriors = self._likelihood(tf.expand_dims(f_mean, 0))
+        modes = tf.concat(
+            [
+                tf.to_float(tf.squeeze(p.mode(), axis=0))
+                for p in posteriors
+            ],
+            axis=1
+        )
+        nan_mask = tf.is_nan(self.y)
+        imputation = tf.where(nan_mask, modes, self.y)
+        return imputation
