@@ -1,8 +1,8 @@
 from typing import Tuple
 
+import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
-import numpy as np
 
 from .inducing_points_model import InducingPointsModel
 from ..kernel import Kernel

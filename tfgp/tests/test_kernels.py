@@ -1,6 +1,6 @@
-import tensorflow as tf
 import numpy as np
 from sklearn.metrics.pairwise import rbf_kernel
+import tensorflow as tf
 
 from tfgp.kernel import *
 

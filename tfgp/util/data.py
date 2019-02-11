@@ -1,11 +1,11 @@
 from typing import Tuple
 
 import numpy as np
-from sklearn.metrics.pairwise import rbf_kernel
-from sklearn.datasets import make_blobs
-from scipy.special import expit
 import pandas as pd
 import pods
+from scipy.special import expit
+from sklearn.metrics.pairwise import rbf_kernel
+from sklearn.datasets import make_blobs
 
 from tfgp.likelihood import *
 

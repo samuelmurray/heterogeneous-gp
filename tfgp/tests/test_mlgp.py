@@ -1,6 +1,6 @@
-import tensorflow as tf
 import numpy as np
 from sklearn.datasets import make_regression
+import tensorflow as tf
 
 from tfgp.model import MLGP
 from tfgp.kernel import RBF

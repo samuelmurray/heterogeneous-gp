@@ -1,5 +1,5 @@
-import tensorflow as tf
 from sklearn.datasets import make_blobs
+import tensorflow as tf
 
 from tfgp.model import GPLVM
 from tfgp.kernel import RBF
