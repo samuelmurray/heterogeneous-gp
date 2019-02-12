@@ -10,13 +10,8 @@ class TestKernel(tf.test.TestCase):
         pass
 
     def test_abc(self):
-        exception_thrown = False
-        try:
-            _ = Kernel("kernel")
-        except TypeError:
-            exception_thrown = True
-        finally:
-            self.assertTrue(exception_thrown)
+        with self.assertRaises(TypeError):
+            Kernel("kernel")
 
 
 class TestRBF(tf.test.TestCase):
@@ -29,13 +24,8 @@ class TestRBF(tf.test.TestCase):
     def test_throw(self):
         a = tf.convert_to_tensor(np.random.normal(size=(10, 5)), dtype=tf.float32)
         b = tf.convert_to_tensor(np.random.normal(size=(12, 4)), dtype=tf.float32)
-        exception_thrown = False
-        try:
-            _ = self.rbf(a, b)
-        except ValueError:
-            exception_thrown = True
-        finally:
-            self.assertTrue(exception_thrown)
+        with self.assertRaises(ValueError):
+            self.rbf(a, b)
 
     def test_simple(self):
         a = tf.convert_to_tensor(np.random.normal(size=(10, 5)), dtype=tf.float32)
@@ -74,13 +64,8 @@ class TestARDRBF(tf.test.TestCase):
     def test_throw(self):
         a = tf.convert_to_tensor(np.random.normal(size=(10, 5)), dtype=tf.float32)
         b = tf.convert_to_tensor(np.random.normal(size=(12, 4)), dtype=tf.float32)
-        exception_thrown = False
-        try:
-            _ = self.kern(a, b)
-        except ValueError:
-            exception_thrown = True
-        finally:
-            self.assertTrue(exception_thrown)
+        with self.assertRaises(ValueError):
+            self.kern(a, b)
 
     def test_equal_to_sklearn(self):
         a = np.random.normal(size=(7, 5))

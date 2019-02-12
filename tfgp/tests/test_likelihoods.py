@@ -6,13 +6,8 @@ from tfgp.likelihood import *
 
 class TestLikelihood(tf.test.TestCase):
     def test_abc(self):
-        exception_thrown = False
-        try:
-            _ = Likelihood(1)
-        except TypeError:
-            exception_thrown = True
-        finally:
-            self.assertTrue(exception_thrown)
+        with self.assertRaises(TypeError):
+            Likelihood(1)
 
 
 class TestBernoulli(tf.test.TestCase):
