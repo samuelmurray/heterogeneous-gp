@@ -5,18 +5,18 @@ from tfgp.likelihood import *
 
 
 class TestLikelihood(tf.test.TestCase):
-    def test_abc(self):
+    def test_abc(self) -> None:
         with self.assertRaises(TypeError):
             Likelihood(1)
 
 
 class TestBernoulli(tf.test.TestCase):
-    def test_create(self):
+    def test_create(self) -> None:
         self.assertIsInstance(Bernoulli(), Bernoulli)
 
 
 class TestMixedLikelihoodWrapper(tf.test.TestCase):
-    def test_create(self):
+    def test_create(self) -> None:
         ber = Bernoulli()
         cat = OneHotCategorical(3)
         nor = Normal()
@@ -28,22 +28,22 @@ class TestMixedLikelihoodWrapper(tf.test.TestCase):
 
 
 class TestNormal(tf.test.TestCase):
-    def test_create(self):
+    def test_create(self) -> None:
         self.assertIsInstance(Normal(), Normal)
 
 
 class TestOneHotCategorical(tf.test.TestCase):
-    def test_create(self):
+    def test_create(self) -> None:
         self.assertIsInstance(OneHotCategorical(2), OneHotCategorical)
 
 
 class TestPoisson(tf.test.TestCase):
-    def test_create(self):
+    def test_create(self) -> None:
         self.assertIsInstance(Poisson(), Poisson)
 
 
 class TestQuantizedNormal(tf.test.TestCase):
-    def test_create(self):
+    def test_create(self) -> None:
         self.assertIsInstance(QuantizedNormal(), QuantizedNormal)
 
 

@@ -7,13 +7,13 @@ from tfgp.model import GPLVM
 
 
 class TestGPLVM(tf.test.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         np.random.seed(1363431413)
         tf.random.set_random_seed(1534135313)
         with tf.variable_scope("gplvm", reuse=tf.AUTO_REUSE):
             self.kernel = RBF()
 
-    def test_GPLVM(self):
+    def test_GPLVM(self) -> None:
         with tf.variable_scope("gplvm", reuse=tf.AUTO_REUSE):
             num_data = 100
             latent_dim = 2

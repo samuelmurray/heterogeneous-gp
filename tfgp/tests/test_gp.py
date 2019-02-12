@@ -6,13 +6,13 @@ from tfgp.model import GP
 
 
 class TestGP(tf.test.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         np.random.seed(1363431413)
         tf.random.set_random_seed(1534135313)
         with tf.variable_scope("gp", reuse=tf.AUTO_REUSE):
             self.kernel = RBF()
 
-    def test_GP(self):
+    def test_GP(self) -> None:
         with tf.variable_scope("gp", reuse=tf.AUTO_REUSE):
             x_train = np.linspace(0, 2 * np.pi, 10)[:, None]
             y_train = np.sin(x_train)

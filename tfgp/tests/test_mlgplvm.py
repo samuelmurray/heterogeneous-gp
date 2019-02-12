@@ -8,13 +8,13 @@ from tfgp.model import MLGPLVM
 
 
 class TestMLGPLVM(tf.test.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         np.random.seed(1363431413)
         tf.random.set_random_seed(1534135313)
         with tf.variable_scope("mlgplvm", reuse=tf.AUTO_REUSE):
             self.kernel = RBF()
 
-    def test_MLGPLVM(self):
+    def test_MLGPLVM(self) -> None:
         with tf.variable_scope("mlgplvm", reuse=tf.AUTO_REUSE):
             num_data = 100
             latent_dim = 2
@@ -39,7 +39,7 @@ class TestMLGPLVM(tf.test.TestCase):
                 second_loss = sess.run(loss)
             self.assertLess(second_loss, initial_loss)
 
-    def test_impute(self):
+    def test_impute(self) -> None:
         with tf.variable_scope("mlgplvm", reuse=tf.AUTO_REUSE):
             num_data = 100
             latent_dim = 2

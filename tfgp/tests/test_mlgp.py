@@ -8,13 +8,13 @@ from tfgp.model import MLGP
 
 
 class TestMLGP(tf.test.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         np.random.seed(1363431413)
         tf.random.set_random_seed(1534135313)
         with tf.variable_scope("mlgp", reuse=tf.AUTO_REUSE):
             self.kernel = RBF()
 
-    def test_MLGP(self):
+    def test_MLGP(self) -> None:
         with tf.variable_scope("mlgp", reuse=tf.AUTO_REUSE):
             num_data = 40
             input_dim = 1
