@@ -1,3 +1,4 @@
+import os
 from typing import Tuple
 
 import numpy as np
@@ -7,9 +8,12 @@ from scipy.special import expit
 from sklearn.metrics.pairwise import rbf_kernel
 from sklearn.datasets import make_blobs
 
+import tfgp
 from tfgp.likelihood import *
 
 DataTuple = Tuple[np.ndarray, MixedLikelihoodWrapper, np.ndarray]
+ROOT_PATH = os.path.dirname(tfgp.__file__)
+DATA_DIR_PATH = os.path.join(ROOT_PATH, os.pardir, "util")
 
 
 ##############
@@ -144,10 +148,10 @@ def make_titanic(num_data: int = None) -> DataTuple:
     return y, likelihood, labels
 
 
-def make_binaryalphadigits(num_data: int = None, num_classes: int = None) -> DataTuple:
+def make_binaryalphadigits(num_data: int = None, num_classes: int = 36) -> DataTuple:
     data_per_class = 30
     try:
-        y = np.loadtxt("../../util/binaryalphadigits_train.csv", delimiter=",")
+        y = np.loadtxt(os.path.join(DATA_DIR_PATH, "binaryalphadigits_train.csv"), delimiter=",")
     except FileNotFoundError as e:
         print("You must run the Matlab script to download the Binary Alphadigits data set before calling this function")
         raise e
@@ -160,10 +164,10 @@ def make_binaryalphadigits(num_data: int = None, num_classes: int = None) -> Dat
     return y, likelihood, labels
 
 
-def make_binaryalphadigits_test(num_data: int = None, num_classes: int = None) -> DataTuple:
+def make_binaryalphadigits_test(num_data: int = None, num_classes: int = 36) -> DataTuple:
     data_per_class = 9
     try:
-        y = np.loadtxt("../../util/binaryalphadigits_test.csv", delimiter=",")
+        y = np.loadtxt(os.path.join(DATA_DIR_PATH, "binaryalphadigits_test.csv"), delimiter=",")
     except FileNotFoundError as e:
         print("You must run the Matlab script to download the Binary Alphadigits data set before calling this function")
         raise e
@@ -178,7 +182,7 @@ def make_binaryalphadigits_test(num_data: int = None, num_classes: int = None) -
 
 def make_cleveland_quantized(num_data: int = None) -> DataTuple:
     try:
-        data = np.loadtxt("../../util/cleveland_onehot.csv", delimiter=",")
+        data = np.loadtxt(os.path.join(DATA_DIR_PATH, "cleveland_onehot.csv"), delimiter=",")
     except FileNotFoundError as e:
         print("You need to have the Cleveland dataset")
         raise e
@@ -207,7 +211,7 @@ def make_cleveland_quantized(num_data: int = None) -> DataTuple:
 
 def make_cleveland(num_data: int = None) -> DataTuple:
     try:
-        data = np.loadtxt("../../util/cleveland_onehot.csv", delimiter=",")
+        data = np.loadtxt(os.path.join(DATA_DIR_PATH, "cleveland_onehot.csv"), delimiter=",")
     except FileNotFoundError as e:
         print("You need to have the Cleveland dataset")
         raise e
@@ -236,7 +240,7 @@ def make_cleveland(num_data: int = None) -> DataTuple:
 
 def make_abalone(num_data: int = None) -> DataTuple:
     try:
-        data = np.loadtxt("../../util/abalone.csv", delimiter=",")
+        data = np.loadtxt(os.path.join(DATA_DIR_PATH, "abalone.csv"), delimiter=",")
     except FileNotFoundError as e:
         print("You need to have the Abalone dataset")
         raise e
@@ -249,7 +253,7 @@ def make_abalone(num_data: int = None) -> DataTuple:
 
 def make_mimic(num_data: int = None) -> DataTuple:
     try:
-        data = np.genfromtxt("../../util/mimic_onehot_train.csv", delimiter=",", filling_values=None)
+        data = np.genfromtxt(os.path.join(DATA_DIR_PATH, "mimic_onehot_train.csv"), delimiter=",", filling_values=None)
     except FileNotFoundError as e:
         print("You need to have the MIMIC 3 dataset")
         raise e
@@ -282,7 +286,7 @@ def make_mimic(num_data: int = None) -> DataTuple:
 
 def make_mimic_test(num_data: int = None) -> DataTuple:
     try:
-        data = np.genfromtxt("../../util/mimic_onehot_test.csv", delimiter=",", filling_values=None)
+        data = np.genfromtxt(os.path.join(DATA_DIR_PATH, "mimic_onehot_test.csv"), delimiter=",", filling_values=None)
     except FileNotFoundError as e:
         print("You need to have the MIMIC 3 dataset")
         raise e
