@@ -41,7 +41,6 @@ setup(
             "matplotlib",
             "jupyter",
             "IPython",
-            "pandas",
             "pods",
             "seaborn",
         ],
