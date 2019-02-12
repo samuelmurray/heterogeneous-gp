@@ -1,3 +1,4 @@
+import importlib.util
 import os
 
 import numpy as np
@@ -71,10 +72,14 @@ class TestUnsupervisedData(tf.test.TestCase):
         self.assertIsInstance(labels, np.ndarray)
 
     def test_oilflow(self):
-        y, likelihood, labels = data.make_oilflow(self.num_data)
-        self.assertIsInstance(y, np.ndarray)
-        self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
-        self.assertIsInstance(labels, np.ndarray)
+        if not importlib.util.find_spec("pods"):
+            with self.assertRaises(ModuleNotFoundError):
+                data.make_oilflow(self.num_data)
+        else:
+            y, likelihood, labels = data.make_oilflow(self.num_data)
+            self.assertIsInstance(y, np.ndarray)
+            self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
+            self.assertIsInstance(labels, np.ndarray)
 
     def test_binaryalphadigits(self):
         if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "binaryalphadigits_train.csv")):
