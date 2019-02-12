@@ -11,8 +11,9 @@ REQUIRES_PYTHON = ">=3.6.0"
 LICENSE = "GNU General Public License v3.0"
 TEST_DIR = "tests"
 
-TENSORFLOW_VERSION = ">=1.10.0"
-TENSORFLOW_PROBABILITY_VERSION = ">=0.4.0"
+TENSORFLOW_VERSION = ">=1.12.0"
+TENSORFLOW_PROBABILITY_VERSION = ">=0.5.0"
+SCIKIT_LEARN_VERSION = ">=0.20"
 
 REQUIRED = [
     "numpy",
@@ -54,7 +55,7 @@ setup(
         ],
         "test": [
             "scipy",
-            "scikit-learn",
+            "scikit-learn" + SCIKIT_LEARN_VERSION,
         ],
     },
     include_package_data=True,
