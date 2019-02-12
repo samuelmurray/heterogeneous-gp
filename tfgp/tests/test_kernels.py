@@ -51,7 +51,8 @@ class TestRBF(tf.test.TestCase):
         init = tf.global_variables_initializer()
         with self.test_session() as sess:
             sess.run(init)
-            self.assertAllClose(k_rbf.eval(), k_sklearn)
+            k_ab = k_rbf.eval()
+        self.assertAllClose(k_ab, k_sklearn)
 
 
 class TestARDRBF(tf.test.TestCase):
@@ -75,7 +76,8 @@ class TestARDRBF(tf.test.TestCase):
         init = tf.global_variables_initializer()
         with self.test_session() as sess:
             sess.run(init)
-            self.assertAllClose(k_ard_rbf.eval(), k_sklearn)
+            k_ab = k_ard_rbf.eval()
+        self.assertAllClose(k_ab, k_sklearn)
 
     def test_simple(self) -> None:
         a = tf.convert_to_tensor(np.random.normal(size=(10, 5)), dtype=tf.float32)
