@@ -83,7 +83,7 @@ class TestUnsupervisedData(tf.test.TestCase):
 
     def test_binaryalphadigits(self):
         if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "binaryalphadigits_train.csv")):
-            with self.assertRaises(FileNotFoundError):
+            with self.assertRaises(OSError):
                 data.make_binaryalphadigits(self.num_data)
         else:
             y, likelihood, labels = data.make_binaryalphadigits(self.num_data)
@@ -93,7 +93,7 @@ class TestUnsupervisedData(tf.test.TestCase):
 
     def test_binaryalphadigits_test(self):
         if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "binaryalphadigits_test.csv")):
-            with self.assertRaises(FileNotFoundError):
+            with self.assertRaises(OSError):
                 data.make_binaryalphadigits_test(self.num_data)
         else:
             y, likelihood, labels = data.make_binaryalphadigits_test(self.num_data)
@@ -103,7 +103,7 @@ class TestUnsupervisedData(tf.test.TestCase):
 
     def test_cleveland(self):
         if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "cleveland_onehot.csv")):
-            with self.assertRaises(FileNotFoundError):
+            with self.assertRaises(OSError):
                 data.make_cleveland(self.num_data)
         else:
             y, likelihood, labels = data.make_cleveland(self.num_data)
@@ -113,7 +113,7 @@ class TestUnsupervisedData(tf.test.TestCase):
 
     def test_cleveland_quantized(self):
         if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "cleveland_onehot.csv")):
-            with self.assertRaises(FileNotFoundError):
+            with self.assertRaises(OSError):
                 data.make_cleveland_quantized(self.num_data)
         else:
             y, likelihood, labels = data.make_cleveland_quantized(self.num_data)
@@ -123,7 +123,7 @@ class TestUnsupervisedData(tf.test.TestCase):
 
     def test_abalone(self):
         if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "abalone.csv")):
-            with self.assertRaises(FileNotFoundError):
+            with self.assertRaises(OSError):
                 data.make_abalone(self.num_data)
         else:
             y, likelihood, labels = data.make_abalone(self.num_data)
@@ -133,7 +133,7 @@ class TestUnsupervisedData(tf.test.TestCase):
 
     def test_mimic(self):
         if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "mimic_onehot_train.csv")):
-            with self.assertRaises(FileNotFoundError):
+            with self.assertRaises(OSError):
                 data.make_mimic(self.num_data)
         else:
             y, likelihood, labels = data.make_mimic(self.num_data)
@@ -143,7 +143,7 @@ class TestUnsupervisedData(tf.test.TestCase):
 
     def test_mimic_test(self):
         if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "mimic_onehot_test.csv")):
-            with self.assertRaises(FileNotFoundError):
+            with self.assertRaises(OSError):
                 data.make_mimic_test(self.num_data)
         else:
             y, likelihood, labels = data.make_mimic_test(self.num_data)

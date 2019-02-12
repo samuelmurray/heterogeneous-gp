@@ -135,7 +135,7 @@ def make_binaryalphadigits(num_data: int = None, num_classes: int = 36) -> DataT
     data_per_class = 30
     try:
         y = np.loadtxt(os.path.join(DATA_DIR_PATH, "binaryalphadigits_train.csv"), delimiter=",")
-    except FileNotFoundError as e:
+    except OSError as e:
         print("You must run the Matlab script to download the Binary Alphadigits data set before calling this function")
         raise e
     y = y[:data_per_class * num_classes]
@@ -151,7 +151,7 @@ def make_binaryalphadigits_test(num_data: int = None, num_classes: int = 36) -> 
     data_per_class = 9
     try:
         y = np.loadtxt(os.path.join(DATA_DIR_PATH, "binaryalphadigits_test.csv"), delimiter=",")
-    except FileNotFoundError as e:
+    except OSError as e:
         print("You must run the Matlab script to download the Binary Alphadigits data set before calling this function")
         raise e
     y = y[:data_per_class * num_classes]
@@ -166,7 +166,7 @@ def make_binaryalphadigits_test(num_data: int = None, num_classes: int = 36) -> 
 def make_cleveland_quantized(num_data: int = None) -> DataTuple:
     try:
         data = np.loadtxt(os.path.join(DATA_DIR_PATH, "cleveland_onehot.csv"), delimiter=",")
-    except FileNotFoundError as e:
+    except OSError as e:
         print("You need to have the Cleveland dataset")
         raise e
     data_indices = np.random.permutation(297)[:num_data]
@@ -195,7 +195,7 @@ def make_cleveland_quantized(num_data: int = None) -> DataTuple:
 def make_cleveland(num_data: int = None) -> DataTuple:
     try:
         data = np.loadtxt(os.path.join(DATA_DIR_PATH, "cleveland_onehot.csv"), delimiter=",")
-    except FileNotFoundError as e:
+    except OSError as e:
         print("You need to have the Cleveland dataset")
         raise e
     data_indices = np.random.permutation(297)[:num_data]
@@ -224,7 +224,7 @@ def make_cleveland(num_data: int = None) -> DataTuple:
 def make_abalone(num_data: int = None) -> DataTuple:
     try:
         data = np.loadtxt(os.path.join(DATA_DIR_PATH, "abalone.csv"), delimiter=",")
-    except FileNotFoundError as e:
+    except OSError as e:
         print("You need to have the Abalone dataset")
         raise e
     data_indices = np.random.permutation(4177)[:num_data]
@@ -237,7 +237,7 @@ def make_abalone(num_data: int = None) -> DataTuple:
 def make_mimic(num_data: int = None) -> DataTuple:
     try:
         data = np.genfromtxt(os.path.join(DATA_DIR_PATH, "mimic_onehot_train.csv"), delimiter=",", filling_values=None)
-    except FileNotFoundError as e:
+    except OSError as e:
         print("You need to have the MIMIC 3 dataset")
         raise e
     data_indices = np.random.permutation(17903)[:num_data]
@@ -270,7 +270,7 @@ def make_mimic(num_data: int = None) -> DataTuple:
 def make_mimic_test(num_data: int = None) -> DataTuple:
     try:
         data = np.genfromtxt(os.path.join(DATA_DIR_PATH, "mimic_onehot_test.csv"), delimiter=",", filling_values=None)
-    except FileNotFoundError as e:
+    except OSError as e:
         print("You need to have the MIMIC 3 dataset")
         raise e
     data_indices = np.random.permutation(3236)[:num_data]
