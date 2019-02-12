@@ -1,3 +1,4 @@
+import numpy as np
 from sklearn.datasets import make_blobs
 import tensorflow as tf
 
@@ -7,6 +8,8 @@ from tfgp.model import GPLVM
 
 class TestGPLVM(tf.test.TestCase):
     def setUp(self):
+        np.random.seed(1363431413)
+        tf.random.set_random_seed(1534135313)
         with tf.variable_scope("gplvm", reuse=tf.AUTO_REUSE):
             self.kernel = RBF()
 

@@ -20,8 +20,9 @@ class TestKernel(tf.test.TestCase):
 
 
 class TestRBF(tf.test.TestCase):
-
     def setUp(self):
+        np.random.seed(1363431413)
+        tf.random.set_random_seed(1534135313)
         with tf.variable_scope("rbf", reuse=tf.AUTO_REUSE):
             self.rbf = RBF(1., 0.5)
 
@@ -64,8 +65,9 @@ class TestRBF(tf.test.TestCase):
 
 
 class TestARDRBF(tf.test.TestCase):
-
     def setUp(self):
+        np.random.seed(1363431413)
+        tf.random.set_random_seed(1534135313)
         with tf.variable_scope("ardrbf", reuse=tf.AUTO_REUSE):
             self.kern = ARDRBF(1., 0.5, xdim=5)
 
