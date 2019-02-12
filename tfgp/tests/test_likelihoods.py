@@ -12,7 +12,7 @@ class TestLikelihood(tf.test.TestCase):
 
 class TestBernoulli(tf.test.TestCase):
     def test_create(self):
-        _ = Bernoulli()
+        self.assertIsInstance(Bernoulli(), Bernoulli)
 
 
 class TestMixedLikelihoodWrapper(tf.test.TestCase):
@@ -23,27 +23,27 @@ class TestMixedLikelihoodWrapper(tf.test.TestCase):
         mixed = MixedLikelihoodWrapper([ber, cat, nor])
         f = tf.constant(np.array([[[0.7, 0.4, 0.4, 0.2, 2.]]]), dtype=tf.float32)
         y = tf.constant(np.array([[1, 1, 0, 0, 2.3]]), dtype=tf.float32)
-        mixed.log_prob(f, y)
+        self.assertIsInstance(mixed.log_prob(f, y), tf.Tensor)
 
 
 class TestNormal(tf.test.TestCase):
     def test_create(self):
-        _ = Normal()
+        self.assertIsInstance(Normal(), Normal)
 
 
 class TestOneHotCategorical(tf.test.TestCase):
     def test_create(self):
-        _ = OneHotCategorical(2)
+        self.assertIsInstance(OneHotCategorical(2), OneHotCategorical)
 
 
 class TestPoisson(tf.test.TestCase):
     def test_create(self):
-        _ = Poisson()
+        self.assertIsInstance(Poisson(), Poisson)
 
 
 class TestQuantizedNormal(tf.test.TestCase):
     def test_create(self):
-        _ = QuantizedNormal()
+        self.assertIsInstance(QuantizedNormal(), QuantizedNormal)
 
 
 if __name__ == "__main__":
