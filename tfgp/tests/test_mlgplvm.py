@@ -2,9 +2,9 @@ import numpy as np
 from sklearn.datasets import make_blobs
 import tensorflow as tf
 
+from tfgp.kernel import RBF
 from tfgp.likelihood import MixedLikelihoodWrapper, Normal
 from tfgp.model import MLGPLVM
-from tfgp.kernel import RBF
 
 
 class TestMLGPLVM(tf.test.TestCase):

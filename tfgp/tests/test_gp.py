@@ -1,8 +1,8 @@
 import numpy as np
 import tensorflow as tf
 
-from tfgp.model import GP
 from tfgp.kernel import RBF
+from tfgp.model import GP
 
 
 class TestGP(tf.test.TestCase):
