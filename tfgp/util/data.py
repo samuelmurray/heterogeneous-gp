@@ -2,7 +2,6 @@ import os
 from typing import Tuple
 
 import numpy as np
-import pods
 from scipy.special import expit
 from sklearn.metrics.pairwise import rbf_kernel
 from sklearn.datasets import make_blobs
@@ -116,6 +115,11 @@ def make_normal_binary(num_data: int) -> DataTuple:
 
 
 def make_oilflow(num_data: int = None, output_dim: int = None, *, one_hot_labels: bool = False) -> DataTuple:
+    try:
+        import pods
+    except ModuleNotFoundError as e:
+        print("You need to install the package 'pods' (pip install pods) to use the Oilflow dataset")
+        raise e
     oil = pods.datasets.oil()
     data_indices = np.random.permutation(1000)[:num_data]
     dim_indices = np.random.permutation(12)[:output_dim]
