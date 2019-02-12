@@ -4,8 +4,8 @@ import numpy as np
 import tensorflow as tf
 
 from .model import Model
-from ..kernel import Kernel
-from ..kernel import RBF
+from tfgp.kernel import Kernel
+from tfgp.kernel import RBF
 
 
 class GP(Model):

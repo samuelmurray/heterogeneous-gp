@@ -3,8 +3,8 @@ import tensorflow as tf
 import tensorflow_probability as tfp
 
 from .mlgp import MLGP
-from ..kernel import Kernel
-from ..likelihood import MixedLikelihoodWrapper
+from tfgp.kernel import Kernel
+from tfgp.likelihood import MixedLikelihoodWrapper
 
 
 class MLGPLVM(MLGP):
