@@ -1,13 +1,13 @@
 import time
 
-import tensorflow as tf
-import numpy as np
-from matplotlib import pyplot as plt
-import seaborn as sns
 from IPython import embed
+from matplotlib import pyplot as plt
+import numpy as np
+import seaborn as sns
+import tensorflow as tf
 
-from tfgp.util import data
 from tfgp.model import MLGP
+from tfgp.util import data
 
 if __name__ == "__main__":
     sns.set()

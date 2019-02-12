@@ -1,7 +1,7 @@
-import tensorflow as tf
-import numpy as np
 from matplotlib import pyplot as plt
+import numpy as np
 import seaborn as sns
+import tensorflow as tf
 
 from tfgp.model import GP
 from tfgp.util import data

@@ -1,12 +1,12 @@
 import time
 
-import tensorflow as tf
+from IPython import embed
 from matplotlib import pyplot as plt
 import seaborn as sns
-from IPython import embed
+import tensorflow as tf
 
-from tfgp.util import data, pca_reduce
 from tfgp.model import GPLVM
+from tfgp.util import data, pca_reduce
 
 if __name__ == "__main__":
     sns.set()

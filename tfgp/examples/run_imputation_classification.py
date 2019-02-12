@@ -2,13 +2,13 @@ import os
 import time
 from typing import Tuple
 
+from IPython import embed
 import numpy as np
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
 import sklearn.metrics
 import tensorflow as tf
-from IPython import embed
 
 import tfgp
 from tfgp.model import MLGPLVM
