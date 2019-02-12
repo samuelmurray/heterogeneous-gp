@@ -23,7 +23,8 @@ class TestMixedLikelihoodWrapper(tf.test.TestCase):
         mixed = MixedLikelihoodWrapper([ber, cat, nor])
         f = tf.constant(np.array([[[0.7, 0.4, 0.4, 0.2, 2.]]]), dtype=tf.float32)
         y = tf.constant(np.array([[1, 1, 0, 0, 2.3]]), dtype=tf.float32)
-        self.assertIsInstance(mixed.log_prob(f, y), tf.Tensor)
+        log_prob = mixed.log_prob(f, y)
+        self.assertShapeEqual(np.empty((1, 1, 3)), log_prob)
 
 
 class TestNormal(tf.test.TestCase):
