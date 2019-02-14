@@ -19,6 +19,28 @@ REQUIRED = [
     "numpy",
 ]
 
+EXTRA_REQUIRED = {
+    "examples": [
+        "matplotlib",
+        "jupyter",
+        "IPython",
+        "pods",
+        "seaborn",
+    ],
+    "tf": [
+        "tensorflow{}" + TENSORFLOW_VERSION,
+        "tensorflow-probability" + TENSORFLOW_PROBABILITY_VERSION,
+    ],
+    "tf_gpu": [
+        "tensorflow-gpu" + TENSORFLOW_VERSION,
+        "tensorflow-probability" + TENSORFLOW_PROBABILITY_VERSION,
+    ],
+    "test": [
+        "scipy",
+        "scikit-learn" + SCIKIT_LEARN_VERSION,
+    ],
+}
+
 # Read version number
 version_dummy = {}
 with open(os.path.join(NAME, '__version__.py')) as f:
@@ -37,27 +59,7 @@ setup(
     packages=find_packages(exclude=(TEST_DIR,)),
     test_suite=NAME + "." + TEST_DIR,
     install_requires=REQUIRED,
-    extras_require={
-        "examples": [
-            "matplotlib",
-            "jupyter",
-            "IPython",
-            "pods",
-            "seaborn",
-        ],
-        "tf": [
-            "tensorflow" + TENSORFLOW_VERSION,
-            "tensorflow-probability" + TENSORFLOW_PROBABILITY_VERSION,
-        ],
-        "tf_gpu": [
-            "tensorflow-gpu" + TENSORFLOW_VERSION,
-            "tensorflow-probability" + TENSORFLOW_PROBABILITY_VERSION,
-        ],
-        "test": [
-            "scipy",
-            "scikit-learn" + SCIKIT_LEARN_VERSION,
-        ],
-    },
+    extras_require=EXTRA_REQUIRED,
     include_package_data=True,
     license=LICENSE,
     classifiers=[
