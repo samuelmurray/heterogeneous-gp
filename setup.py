@@ -30,7 +30,7 @@ EXTRA_REQUIRED = {
         "seaborn",
     ],
     "tf": [
-        "tensorflow{}" + TENSORFLOW_VERSION,
+        "tensorflow" + TENSORFLOW_VERSION,
         "tensorflow-probability" + TENSORFLOW_PROBABILITY_VERSION,
     ],
     "tf_gpu": [
