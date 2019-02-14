@@ -11,9 +11,9 @@ REQUIRES_PYTHON = ">=3.6.0"
 LICENSE = "GNU General Public License v3.0"
 TEST_DIR = "tests"
 
+SCIKIT_LEARN_VERSION = ">=0.20"
 TENSORFLOW_VERSION = ">=1.12.0"
 TENSORFLOW_PROBABILITY_VERSION = ">=0.5.0"
-SCIKIT_LEARN_VERSION = ">=0.20"
 
 REQUIRED = [
     "numpy",
@@ -21,13 +21,13 @@ REQUIRED = [
 
 EXTRA_REQUIRED = {
     "examples": [
-        "matplotlib",
-        "jupyter",
         "IPython",
+        "jupyter",
+        "matplotlib",
         "pods",
-        "seaborn",
-        "scipy",
         "scikit-learn" + SCIKIT_LEARN_VERSION,
+        "scipy",
+        "seaborn",
     ],
     "tf": [
         "tensorflow{}" + TENSORFLOW_VERSION,
@@ -38,8 +38,8 @@ EXTRA_REQUIRED = {
         "tensorflow-probability" + TENSORFLOW_PROBABILITY_VERSION,
     ],
     "test": [
-        "scipy",
         "scikit-learn" + SCIKIT_LEARN_VERSION,
+        "scipy",
     ],
 }
 
