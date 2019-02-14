@@ -26,6 +26,8 @@ EXTRA_REQUIRED = {
         "IPython",
         "pods",
         "seaborn",
+        "scipy",
+        "scikit-learn" + SCIKIT_LEARN_VERSION,
     ],
     "tf": [
         "tensorflow{}" + TENSORFLOW_VERSION,
