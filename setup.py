@@ -24,10 +24,12 @@ EXTRA_REQUIRED = {
         "IPython",
         "jupyter",
         "matplotlib",
-        "pods",
         "scikit-learn" + SCIKIT_LEARN_VERSION,
         "scipy",
         "seaborn",
+    ],
+    "oilflow": [
+        "pods",
     ],
     "tf": [
         "tensorflow" + TENSORFLOW_VERSION,
