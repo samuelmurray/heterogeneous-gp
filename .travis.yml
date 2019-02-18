@@ -1,10 +1,8 @@
 os:
   - linux
-# - osx macOS does not support Python
 language: python
 python:
   - "3.6"
-# - "3.7" not supported by Travis, nor Tensorflow
 install:
   - pip install .[tf,test,examples]
 script:
