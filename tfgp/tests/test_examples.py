@@ -2,7 +2,7 @@ import pytest
 import tensorflow as tf
 
 
-@pytest.mark.examples
+@pytest.mark.example
 class TestImportRun(tf.test.TestCase):
     def setUp(self):
         pass

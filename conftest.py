@@ -3,15 +3,15 @@ import pytest
 
 def pytest_addoption(parser):
     parser.addoption(
-        "--runexamples", action="store_true", default=False, help="run tests for examples"
+        "--testexamples", action="store_true", default=False, help="run tests for example scripts"
     )
 
 
 def pytest_collection_modifyitems(config, items):
-    if config.getoption("--runexamples"):
-        # --runexamples given in cli: do not skip examples tests
+    if config.getoption("--testexamples"):
+        # --testexamples given in cli: do not skip examples tests
         return
-    skip_examples = pytest.mark.skip(reason="need --runexamples option to run")
+    skip_examples = pytest.mark.skip(reason="pass --testexamples option to run")
     for item in items:
-        if "examples" in item.keywords:
+        if "example" in item.keywords:
             item.add_marker(skip_examples)
