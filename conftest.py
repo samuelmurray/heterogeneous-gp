@@ -11,7 +11,7 @@ def pytest_collection_modifyitems(config, items):
     if config.getoption("--runexamples"):
         # --runexamples given in cli: do not skip examples tests
         return
-    skipt_examples = pytest.mark.skip(reason="need --runexaples option to run")
+    skip_examples = pytest.mark.skip(reason="need --runexamples option to run")
     for item in items:
         if "examples" in item.keywords:
-            item.add_marker(skipt_examples)
+            item.add_marker(skip_examples)
