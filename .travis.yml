@@ -6,4 +6,4 @@ python:
 install:
   - pip install .[tf,test,examples]
 script:
-  - pytest --runexamples
+  - pytest --testexamples
