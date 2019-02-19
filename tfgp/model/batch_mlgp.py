@@ -1,4 +1,3 @@
-from functools import partial
 from typing import Tuple
 
 import numpy as np
@@ -9,23 +8,6 @@ from .inducing_points_model import InducingPointsModel
 from tfgp.kernel import Kernel
 from tfgp.kernel import RBF
 from tfgp.likelihood import MixedLikelihoodWrapper
-
-
-class Batch:
-    def __init__(self, mean: tf.Tensor, var: tf.Tensor):
-        self._mean = mean
-        self._var = var
-
-    @property
-    def mean(self) -> tf.Tensor:
-        return self._mean
-
-    @property
-    def var(self) -> tf.Tensor:
-        return self._var
-
-    def get(self) -> Tuple[tf.Tensor, tf.Tensor]:
-        return self.mean, self.var
 
 
 class BatchMLGP(InducingPointsModel):
@@ -71,8 +53,6 @@ class BatchMLGP(InducingPointsModel):
         self.y_batch = tf.placeholder(shape=[self._batch_size, self.ydim], dtype=tf.float32, name="y_batch")
 
     def initialize(self) -> None:
-        # batch_ph = tf.placeholder(shape=[self._batch_size, self.xdim], dtype=tf.float32, name="batch_ph")
-
         tf.losses.add_loss(self._loss())
 
     def _loss(self) -> tf.Tensor:
