@@ -1,7 +1,7 @@
 import tensorflow as tf
 import tensorflow_probability as tfp
 
-from .normal import Normal
+from tfgp.likelihood import Normal
 
 
 class QuantizedNormal(Normal):

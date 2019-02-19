@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
 
-from .likelihood import Likelihood
+from tfgp.likelihood import Likelihood
 
 
 class Normal(Likelihood):

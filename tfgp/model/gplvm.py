@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-from .model import Model
+from tfgp.model import Model
 from tfgp.kernel import Kernel
 from tfgp.kernel import RBF
 
