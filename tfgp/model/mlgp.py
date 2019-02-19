@@ -84,13 +84,6 @@ class MLGP(InducingPointsModel):
             k_zz = self.kernel(self.z, name="k_zz")
             k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
 
-            # u = qu_mean + qu_scale * e_u, e_u ~ N(0,1)
-            e_u = tf.random_normal(shape=[self._num_samples, self.ydim, self.num_inducing], name="e_u")
-            u_noise = tf.einsum("ijk,tik->tij", self.qu_scale, e_u, name="u_noise")
-            u_sample = tf.add(self.qu_mean, u_noise, name="u_sample")
-            assert u_sample.shape.as_list() == [self._num_samples, self.ydim, self.num_inducing], "{} != {}".format(
-                u_sample.shape.as_list(), [self._num_samples, self.ydim, self.num_inducing])
-
             k_zx = self.kernel(self.z, self.x, name="k_zx")
             assert k_zx.shape.as_list() == [self.num_inducing, self.num_data], "{} != {}".format(
                 k_zx.shape.as_list(), [self.num_inducing, self.num_data])
@@ -123,6 +116,7 @@ class MLGP(InducingPointsModel):
                 k_tilde_pos_tiled.shape.as_list(), [self._num_samples, self.num_data])
 
             # f = a.T * u + sqrt(K~) * e_f, e_f ~ N(0,1)
+            u_sample = self._sample_us()
             e_f = tf.random_normal(shape=[self._num_samples, self.ydim, self.num_data], name="e_f")
             f_mean = tf.matmul(u_sample, a_tiled, name="f_mean")
             f_noise = tf.multiply(tf.expand_dims(tf.sqrt(k_tilde_pos_tiled), axis=1), e_f, name="f_noise")
@@ -131,6 +125,15 @@ class MLGP(InducingPointsModel):
                 f_samples.shape.as_list(), [self._num_samples, self.ydim, self.num_data])
 
         return f_samples
+
+    def _sample_us(self):
+        # u = qu_mean + qu_scale * e_u, e_u ~ N(0,1)
+        e_u = tf.random_normal(shape=[self._num_samples, self.ydim, self.num_inducing], name="e_u")
+        u_noise = tf.einsum("ijk,tik->tij", self.qu_scale, e_u, name="u_noise")
+        u_samples = tf.add(self.qu_mean, u_noise, name="u_samples")
+        assert u_samples.shape.as_list() == [self._num_samples, self.ydim, self.num_inducing], "{} != {}".format(
+            u_samples.shape.as_list(), [self._num_samples, self.ydim, self.num_inducing])
+        return u_samples
 
     def predict(self, xs: np.ndarray) -> Tuple[tf.Tensor, tf.Tensor]:
         # TODO: Not clear how to report the variances.

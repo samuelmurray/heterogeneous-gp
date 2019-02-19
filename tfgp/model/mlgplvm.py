@@ -49,23 +49,16 @@ class MLGPLVM(MLGP):
             # x = qx_mean + qx_std * e_x, e_x ~ N(0,1)
             e_x = tf.random_normal(shape=[self._num_samples, self.num_data, self.xdim], name="e_x")
             x_noise = tf.multiply(tf.sqrt(self.qx_var), e_x, name="x_noise")
-            x_sample = tf.add(self.qx_mean, x_noise, name="x_sample")
-            assert x_sample.shape.as_list() == [self._num_samples, self.num_data, self.xdim], "{} != {}".format(
-                x_sample.shape.as_list(), [self._num_samples, self.num_data, self.xdim])
-
-            # u = qu_mean + qu_scale * e_u, e_u ~ N(0,1)
-            e_u = tf.random_normal(shape=[self._num_samples, self.ydim, self.num_inducing], name="e_u")
-            u_noise = tf.einsum("ijk,tik->tij", self.qu_scale, e_u, name="u_noise")
-            u_sample = tf.add(self.qu_mean, u_noise, name="u_sample")
-            assert u_sample.shape.as_list() == [self._num_samples, self.ydim, self.num_inducing], "{} != {}".format(
-                u_sample.shape.as_list(), [self._num_samples, self.ydim, self.num_inducing])
+            x_samples = tf.add(self.qx_mean, x_noise, name="x_samples")
+            assert x_samples.shape.as_list() == [self._num_samples, self.num_data, self.xdim], "{} != {}".format(
+                x_samples.shape.as_list(), [self._num_samples, self.num_data, self.xdim])
 
             z_tiled = tf.tile(tf.expand_dims(self.z, axis=0), multiples=[self._num_samples, 1, 1], name="z_tiled")
-            k_zx = self.kernel(z_tiled, x_sample, name="k_zx")
+            k_zx = self.kernel(z_tiled, x_samples, name="k_zx")
             assert k_zx.shape.as_list() == [self._num_samples, self.num_inducing, self.num_data], "{} != {}".format(
                 k_zx.shape.as_list(), [self._num_samples, self.num_inducing, self.num_data])
 
-            k_xx = self.kernel(x_sample, name="k_xx")
+            k_xx = self.kernel(x_samples, name="k_xx")
             assert k_xx.shape.as_list() == [self._num_samples, self.num_data, self.num_data], "{} != {}".format(
                 k_xx.shape.as_list(), [self._num_samples, self.num_data, self.num_data])
 
@@ -86,8 +79,9 @@ class MLGPLVM(MLGP):
             k_tilde_pos = tf.maximum(k_tilde, 1e-16, name="k_tilde_pos")  # k_tilde can't be negative
 
             # f = a.T * u + sqrt(k_tilde) * e_f, e_f ~ N(0,1)
+            u_samples = self._sample_us()
             e_f = tf.random_normal(shape=[self._num_samples, self.ydim, self.num_data], name="e_f")
-            f_mean = tf.matmul(u_sample, a, name="f_mean")
+            f_mean = tf.matmul(u_samples, a, name="f_mean")
             f_noise = tf.multiply(tf.expand_dims(tf.sqrt(k_tilde_pos), axis=1), e_f, name="f_noise")
             f_samples = tf.add(f_mean, f_noise, name="f_samples")
             assert f_samples.shape.as_list() == [self._num_samples, self.ydim, self.num_data], "{} != {}".format(
