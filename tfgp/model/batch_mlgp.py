@@ -76,5 +76,5 @@ class BatchMLGP(MLGP):
             f_samples = tf.add(f_mean, f_noise, name="f_samples")
             assert f_samples.shape.as_list() == [self._num_samples, self.ydim, self._batch_size], "{} != {}".format(
                 f_samples.shape.as_list(), [self._num_samples, self.ydim, self._batch_size])
-            self._sample_fs(a_tiled, u_sample, )
+
         return f_samples
