@@ -19,9 +19,7 @@ class TestGP(tf.test.TestCase):
         with tf.variable_scope("gp", reuse=tf.AUTO_REUSE):
             x_train = np.linspace(0, 2 * np.pi, 10)[:, None]
             y_train = np.sin(x_train)
-            x = tf.convert_to_tensor(x_train, dtype=tf.float32)
-            y = tf.convert_to_tensor(y_train, dtype=tf.float32)
-            m = GP(x, y, kernel=self.kernel)
+            m = GP(x_train, y_train, kernel=self.kernel)
             m.initialize()
             init = tf.global_variables_initializer()
             with tf.Session() as sess:
