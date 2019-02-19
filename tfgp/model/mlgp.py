@@ -84,47 +84,53 @@ class MLGP(InducingPointsModel):
             k_zz = self.kernel(self.z, name="k_zz")
             k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
 
-            k_zx = self.kernel(self.z, self.x, name="k_zx")
-            assert k_zx.shape.as_list() == [self.num_inducing, self.num_data], "{} != {}".format(
-                k_zx.shape.as_list(), [self.num_inducing, self.num_data])
-            k_xx = self.kernel(self.x, name="k_xx")
-            assert k_xx.shape.as_list() == [self.num_data, self.num_data], "{} != {}".format(
-                k_xx.shape.as_list(), [self.num_data, self.num_data])
+            x = self._sample_or_return_x()
+            num_data = x.shape.as_list()[0]
+
+            k_zx = self.kernel(self.z, x, name="k_zx")
+            assert k_zx.shape.as_list() == [self.num_inducing, num_data], "{} != {}".format(
+                k_zx.shape.as_list(), [self.num_inducing, num_data])
+            k_xx = self.kernel(x, name="k_xx")
+            assert k_xx.shape.as_list() == [num_data, num_data], "{} != {}".format(
+                k_xx.shape.as_list(), [num_data, num_data])
 
             # a = Kzz^(-1) * Kzx
             a = tf.matmul(k_zz_inv, k_zx, name="a")
-            assert a.shape.as_list() == [self.num_inducing, self.num_data], "{} != {}".format(
-                a.shape.as_list(), [self.num_inducing, self.num_data])
+            assert a.shape.as_list() == [self.num_inducing, num_data], "{} != {}".format(
+                a.shape.as_list(), [self.num_inducing, num_data])
 
             # K~ = Kxx - Kxz * Kzz^(-1) * Kzx
             k_tilde_full = tf.subtract(k_xx, tf.matmul(k_zx, a, transpose_a=True), name="k_tilde_full")
-            assert k_tilde_full.shape.as_list() == [self.num_data, self.num_data], "{} != {}".format(
-                k_tilde_full.shape.as_list(), [self.num_data, self.num_data])
+            assert k_tilde_full.shape.as_list() == [num_data, num_data], "{} != {}".format(
+                k_tilde_full.shape.as_list(), [num_data, num_data])
 
             k_tilde = tf.matrix_diag_part(k_tilde_full, name="diag_b")
-            assert k_tilde.shape.as_list() == [self.num_data], "{} != {}".format(
-                k_tilde.shape.as_list(), [self.num_data])
+            assert k_tilde.shape.as_list() == [num_data], "{} != {}".format(
+                k_tilde.shape.as_list(), [num_data])
 
             k_tilde_pos = tf.maximum(k_tilde, 1e-16, name="pos_b")  # k_tilde can't be negative
 
             a_tiled = tf.tile(tf.expand_dims(a, axis=0), multiples=[self._num_samples, 1, 1])
-            assert a_tiled.shape.as_list() == [self._num_samples, self.num_inducing, self.num_data], "{} != {}".format(
-                a_tiled.shape.as_list(), [self._num_samples, self.num_inducing, self.num_data])
+            assert a_tiled.shape.as_list() == [self._num_samples, self.num_inducing, num_data], "{} != {}".format(
+                a_tiled.shape.as_list(), [self._num_samples, self.num_inducing, num_data])
 
             k_tilde_pos_tiled = tf.tile(tf.expand_dims(k_tilde_pos, axis=0), multiples=[self._num_samples, 1])
-            assert k_tilde_pos_tiled.shape.as_list() == [self._num_samples, self.num_data], "{} != {}".format(
-                k_tilde_pos_tiled.shape.as_list(), [self._num_samples, self.num_data])
+            assert k_tilde_pos_tiled.shape.as_list() == [self._num_samples, num_data], "{} != {}".format(
+                k_tilde_pos_tiled.shape.as_list(), [self._num_samples, num_data])
 
             # f = a.T * u + sqrt(K~) * e_f, e_f ~ N(0,1)
             u_sample = self._sample_us()
-            e_f = tf.random_normal(shape=[self._num_samples, self.ydim, self.num_data], name="e_f")
+            e_f = tf.random_normal(shape=[self._num_samples, self.ydim, num_data], name="e_f")
             f_mean = tf.matmul(u_sample, a_tiled, name="f_mean")
             f_noise = tf.multiply(tf.expand_dims(tf.sqrt(k_tilde_pos_tiled), axis=1), e_f, name="f_noise")
             f_samples = tf.add(f_mean, f_noise, name="f_samples")
-            assert f_samples.shape.as_list() == [self._num_samples, self.ydim, self.num_data], "{} != {}".format(
-                f_samples.shape.as_list(), [self._num_samples, self.ydim, self.num_data])
+            assert f_samples.shape.as_list() == [self._num_samples, self.ydim, num_data], "{} != {}".format(
+                f_samples.shape.as_list(), [self._num_samples, self.ydim, num_data])
 
         return f_samples
+
+    def _sample_or_return_x(self):
+        return self.x
 
     def _sample_us(self):
         # u = qu_mean + qu_scale * e_u, e_u ~ N(0,1)
