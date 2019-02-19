@@ -13,6 +13,9 @@ class TestGPLVM(tf.test.TestCase):
         with tf.variable_scope("gplvm", reuse=tf.AUTO_REUSE):
             self.kernel = RBF()
 
+    def tearDown(self) -> None:
+        tf.reset_default_graph()
+
     def test_GPLVM(self) -> None:
         with tf.variable_scope("gplvm", reuse=tf.AUTO_REUSE):
             num_data = 100

@@ -4,8 +4,8 @@ import tensorflow as tf
 
 @pytest.mark.example
 class TestImportRun(tf.test.TestCase):
-    def setUp(self):
-        pass
+    def tearDown(self) -> None:
+        tf.reset_default_graph()
 
     def test_run_gp(self):
         try:

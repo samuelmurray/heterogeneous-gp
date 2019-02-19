@@ -12,6 +12,9 @@ class TestGP(tf.test.TestCase):
         with tf.variable_scope("gp", reuse=tf.AUTO_REUSE):
             self.kernel = RBF()
 
+    def tearDown(self) -> None:
+        tf.reset_default_graph()
+
     def test_GP(self) -> None:
         with tf.variable_scope("gp", reuse=tf.AUTO_REUSE):
             x_train = np.linspace(0, 2 * np.pi, 10)[:, None]

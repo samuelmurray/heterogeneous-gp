@@ -14,6 +14,9 @@ class TestMLGPLVM(tf.test.TestCase):
         with tf.variable_scope("mlgplvm", reuse=tf.AUTO_REUSE):
             self.kernel = RBF()
 
+    def tearDown(self) -> None:
+        tf.reset_default_graph()
+
     def test_MLGPLVM(self) -> None:
         with tf.variable_scope("mlgplvm", reuse=tf.AUTO_REUSE):
             num_data = 100
