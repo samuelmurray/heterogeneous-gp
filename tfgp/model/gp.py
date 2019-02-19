@@ -19,7 +19,7 @@ class GP(Model):
         self.x = tf.convert_to_tensor(x, dtype=tf.float32, name="x")
         self.y = tf.convert_to_tensor(y, dtype=tf.float32, name="y")
         self.kernel = kernel if (kernel is not None) else RBF()
-        self.k_xx = self.kernel(x, name="k_xx")
+        self.k_xx = self.kernel(self.x, name="k_xx")
         self.chol_xx = tf.cholesky(self.k_xx, name="chol_xx")
         self.a = tf.matrix_solve(tf.transpose(self.chol_xx), tf.matrix_solve(self.chol_xx, self.y), name="a")
 
