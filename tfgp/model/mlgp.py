@@ -68,7 +68,8 @@ class MLGP(InducingPointsModel):
     def _mc_expectation(self) -> tf.Tensor:
         with tf.name_scope("mc_expectation"):
             num_samples = 10
-            approx_exp_all = tfp.monte_carlo.expectation(f=self._log_prob, samples=self._sample_f(num_samples),
+            approx_exp_all = tfp.monte_carlo.expectation(f=self._log_prob,
+                                                         samples=self._sample_f(num_samples),
                                                          name="approx_exp_all")
             approx_exp = tf.reduce_sum(approx_exp_all, axis=[0, 1], name="approx_exp")
         return approx_exp
