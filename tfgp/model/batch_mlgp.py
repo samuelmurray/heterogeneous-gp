@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-from tfgp.model import MLGP
+from .mlgp import MLGP
 from tfgp.kernel import Kernel
 from tfgp.likelihood import MixedLikelihoodWrapper
 

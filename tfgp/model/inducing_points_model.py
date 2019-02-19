@@ -1,4 +1,4 @@
-from tfgp.model import Model
+from .model import Model
 
 
 class InducingPointsModel(Model):

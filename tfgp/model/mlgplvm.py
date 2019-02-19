@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
 
-from tfgp.model import MLGP
+from .mlgp import MLGP
 from tfgp.kernel import Kernel
 from tfgp.likelihood import MixedLikelihoodWrapper
 

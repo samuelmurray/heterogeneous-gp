@@ -4,7 +4,7 @@ import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
 
-from tfgp.model import InducingPointsModel
+from .inducing_points_model import InducingPointsModel
 from tfgp.kernel import Kernel
 from tfgp.kernel import RBF
 from tfgp.likelihood import MixedLikelihoodWrapper

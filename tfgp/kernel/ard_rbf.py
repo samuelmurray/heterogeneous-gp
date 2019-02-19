@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-from tfgp.kernel import Kernel
+from .kernel import Kernel
 
 
 class ARDRBF(Kernel):
