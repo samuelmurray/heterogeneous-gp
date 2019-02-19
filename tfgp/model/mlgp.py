@@ -24,6 +24,7 @@ class MLGP(InducingPointsModel):
                              f"but num_inducing={self.num_inducing} and y.shape={y.shape}")
         inducing_indices = np.random.permutation(self.num_data)[:self.num_inducing]
         z = x[inducing_indices]
+        self._num_samples = 10
         # TODO: Try changing to float64 and see if it solves Cholesky inversion problems!
         self.x = tf.convert_to_tensor(x, dtype=tf.float32, name="x")
         self.y = tf.convert_to_tensor(y, dtype=tf.float32, name="y")
@@ -67,9 +68,8 @@ class MLGP(InducingPointsModel):
 
     def _mc_expectation(self) -> tf.Tensor:
         with tf.name_scope("mc_expectation"):
-            num_samples = 10
             approx_exp_all = tfp.monte_carlo.expectation(f=self._log_prob,
-                                                         samples=self._sample_f(num_samples),
+                                                         samples=self._sample_f(),
                                                          name="approx_exp_all")
             approx_exp = tf.reduce_sum(approx_exp_all, axis=[0, 1], name="approx_exp")
         return approx_exp
@@ -79,17 +79,17 @@ class MLGP(InducingPointsModel):
             log_prob = self._likelihood.log_prob(tf.matrix_transpose(samples), self.y)
         return log_prob
 
-    def _sample_f(self, num_samples: int) -> tf.Tensor:
+    def _sample_f(self) -> tf.Tensor:
         with tf.name_scope("sample_f"):
             k_zz = self.kernel(self.z, name="k_zz")
             k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
 
             # u = qu_mean + qu_scale * e_u, e_u ~ N(0,1)
-            e_u = tf.random_normal(shape=[num_samples, self.ydim, self.num_inducing], name="e_u")
+            e_u = tf.random_normal(shape=[self._num_samples, self.ydim, self.num_inducing], name="e_u")
             u_noise = tf.einsum("ijk,tik->tij", self.qu_scale, e_u, name="u_noise")
             u_sample = tf.add(self.qu_mean, u_noise, name="u_sample")
-            assert u_sample.shape.as_list() == [num_samples, self.ydim, self.num_inducing], "{} != {}".format(
-                u_sample.shape.as_list(), [num_samples, self.ydim, self.num_inducing])
+            assert u_sample.shape.as_list() == [self._num_samples, self.ydim, self.num_inducing], "{} != {}".format(
+                u_sample.shape.as_list(), [self._num_samples, self.ydim, self.num_inducing])
 
             k_zx = self.kernel(self.z, self.x, name="k_zx")
             assert k_zx.shape.as_list() == [self.num_inducing, self.num_data], "{} != {}".format(
@@ -114,21 +114,21 @@ class MLGP(InducingPointsModel):
 
             k_tilde_pos = tf.maximum(k_tilde, 1e-16, name="pos_b")  # k_tilde can't be negative
 
-            a_tiled = tf.tile(tf.expand_dims(a, axis=0), multiples=[num_samples, 1, 1])
-            assert a_tiled.shape.as_list() == [num_samples, self.num_inducing, self.num_data], "{} != {}".format(
-                a_tiled.shape.as_list(), [num_samples, self.num_inducing, self.num_data])
+            a_tiled = tf.tile(tf.expand_dims(a, axis=0), multiples=[self._num_samples, 1, 1])
+            assert a_tiled.shape.as_list() == [self._num_samples, self.num_inducing, self.num_data], "{} != {}".format(
+                a_tiled.shape.as_list(), [self._num_samples, self.num_inducing, self.num_data])
 
-            k_tilde_pos_tiled = tf.tile(tf.expand_dims(k_tilde_pos, axis=0), multiples=[num_samples, 1])
-            assert k_tilde_pos_tiled.shape.as_list() == [num_samples, self.num_data], "{} != {}".format(
-                k_tilde_pos_tiled.shape.as_list(), [num_samples, self.num_data])
+            k_tilde_pos_tiled = tf.tile(tf.expand_dims(k_tilde_pos, axis=0), multiples=[self._num_samples, 1])
+            assert k_tilde_pos_tiled.shape.as_list() == [self._num_samples, self.num_data], "{} != {}".format(
+                k_tilde_pos_tiled.shape.as_list(), [self._num_samples, self.num_data])
 
             # f = a.T * u + sqrt(K~) * e_f, e_f ~ N(0,1)
-            e_f = tf.random_normal(shape=[num_samples, self.ydim, self.num_data], name="e_f")
+            e_f = tf.random_normal(shape=[self._num_samples, self.ydim, self.num_data], name="e_f")
             f_mean = tf.matmul(u_sample, a_tiled, name="f_mean")
             f_noise = tf.multiply(tf.expand_dims(tf.sqrt(k_tilde_pos_tiled), axis=1), e_f, name="f_noise")
             f_samples = tf.add(f_mean, f_noise, name="f_samples")
-            assert f_samples.shape.as_list() == [num_samples, self.ydim, self.num_data], "{} != {}".format(
-                f_samples.shape.as_list(), [num_samples, self.ydim, self.num_data])
+            assert f_samples.shape.as_list() == [self._num_samples, self.ydim, self.num_data], "{} != {}".format(
+                f_samples.shape.as_list(), [self._num_samples, self.ydim, self.num_data])
 
         return f_samples
 
