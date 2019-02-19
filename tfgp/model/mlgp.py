@@ -16,9 +16,9 @@ class MLGP(InducingPointsModel):
                  num_inducing: int = 50,
                  likelihood: MixedLikelihoodWrapper,
                  ) -> None:
-        super().__init__(x.shape[1], y.shape[1], y.shape[0], num_inducing)
         if x.shape[0] != y.shape[0]:
             raise ValueError(f"First dimension of x and y must match, but x.shape={x.shape} and y.shape={y.shape}")
+        super().__init__(x.shape[1], y.shape[1], y.shape[0], num_inducing)
         if self.num_inducing > self.num_data:
             raise ValueError(f"Can't have more inducing points than data, "
                              f"but num_inducing={self.num_inducing} and y.shape={y.shape}")
