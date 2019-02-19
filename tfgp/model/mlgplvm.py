@@ -48,21 +48,23 @@ class MLGPLVM(MLGP):
 
             # x = qx_mean + qx_std * e_x, e_x ~ N(0,1)
             e_x = tf.random_normal(shape=[num_samples, self.num_data, self.xdim], name="e_x")
-            x_sample = tf.add(self.qx_mean, tf.sqrt(self.qx_var) * e_x, name="x_sample")
+            x_noise = tf.multiply(tf.sqrt(self.qx_var), e_x, name="x_noise")
+            x_sample = tf.add(self.qx_mean, x_noise, name="x_sample")
             assert x_sample.shape.as_list() == [num_samples, self.num_data, self.xdim], "{} != {}".format(
                 x_sample.shape.as_list(), [num_samples, self.num_data, self.xdim])
 
             # u = qu_mean + qu_scale * e_u, e_u ~ N(0,1)
             e_u = tf.random_normal(shape=[num_samples, self.ydim, self.num_inducing], name="e_u")
-            u_sample = tf.add(self.qu_mean, tf.einsum("ijk,tik->tij", self.qu_scale, e_u), name="u_sample")
+            u_noise = tf.einsum("ijk,tik->tij", self.qu_scale, e_u, name="u_noise")
+            u_sample = tf.add(self.qu_mean, u_noise, name="u_sample")
             assert u_sample.shape.as_list() == [num_samples, self.ydim, self.num_inducing], "{} != {}".format(
                 u_sample.shape.as_list(), [num_samples, self.ydim, self.num_inducing])
 
-            k_zx = self.kernel(tf.tile(tf.expand_dims(self.z, axis=0), multiples=[num_samples, 1, 1]),
-                               x_sample,
-                               name="k_zx")
+            z_tiled = tf.tile(tf.expand_dims(self.z, axis=0), multiples=[num_samples, 1, 1], name="z_tiled")
+            k_zx = self.kernel(z_tiled, x_sample, name="k_zx")
             assert k_zx.shape.as_list() == [num_samples, self.num_inducing, self.num_data], "{} != {}".format(
                 k_zx.shape.as_list(), [num_samples, self.num_inducing, self.num_data])
+
             k_xx = self.kernel(x_sample, name="k_xx")
             assert k_xx.shape.as_list() == [num_samples, self.num_data, self.num_data], "{} != {}".format(
                 k_xx.shape.as_list(), [num_samples, self.num_data, self.num_data])
@@ -72,22 +74,25 @@ class MLGPLVM(MLGP):
             assert a.shape.as_list() == [num_samples, self.num_inducing, self.num_data], "{} != {}".format(
                 a.shape.as_list(), [num_samples, self.num_inducing, self.num_data])
 
-            # b = Kxx - Kxz * Kzz^(-1) * Kzx
-            full_b = tf.subtract(k_xx, tf.matmul(k_zx, a, transpose_a=True), name="full_b")
-            assert full_b.shape.as_list() == [num_samples, self.num_data, self.num_data], "{} != {}".format(
-                full_b.shape.as_list(), [num_samples, self.num_data, self.num_data])
-            b = tf.matrix_diag_part(full_b, name="diag_b")
-            assert b.shape.as_list() == [num_samples, self.num_data], "{} != {}".format(
-                b.shape.as_list(), [num_samples, self.num_data])
-            b = tf.maximum(b, 1e-16, name="pos_b")  # Sometimes b is small negative, which will crash in sqrt(b)
+            # K~ = Kxx - Kxz * Kzz^(-1) * Kzx
+            k_tilde_full = tf.subtract(k_xx, tf.matmul(k_zx, a, transpose_a=True), name="k_tilde_full")
+            assert k_tilde_full.shape.as_list() == [num_samples, self.num_data, self.num_data], "{} != {}".format(
+                k_tilde_full.shape.as_list(), [num_samples, self.num_data, self.num_data])
 
-            # f = a.T * u + sqrt(b) * e_f, e_f ~ N(0,1)
+            k_tilde = tf.matrix_diag_part(k_tilde_full, name="k_tilde")
+            assert k_tilde.shape.as_list() == [num_samples, self.num_data], "{} != {}".format(
+                k_tilde.shape.as_list(), [num_samples, self.num_data])
+
+            k_tilde_pos = tf.maximum(k_tilde, 1e-16, name="k_tilde_pos")  # k_tilde can't be negative
+
+            # f = a.T * u + sqrt(k_tilde) * e_f, e_f ~ N(0,1)
             e_f = tf.random_normal(shape=[num_samples, self.ydim, self.num_data], name="e_f")
-            f_samples = tf.add(tf.matmul(u_sample, a),
-                               tf.multiply(tf.expand_dims(tf.sqrt(b), axis=1), e_f),
-                               name="f_samples")
+            f_mean = tf.matmul(u_sample, a, name="f_mean")
+            f_noise = tf.multiply(tf.expand_dims(tf.sqrt(k_tilde_pos), axis=1), e_f, name="f_noise")
+            f_samples = tf.add(f_mean, f_noise, name="f_samples")
             assert f_samples.shape.as_list() == [num_samples, self.ydim, self.num_data], "{} != {}".format(
                 f_samples.shape.as_list(), [num_samples, self.ydim, self.num_data])
+
         return f_samples
 
     def impute(self) -> tf.Tensor:

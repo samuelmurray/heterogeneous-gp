@@ -85,7 +85,8 @@ class MLGP(InducingPointsModel):
 
             # u = qu_mean + qu_scale * e_u, e_u ~ N(0,1)
             e_u = tf.random_normal(shape=[num_samples, self.ydim, self.num_inducing], name="e_u")
-            u_sample = tf.add(self.qu_mean, tf.einsum("ijk,tik->tij", self.qu_scale, e_u), name="u_sample")
+            u_noise = tf.einsum("ijk,tik->tij", self.qu_scale, e_u, name="u_noise")
+            u_sample = tf.add(self.qu_mean, u_noise, name="u_sample")
             assert u_sample.shape.as_list() == [num_samples, self.ydim, self.num_inducing], "{} != {}".format(
                 u_sample.shape.as_list(), [num_samples, self.ydim, self.num_inducing])
 
@@ -101,29 +102,33 @@ class MLGP(InducingPointsModel):
             assert a.shape.as_list() == [self.num_inducing, self.num_data], "{} != {}".format(
                 a.shape.as_list(), [self.num_inducing, self.num_data])
 
-            # b = Kxx - Kxz * Kzz^(-1) * Kzx
-            full_b = tf.subtract(k_xx, tf.matmul(k_zx, a, transpose_a=True), name="full_b")
-            assert full_b.shape.as_list() == [self.num_data, self.num_data], "{} != {}".format(
-                full_b.shape.as_list(), [self.num_data, self.num_data])
-            b = tf.matrix_diag_part(full_b, name="diag_b")
-            assert b.shape.as_list() == [self.num_data], "{} != {}".format(
-                b.shape.as_list(), [self.num_data])
-            b = tf.maximum(b, 1e-16, name="pos_b")  # Sometimes b is small negative, which will crash in sqrt(b)
+            # K~ = Kxx - Kxz * Kzz^(-1) * Kzx
+            k_tilde_full = tf.subtract(k_xx, tf.matmul(k_zx, a, transpose_a=True), name="k_tilde_full")
+            assert k_tilde_full.shape.as_list() == [self.num_data, self.num_data], "{} != {}".format(
+                k_tilde_full.shape.as_list(), [self.num_data, self.num_data])
 
-            a = tf.tile(tf.expand_dims(a, axis=0), multiples=[num_samples, 1, 1])
-            assert a.shape.as_list() == [num_samples, self.num_inducing, self.num_data], "{} != {}".format(
-                a.shape.as_list(), [num_samples, self.num_inducing, self.num_data])
-            b = tf.tile(tf.expand_dims(b, axis=0), multiples=[num_samples, 1])
-            assert b.shape.as_list() == [num_samples, self.num_data], "{} != {}".format(
-                b.shape.as_list(), [num_samples, self.num_inducing])
+            k_tilde = tf.matrix_diag_part(k_tilde_full, name="diag_b")
+            assert k_tilde.shape.as_list() == [self.num_data], "{} != {}".format(
+                k_tilde.shape.as_list(), [self.num_data])
 
-            # f = a.T * u + sqrt(b) * e_f, e_f ~ N(0,1)
+            k_tilde_pos = tf.maximum(k_tilde, 1e-16, name="pos_b")  # k_tilde can't be negative
+
+            a_tiled = tf.tile(tf.expand_dims(a, axis=0), multiples=[num_samples, 1, 1])
+            assert a_tiled.shape.as_list() == [num_samples, self.num_inducing, self.num_data], "{} != {}".format(
+                a_tiled.shape.as_list(), [num_samples, self.num_inducing, self.num_data])
+
+            k_tilde_pos_tiled = tf.tile(tf.expand_dims(k_tilde_pos, axis=0), multiples=[num_samples, 1])
+            assert k_tilde_pos_tiled.shape.as_list() == [num_samples, self.num_data], "{} != {}".format(
+                k_tilde_pos_tiled.shape.as_list(), [num_samples, self.num_data])
+
+            # f = a.T * u + sqrt(K~) * e_f, e_f ~ N(0,1)
             e_f = tf.random_normal(shape=[num_samples, self.ydim, self.num_data], name="e_f")
-            ua = tf.matmul(u_sample, a)
-            bef = tf.multiply(tf.expand_dims(tf.sqrt(b), axis=1), e_f)
-            f_samples = tf.add(ua, bef, name="f_samples")
+            f_mean = tf.matmul(u_sample, a_tiled, name="f_mean")
+            f_noise = tf.multiply(tf.expand_dims(tf.sqrt(k_tilde_pos_tiled), axis=1), e_f, name="f_noise")
+            f_samples = tf.add(f_mean, f_noise, name="f_samples")
             assert f_samples.shape.as_list() == [num_samples, self.ydim, self.num_data], "{} != {}".format(
                 f_samples.shape.as_list(), [num_samples, self.ydim, self.num_data])
+
         return f_samples
 
     def predict(self, xs: np.ndarray) -> Tuple[tf.Tensor, tf.Tensor]:
