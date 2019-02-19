@@ -1,87 +1,31 @@
-from typing import Tuple
-
 import numpy as np
 import tensorflow as tf
-import tensorflow_probability as tfp
 
-from .inducing_points_model import InducingPointsModel
+from .mlgp import MLGP
 from tfgp.kernel import Kernel
-from tfgp.kernel import RBF
 from tfgp.likelihood import MixedLikelihoodWrapper
 
 
-class BatchMLGP(InducingPointsModel):
+class BatchMLGP(MLGP):
     def __init__(self, x: np.ndarray, y: np.ndarray, *,
                  kernel: Kernel = None,
                  num_inducing: int = 50,
                  batch_size: int,
                  likelihood: MixedLikelihoodWrapper,
                  ) -> None:
-        if x.shape[0] != y.shape[0]:
-            raise ValueError(f"First dimension of x and y must match, but x.shape={x.shape} and y.shape={y.shape}")
-        super().__init__(x.shape[1], y.shape[1], y.shape[0], num_inducing)
-        if self.num_inducing > self.num_data:
-            raise ValueError(f"Can't have more inducing points than data, "
-                             f"but num_inducing={self.num_inducing} and y.shape={y.shape}")
-        if batch_size > self.num_data:
+        super().__init__(x, y, kernel=kernel, num_inducing=num_inducing, likelihood=likelihood)
+        self._batch_size = batch_size
+        if self._batch_size > self.num_data:
             raise ValueError(f"Can't have larger batch size the number of data,"
                              f"but batch_size={batch_size} and y.shape={y.shape}")
-        self._batch_size = batch_size
 
-        inducing_indices = np.random.permutation(self.num_data)[:self.num_inducing]
-        z = x[inducing_indices]
-        # TODO: Try changing to float64 and see if it solves Cholesky inversion problems!
-        self.x = tf.convert_to_tensor(x, dtype=tf.float32, name="x")
-        self.y = tf.convert_to_tensor(y, dtype=tf.float32, name="y")
-        if likelihood.num_dim != self.ydim:
-            raise ValueError(f"The likelihood must have as many dimensions as y, "
-                             f"but likelihood.num_dim={likelihood.num_dim} and y.shape={y.shape}")
-        self._likelihood = likelihood
-        self.kernel = kernel if (kernel is not None) else RBF()
-        self.z = tf.get_variable("z", shape=[self.num_inducing, self.xdim], initializer=tf.constant_initializer(z))
-        with tf.variable_scope("qu"):
-            self.qu_mean = tf.get_variable("mean", shape=[self.ydim, self.num_inducing],
-                                           initializer=tf.random_normal_initializer())
-            self.qu_log_scale_vec = tf.get_variable("log_scale_vec",
-                                                    shape=[self.ydim, self.num_inducing * (self.num_inducing + 1) / 2],
-                                                    initializer=tf.zeros_initializer())
-            self.qu_log_scale = tfp.distributions.fill_triangular(self.qu_log_scale_vec, name="log_scale")
-            self.qu_scale = tf.identity(self.qu_log_scale
-                                        - tf.matrix_diag(tf.matrix_diag_part(self.qu_log_scale))
-                                        + tf.matrix_diag(tf.exp(tf.matrix_diag_part(self.qu_log_scale))), name="scale")
         self.x_batch = tf.placeholder(shape=[self._batch_size, self.xdim], dtype=tf.float32, name="x_batch")
         self.y_batch = tf.placeholder(shape=[self._batch_size, self.ydim], dtype=tf.float32, name="y_batch")
-
-    def initialize(self) -> None:
-        tf.losses.add_loss(self._loss())
-
-    def _loss(self) -> tf.Tensor:
-        loss = tf.negative(self._elbo(), name="elbo_loss")
-        return loss
 
     def _elbo(self) -> tf.Tensor:
         scaled_kl_qu_pu = tf.multiply(self._batch_size / self.num_data, self._kl_qu_pu(), name="scaled_kl_qu_pu")
         elbo = tf.identity(self._mc_expectation() - scaled_kl_qu_pu, name="elbo")
         return elbo
-
-    def _kl_qu_pu(self) -> tf.Tensor:
-        with tf.name_scope("kl_qu_pu"):
-            qu = tfp.distributions.MultivariateNormalTriL(self.qu_mean, self.qu_scale, name="qu")
-            k_zz = self.kernel(self.z, name="k_zz")
-            chol_zz = tf.cholesky(k_zz, name="chol_zz")
-            pu = tfp.distributions.MultivariateNormalTriL(tf.zeros(self.num_inducing), chol_zz, name="pu")
-            kl = tfp.distributions.kl_divergence(qu, pu, allow_nan_stats=False, name="kl")
-            kl_sum = tf.reduce_sum(kl, axis=0, name="kl_sum")
-        return kl_sum
-
-    def _mc_expectation(self) -> tf.Tensor:
-        with tf.name_scope("mc_expectation"):
-            num_samples = 10
-            approx_exp_all = tfp.monte_carlo.expectation(f=self._log_prob,
-                                                         samples=self._sample_f(num_samples),
-                                                         name="approx_exp_all")
-            approx_exp = tf.reduce_sum(approx_exp_all, axis=[0, 1], name="approx_exp")
-        return approx_exp
 
     def _log_prob(self, samples: tf.Tensor) -> tf.Tensor:
         with tf.name_scope("log_prob"):
@@ -140,30 +84,3 @@ class BatchMLGP(InducingPointsModel):
                 f_samples.shape.as_list(), [num_samples, self.ydim, self._batch_size])
 
         return f_samples
-
-    def predict(self, xs: np.ndarray) -> Tuple[tf.Tensor, tf.Tensor]:
-        # TODO: Not clear how to report the variances.
-        # Should we use qu_scale? Do we in the end want mean and std of f(x), h(f(x)) or p(y|x)=ExpFam(h(f(x)))?
-        # For now, we just report mean and std of ExpFam(h(f_mean(x)))
-        xs = tf.convert_to_tensor(xs, dtype=tf.float32)
-        k_zz = self.kernel(self.z)
-        k_zz_inv = tf.matrix_inverse(k_zz)
-        k_xs_z = self.kernel(xs, self.z)
-        f_mean = tf.matmul(tf.matmul(k_xs_z, k_zz_inv), self.qu_mean, transpose_b=True)
-
-        # TODO: Below is hack to work with new likelihood
-        mean = tf.stack(
-            [likelihood(f_mean[:, i]).mean() for i, likelihood in enumerate(self._likelihood._likelihoods)], axis=1)
-        std = tf.stack(
-            [likelihood(f_mean[:, i]).stddev() for i, likelihood in enumerate(self._likelihood._likelihoods)], axis=1)
-        return mean, std
-
-    def create_summaries(self) -> None:
-        tf.summary.scalar("kl_qu_pu", self._kl_qu_pu(), family="Model")
-        tf.summary.scalar("expectation", self._mc_expectation(), family="Model")
-        tf.summary.scalar("elbo_loss", self._loss(), family="Loss")
-        tf.summary.histogram("z", self.z)
-        tf.summary.histogram("qu_mean", self.qu_mean)
-        tf.summary.histogram("qu_scale", tfp.distributions.fill_triangular_inverse(self.qu_scale))
-        self.kernel.create_summaries()
-        self._likelihood.create_summaries()
