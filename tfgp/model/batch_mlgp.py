@@ -41,7 +41,11 @@ class BatchMLGP(InducingPointsModel):
         if self.num_inducing > self.num_data:
             raise ValueError(f"Can't have more inducing points than data, "
                              f"but num_inducing={self.num_inducing} and y.shape={y.shape}")
+        if batch_size > self.num_data:
+            raise ValueError(f"Can't have larger batch size the number of data,"
+                             f"but batch_size={batch_size} and y.shape={y.shape}")
         self._batch_size = batch_size
+
         inducing_indices = np.random.permutation(self.num_data)[:self.num_inducing]
         z = x[inducing_indices]
         # TODO: Try changing to float64 and see if it solves Cholesky inversion problems!
