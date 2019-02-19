@@ -23,7 +23,6 @@ class GPLVM(Model):
         self.y = tf.convert_to_tensor(y, dtype=tf.float32)
         self.x = tf.get_variable("x", shape=[self.num_data, self.xdim], initializer=tf.constant_initializer(x))
         self.kernel = kernel if (kernel is not None) else RBF(0.1, eps=0.1)
-        tf.losses.add_loss(self._loss())
 
     def initialize(self) -> None:
         tf.losses.add_loss(self._loss())

@@ -19,6 +19,7 @@ if __name__ == "__main__":
 
     print("Creating model...")
     m = GPLVM(y, latent_dim, x=x)
+    m.initialize()
 
     print("Building graph...")
     loss = tf.losses.get_total_loss()
