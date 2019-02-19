@@ -61,8 +61,9 @@ class MLGP(InducingPointsModel):
             k_zz = self.kernel(self.z, name="k_zz")
             chol_zz = tf.cholesky(k_zz, name="chol_zz")
             pu = tfp.distributions.MultivariateNormalTriL(tf.zeros(self.num_inducing), chol_zz, name="pu")
-            kl = tf.reduce_sum(tfp.distributions.kl_divergence(qu, pu, allow_nan_stats=False), axis=0, name="kl")
-        return kl
+            kl = tfp.distributions.kl_divergence(qu, pu, allow_nan_stats=False, name="kl")
+            kl_sum = tf.reduce_sum(kl, axis=0, name="kl_sum")
+        return kl_sum
 
     def _mc_expectation(self) -> tf.Tensor:
         with tf.name_scope("mc_expectation"):
