@@ -31,7 +31,7 @@ class MLGP(InducingPointsModel):
         if likelihood.num_dim != self.ydim:
             raise ValueError(f"The likelihood must have as many dimensions as y, "
                              f"but likelihood.num_dim={likelihood.num_dim} and y.shape={y.shape}")
-        self._likelihood = likelihood
+        self.likelihood = likelihood
         self.kernel = kernel if (kernel is not None) else RBF()
         self.z = tf.get_variable("z", shape=[self.num_inducing, self.xdim], initializer=tf.constant_initializer(z))
         with tf.variable_scope("qu"):
@@ -76,7 +76,7 @@ class MLGP(InducingPointsModel):
 
     def _log_prob(self, samples: tf.Tensor) -> tf.Tensor:
         with tf.name_scope("log_prob"):
-            log_prob = self._likelihood.log_prob(tf.matrix_transpose(samples), self.y)
+            log_prob = self.likelihood.log_prob(tf.matrix_transpose(samples), self.y)
         return log_prob
 
     def _sample_f(self) -> tf.Tensor:
@@ -153,9 +153,9 @@ class MLGP(InducingPointsModel):
 
         # TODO: Below is hack to work with new likelihood
         mean = tf.stack(
-            [likelihood(f_mean[:, i]).mean() for i, likelihood in enumerate(self._likelihood._likelihoods)], axis=1)
+            [likelihood(f_mean[:, i]).mean() for i, likelihood in enumerate(self.likelihood._likelihoods)], axis=1)
         std = tf.stack(
-            [likelihood(f_mean[:, i]).stddev() for i, likelihood in enumerate(self._likelihood._likelihoods)], axis=1)
+            [likelihood(f_mean[:, i]).stddev() for i, likelihood in enumerate(self.likelihood._likelihoods)], axis=1)
 
         """
         k_xsxs = self.kernel(xs)
@@ -173,4 +173,4 @@ class MLGP(InducingPointsModel):
         tf.summary.histogram("qu_mean", self.qu_mean)
         tf.summary.histogram("qu_scale", tfp.distributions.fill_triangular_inverse(self.qu_scale))
         self.kernel.create_summaries()
-        self._likelihood.create_summaries()
+        self.likelihood.create_summaries()

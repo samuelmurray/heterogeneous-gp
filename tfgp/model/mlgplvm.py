@@ -94,7 +94,7 @@ class MLGPLVM(MLGP):
         k_zz_inv = tf.matrix_inverse(k_zz)
         k_xz = self.kernel(self.qx_mean, self.z)
         f_mean = tf.matmul(tf.matmul(k_xz, k_zz_inv), self.qu_mean, transpose_b=True)
-        posteriors = self._likelihood(tf.expand_dims(f_mean, 0))
+        posteriors = self.likelihood(tf.expand_dims(f_mean, 0))
         modes = tf.concat(
             [
                 tf.to_float(tf.squeeze(p.mode(), axis=0))

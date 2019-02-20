@@ -33,7 +33,7 @@ class BatchMLGP(MLGP):
 
     def _log_prob(self, samples: tf.Tensor) -> tf.Tensor:
         with tf.name_scope("log_prob"):
-            log_prob = self._likelihood.log_prob(tf.matrix_transpose(samples), self.y_batch)
+            log_prob = self.likelihood.log_prob(tf.matrix_transpose(samples), self.y_batch)
         return log_prob
 
     def _sample_or_return_x(self):
