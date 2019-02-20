@@ -26,14 +26,14 @@ class GP(Model):
     def initialize(self) -> None:
         pass
 
-    def predict(self, z: np.ndarray) -> Tuple[tf.Tensor, tf.Tensor]:
-        z = tf.convert_to_tensor(z, dtype=tf.float32, name="z")
-        k_zx = self.kernel(z, self.x, name="k_zx")
-        k_zz = self.kernel(z, z, name="k_zz")
-        mean = tf.matmul(k_zx, self.a, name="mean")
-        v = tf.matrix_solve(self.chol_xx, tf.transpose(k_zx), name="v")
+    def predict(self, xs: np.ndarray) -> Tuple[tf.Tensor, tf.Tensor]:
+        xs = tf.convert_to_tensor(xs, dtype=tf.float32, name="xs")
+        k_xsx = self.kernel(xs, self.x, name="k_xsx")
+        k_xsxs = self.kernel(xs, xs, name="k_xsxs")
+        mean = tf.matmul(k_xsx, self.a, name="mean")
+        v = tf.matrix_solve(self.chol_xx, tf.transpose(k_xsx), name="v")
         vv = tf.matmul(v, v, transpose_a=True, name="vv")
-        cov = tf.subtract(k_zz, vv, name="cov")
+        cov = tf.subtract(k_xsxs, vv, name="cov")
         return mean, cov
 
     def create_summaries(self) -> None:
