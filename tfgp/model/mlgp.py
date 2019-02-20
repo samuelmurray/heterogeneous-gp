@@ -88,7 +88,7 @@ class MLGP(InducingPointsModel):
             k_zz = self.kernel(self.z, name="k_zz")
             k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
 
-            x = self._sample_or_return_x()
+            x = self._get_or_subsample_x()
             num_data = x.shape.as_list()[0]
 
             k_zx = self.kernel(self.z, x, name="k_zx")
@@ -133,7 +133,7 @@ class MLGP(InducingPointsModel):
 
         return f_samples
 
-    def _sample_or_return_x(self) -> tf.Tensor:
+    def _get_or_subsample_x(self) -> tf.Tensor:
         return self.x
 
     def _sample_us(self) -> tf.Tensor:
