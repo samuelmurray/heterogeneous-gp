@@ -22,6 +22,10 @@ class BatchMLGP(MLGP):
         self.x_batch = tf.placeholder(shape=[self._batch_size, self.xdim], dtype=tf.float32, name="x_batch")
         self.y_batch = tf.placeholder(shape=[self._batch_size, self.ydim], dtype=tf.float32, name="y_batch")
 
+    @property
+    def batch_size(self):
+        return self._batch_size
+
     def _elbo(self) -> tf.Tensor:
         scaled_kl_qu_pu = tf.multiply(self._batch_size / self.num_data, self._kl_qu_pu(), name="scaled_kl_qu_pu")
         elbo = tf.identity(self._mc_expectation() - scaled_kl_qu_pu, name="elbo")
