@@ -37,7 +37,7 @@ class MLGPLVM(MLGP):
 
     def _kl_qx_px(self) -> tf.Tensor:
         with tf.name_scope("kl_qx_px"):
-            qx_mean, qx_var = self._sample_or_return_qx()
+            qx_mean, qx_var = self._subsample_or_return_qx()
             qx = tfp.distributions.Normal(qx_mean, qx_var, name="qx")
             px = tfp.distributions.Normal(tf.zeros(1), tf.ones(1), name="px")
             kl = tfp.distributions.kl_divergence(qx, px, allow_nan_stats=False, name="kl")
@@ -49,7 +49,7 @@ class MLGPLVM(MLGP):
             k_zz = self.kernel(self.z, name="k_zz")
             k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
 
-            qx_mean, qx_var = self._sample_or_return_qx()
+            qx_mean, qx_var = self._subsample_or_return_qx()
             num_data = qx_mean.shape.as_list()[0]
 
             # x = qx_mean + qx_std * e_x, e_x ~ N(0,1)
@@ -95,7 +95,7 @@ class MLGPLVM(MLGP):
 
         return f_samples
 
-    def _sample_or_return_qx(self) -> Tuple[tf.Tensor, tf.Tensor]:
+    def _subsample_or_return_qx(self) -> Tuple[tf.Tensor, tf.Tensor]:
         return self.qx_mean, self.qx_var
 
     def impute(self) -> tf.Tensor:
