@@ -4,6 +4,7 @@ Package for all supported models
 
 __all__ = [
     "BatchMLGP",
+    "BatchMLGPLVM",
     "GP",
     "GPLVM",
     "InducingPointsModel",
@@ -13,6 +14,7 @@ __all__ = [
 ]
 
 from .batch_mlgp import BatchMLGP
+from .batch_mlgplvm import BatchMLGPLVM
 from .gp import GP
 from .gplvm import GPLVM
 from .inducing_points_model import InducingPointsModel
