@@ -23,6 +23,9 @@ class GP(Model):
         self.chol_xx = tf.cholesky(self.k_xx, name="chol_xx")
         self.a = tf.matrix_solve(tf.transpose(self.chol_xx), tf.matrix_solve(self.chol_xx, self.y), name="a")
 
+    def initialize(self) -> None:
+        pass
+
     def predict(self, z: np.ndarray) -> Tuple[tf.Tensor, tf.Tensor]:
         z = tf.convert_to_tensor(z, dtype=tf.float32, name="z")
         k_zx = self.kernel(z, self.x, name="k_zx")
@@ -33,8 +36,5 @@ class GP(Model):
         cov = tf.subtract(k_zz, vv, name="cov")
         return mean, cov
 
-    def initialize(self) -> None:
-        pass
-
     def create_summaries(self) -> None:
-        pass
+        self.kernel.create_summaries()

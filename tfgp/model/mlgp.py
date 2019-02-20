@@ -45,6 +45,10 @@ class MLGP(InducingPointsModel):
                                         - tf.matrix_diag(tf.matrix_diag_part(self.qu_log_scale))
                                         + tf.matrix_diag(tf.exp(tf.matrix_diag_part(self.qu_log_scale))), name="scale")
 
+    @property
+    def num_samples(self):
+        return self._num_samples
+
     def initialize(self) -> None:
         tf.losses.add_loss(self._loss())
 
