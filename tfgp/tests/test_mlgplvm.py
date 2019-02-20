@@ -2,7 +2,6 @@ import numpy as np
 from sklearn.datasets import make_blobs
 import tensorflow as tf
 
-from tfgp.kernel import RBF
 from tfgp.likelihood import MixedLikelihoodWrapper, Normal
 from tfgp.model import MLGPLVM
 
@@ -12,23 +11,20 @@ class TestMLGPLVM(tf.test.TestCase):
         np.random.seed(1363431413)
         tf.random.set_random_seed(1534135313)
         with tf.variable_scope("mlgplvm", reuse=tf.AUTO_REUSE):
-            self.kernel = RBF()
+            self.num_data = 100
+            self.latent_dim = 2
+            self.output_dim = 5
+            num_classes = 3
+            y, _ = make_blobs(self.num_data, self.output_dim, num_classes)
+            likelihood = MixedLikelihoodWrapper([Normal() for _ in range(self.output_dim)])
+            self.m = MLGPLVM(y, self.latent_dim, likelihood=likelihood)
+            self.m.initialize()
 
     def tearDown(self) -> None:
         tf.reset_default_graph()
 
-    def test_MLGPLVM(self) -> None:
+    def test_train(self) -> None:
         with tf.variable_scope("mlgplvm", reuse=tf.AUTO_REUSE):
-            num_data = 100
-            latent_dim = 2
-            output_dim = 5
-            num_classes = 3
-            y, _ = make_blobs(num_data, output_dim, num_classes)
-            likelihood = MixedLikelihoodWrapper([Normal() for _ in range(output_dim)])
-
-            m = MLGPLVM(y, latent_dim, kernel=self.kernel, likelihood=likelihood)
-            m.initialize()
-
             loss = tf.losses.get_total_loss()
             learning_rate = 0.1
             optimizer = tf.train.RMSPropOptimizer(learning_rate)
@@ -44,21 +40,11 @@ class TestMLGPLVM(tf.test.TestCase):
 
     def test_impute(self) -> None:
         with tf.variable_scope("mlgplvm", reuse=tf.AUTO_REUSE):
-            num_data = 100
-            latent_dim = 2
-            output_dim = 5
-            num_classes = 3
-            y, _ = make_blobs(num_data, output_dim, num_classes)
-            likelihood = MixedLikelihoodWrapper([Normal() for _ in range(output_dim)])
-
-            m = MLGPLVM(y, latent_dim, kernel=self.kernel, likelihood=likelihood)
-            m.initialize()
-
             init = tf.global_variables_initializer()
             with tf.Session() as sess:
                 sess.run(init)
-                y_impute = m.impute()
-            self.assertShapeEqual(np.empty((num_data, output_dim)), y_impute)
+                y_impute = self.m.impute()
+            self.assertShapeEqual(np.empty((self.num_data, self.output_dim)), y_impute)
 
 
 if __name__ == "__main__":
