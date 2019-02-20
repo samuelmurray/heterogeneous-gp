@@ -53,8 +53,8 @@ class TestMLGPLVM(tf.test.TestCase):
 
             m = MLGPLVM(y, latent_dim, kernel=self.kernel, likelihood=likelihood)
             m.initialize()
-            init = tf.global_variables_initializer()
 
+            init = tf.global_variables_initializer()
             with tf.Session() as sess:
                 sess.run(init)
                 y_impute = m.impute()
