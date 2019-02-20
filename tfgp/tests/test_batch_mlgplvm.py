@@ -32,13 +32,47 @@ class TestBatchMLGPLVM(tf.test.TestCase):
             train_all = optimizer.minimize(loss, var_list=tf.trainable_variables())
 
             init = tf.global_variables_initializer()
-            feed_dict = {self.m.batch_indices: np.arange(self.batch_size)}
+            indices = np.arange(self.batch_size)
+            feed_dict = {self.m.batch_indices: indices}
             with tf.Session() as sess:
                 sess.run(init)
                 initial_loss = sess.run(loss, feed_dict=feed_dict)
                 sess.run(train_all, feed_dict=feed_dict)
                 second_loss = sess.run(loss, feed_dict=feed_dict)
             self.assertLess(second_loss, initial_loss)
+
+    def test_batch(self) -> None:
+        with tf.variable_scope("batch_mlgplvm", reuse=tf.AUTO_REUSE):
+            loss = tf.losses.get_total_loss()
+            learning_rate = 0.1
+            optimizer = tf.train.RMSPropOptimizer(learning_rate)
+            train_all = optimizer.minimize(loss, var_list=tf.trainable_variables())
+
+            init = tf.global_variables_initializer()
+            indices = np.arange(self.batch_size)
+            feed_dict = {self.m.batch_indices: indices}
+            with tf.Session() as sess:
+                sess.run(init)
+                qx_mean = tf.get_variable("qx/mean")
+                qx_log_var = tf.get_variable("qx/log_var")
+                before_batch_qx_mean = sess.run(qx_mean[:self.batch_size])
+                before_batch_qx_log_var = sess.run(qx_log_var[:self.batch_size])
+                before_out_of_batch_qx_mean = sess.run(qx_mean[self.batch_size:])
+                before_out_of_batch_qx_log_var = sess.run(qx_log_var[self.batch_size:])
+
+                # Run one training op
+                sess.run(train_all, feed_dict=feed_dict)
+
+                after_batch_qx_mean = sess.run(qx_mean[:self.batch_size])
+                after_batch_qx_log_var = sess.run(qx_log_var[:self.batch_size])
+                after_out_of_batch_qx_mean = sess.run(qx_mean[self.batch_size:])
+                after_out_of_batch_qx_log_var = sess.run(qx_log_var[self.batch_size:])
+
+            # FIXME: This gives really bad error messages!
+            self.assertAllInSet(tf.math.not_equal(before_batch_qx_mean, after_batch_qx_mean), [True])
+            self.assertAllInSet(tf.math.not_equal(before_batch_qx_log_var, after_batch_qx_log_var), [True])
+            self.assertAllEqual(before_out_of_batch_qx_mean, after_out_of_batch_qx_mean)
+            self.assertAllEqual(before_out_of_batch_qx_log_var, after_out_of_batch_qx_log_var)
 
     def test_impute(self) -> None:
         with tf.variable_scope("batch_mlgplvm", reuse=tf.AUTO_REUSE):
