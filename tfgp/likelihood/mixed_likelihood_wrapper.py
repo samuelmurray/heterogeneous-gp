@@ -20,11 +20,11 @@ class MixedLikelihoodWrapper:
         return [likelihood(f[:, :, dims]) for likelihood, dims in zip(self._likelihoods, self._slices)]
 
     @property
-    def num_dim(self):
+    def num_dim(self) -> int:
         return self._num_dim
 
     @property
-    def num_likelihoods(self):
+    def num_likelihoods(self) -> int:
         return len(self._likelihoods)
 
     def log_prob(self, f: tf.Tensor, y: tf.Tensor) -> tf.Tensor:

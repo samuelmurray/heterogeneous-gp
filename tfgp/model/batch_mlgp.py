@@ -22,7 +22,7 @@ class BatchMLGP(MLGP):
         self.y_batch = tf.placeholder(shape=[self.batch_size, self.ydim], dtype=tf.float32, name="y_batch")
 
     @property
-    def batch_size(self):
+    def batch_size(self) -> int:
         return self._batch_size
 
     def _elbo(self) -> tf.Tensor:
@@ -35,5 +35,5 @@ class BatchMLGP(MLGP):
             log_prob = self.likelihood.log_prob(tf.matrix_transpose(samples), self.y_batch)
         return log_prob
 
-    def _sample_or_return_x(self):
+    def _sample_or_return_x(self) -> tf.Tensor:
         return self.x_batch

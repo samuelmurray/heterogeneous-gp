@@ -46,7 +46,7 @@ class MLGP(InducingPointsModel):
                                         + tf.matrix_diag(tf.exp(tf.matrix_diag_part(self.qu_log_scale))), name="scale")
 
     @property
-    def num_samples(self):
+    def num_samples(self) -> int:
         return self._num_samples
 
     def initialize(self) -> None:
@@ -133,10 +133,10 @@ class MLGP(InducingPointsModel):
 
         return f_samples
 
-    def _sample_or_return_x(self):
+    def _sample_or_return_x(self) -> tf.Tensor:
         return self.x
 
-    def _sample_us(self):
+    def _sample_us(self) -> tf.Tensor:
         # u = qu_mean + qu_scale * e_u, e_u ~ N(0,1)
         e_u = tf.random_normal(shape=[self.num_samples, self.ydim, self.num_inducing], name="e_u")
         u_noise = tf.einsum("ijk,tik->tij", self.qu_scale, e_u, name="u_noise")
