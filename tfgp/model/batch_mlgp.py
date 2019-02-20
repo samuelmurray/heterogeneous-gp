@@ -15,10 +15,9 @@ class BatchMLGP(MLGP):
                  ) -> None:
         super().__init__(x, y, kernel=kernel, num_inducing=num_inducing, likelihood=likelihood)
         self._batch_size = batch_size
-        if self._batch_size > self.num_data:
+        if self.batch_size > self.num_data:
             raise ValueError(f"Can't have larger batch size the number of data,"
                              f"but batch_size={batch_size} and y.shape={y.shape}")
-
         self.x_batch = tf.placeholder(shape=[self.batch_size, self.xdim], dtype=tf.float32, name="x_batch")
         self.y_batch = tf.placeholder(shape=[self.batch_size, self.ydim], dtype=tf.float32, name="y_batch")
 
