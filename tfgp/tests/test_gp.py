@@ -10,23 +10,25 @@ class TestGP(tf.test.TestCase):
         np.random.seed(1363431413)
         tf.random.set_random_seed(1534135313)
         with tf.variable_scope("gp", reuse=tf.AUTO_REUSE):
-            self.kernel = RBF()
-
-    def test_GP(self) -> None:
-        with tf.variable_scope("gp", reuse=tf.AUTO_REUSE):
+            self.output_dim = 1
             x_train = np.linspace(0, 2 * np.pi, 10)[:, None]
             y_train = np.sin(x_train)
-            x = tf.convert_to_tensor(x_train, dtype=tf.float32)
-            y = tf.convert_to_tensor(y_train, dtype=tf.float32)
-            m = GP(x, y, kernel=self.kernel)
-            m.initialize()
+            self.m = GP(x_train, y_train)
+            self.m.initialize()
+
+    def tearDown(self) -> None:
+        tf.reset_default_graph()
+
+    def test_predict(self) -> None:
+        with tf.variable_scope("gp", reuse=tf.AUTO_REUSE):
+            num_test = 30
             init = tf.global_variables_initializer()
             with tf.Session() as sess:
                 sess.run(init)
-                x_test = np.linspace(0, 2 * np.pi, 50)[:, None]
-                mean, cov = m.predict(x_test)
-            self.assertShapeEqual(np.empty([50, 1]), mean)
-            self.assertShapeEqual(np.empty([50, 50]), cov)
+                x_test = np.linspace(0, 2 * np.pi, num_test)[:, None]
+                mean, cov = self.m.predict(x_test)
+            self.assertShapeEqual(np.empty([num_test, self.output_dim]), mean)
+            self.assertShapeEqual(np.empty([num_test, num_test]), cov)
 
 
 if __name__ == "__main__":

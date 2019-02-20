@@ -19,6 +19,14 @@ class MixedLikelihoodWrapper:
     def __call__(self, f: tf.Tensor) -> List[tfp.distributions.Distribution]:
         return [likelihood(f[:, :, dims]) for likelihood, dims in zip(self._likelihoods, self._slices)]
 
+    @property
+    def num_dim(self) -> int:
+        return self._num_dim
+
+    @property
+    def num_likelihoods(self) -> int:
+        return len(self._likelihoods)
+
     def log_prob(self, f: tf.Tensor, y: tf.Tensor) -> tf.Tensor:
         nan_mask = tf.is_nan(y)
         y_ = tf.where(nan_mask, tf.zeros_like(y), y)
@@ -33,14 +41,6 @@ class MixedLikelihoodWrapper:
         assert log_prob.shape == tiled_mask.shape, f"{log_prob.shape} != {tiled_mask.shape}"
         filtered_log_prob = tf.where(tiled_mask, tf.zeros_like(log_prob), log_prob)
         return filtered_log_prob
-
-    @property
-    def num_dim(self):
-        return self._num_dim
-
-    @property
-    def num_likelihoods(self):
-        return len(self._likelihoods)
 
     def create_summaries(self) -> None:
         for likelihood in self._likelihoods:

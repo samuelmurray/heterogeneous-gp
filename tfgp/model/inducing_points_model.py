@@ -1,3 +1,5 @@
+import abc
+
 from .model import Model
 
 
@@ -9,3 +11,11 @@ class InducingPointsModel(Model):
     @property
     def num_inducing(self) -> int:
         return self._num_inducing
+
+    @abc.abstractmethod
+    def initialize(self) -> None:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def create_summaries(self) -> None:
+        raise NotImplementedError

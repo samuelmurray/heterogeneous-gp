@@ -6,8 +6,8 @@ from tfgp.kernel import *
 
 
 class TestKernel(tf.test.TestCase):
-    def setUp(self) -> None:
-        pass
+    def tearDown(self) -> None:
+        tf.reset_default_graph()
 
     def test_abc(self) -> None:
         with self.assertRaises(TypeError):
@@ -20,6 +20,9 @@ class TestRBF(tf.test.TestCase):
         tf.random.set_random_seed(1534135313)
         with tf.variable_scope("rbf", reuse=tf.AUTO_REUSE):
             self.rbf = RBF(1., 0.5)
+
+    def tearDown(self) -> None:
+        tf.reset_default_graph()
 
     def test_throw(self) -> None:
         a = tf.convert_to_tensor(np.random.normal(size=(10, 5)), dtype=tf.float32)
@@ -61,6 +64,9 @@ class TestARDRBF(tf.test.TestCase):
         tf.random.set_random_seed(1534135313)
         with tf.variable_scope("ardrbf", reuse=tf.AUTO_REUSE):
             self.kern = ARDRBF(1., 0.5, xdim=5)
+
+    def tearDown(self) -> None:
+        tf.reset_default_graph()
 
     def test_throw(self) -> None:
         a = tf.convert_to_tensor(np.random.normal(size=(10, 5)), dtype=tf.float32)

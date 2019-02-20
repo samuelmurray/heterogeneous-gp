@@ -12,6 +12,9 @@ class TestSupervisedData(tf.test.TestCase):
     def setUp(self) -> None:
         self.num_data = 10
 
+    def tearDown(self) -> None:
+        tf.reset_default_graph()
+
     def test_sin(self) -> None:
         x, likelihood, y = data.make_sin(self.num_data)
         self.assertIsInstance(x, np.ndarray)
@@ -52,6 +55,9 @@ class TestSupervisedData(tf.test.TestCase):
 class TestUnsupervisedData(tf.test.TestCase):
     def setUp(self) -> None:
         self.num_data = 10
+
+    def tearDown(self) -> None:
+        tf.reset_default_graph()
 
     def test_gaussian_blobs(self):
         y, likelihood, labels = data.make_gaussian_blobs(self.num_data, 2, 2)

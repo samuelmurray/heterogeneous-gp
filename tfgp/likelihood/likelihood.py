@@ -9,13 +9,13 @@ class Likelihood(abc.ABC):
         self._summary_family = "Likelihood"
         self._num_dimensions = num_dimensions
 
-    @property
-    def num_dimensions(self) -> int:
-        return self._num_dimensions
-
     @abc.abstractmethod
     def __call__(self, f: tf.Tensor) -> tfp.distributions.Distribution:
         raise NotImplementedError
+
+    @property
+    def num_dimensions(self) -> int:
+        return self._num_dimensions
 
     @abc.abstractmethod
     def create_summaries(self) -> None:
