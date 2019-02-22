@@ -9,10 +9,6 @@ from tfgp.likelihood import MixedLikelihoodWrapper
 
 
 class VAEMLGPLVM(BatchMLGPLVM):
-    @property
-    def batch_size(self) -> int:
-        return self._batch_size
-
     def __init__(self, y: np.ndarray, xdim: int, *,
                  x: np.ndarray = None,
                  kernel: Kernel = None,
