@@ -89,38 +89,20 @@ class MLGP(InducingPointsModel):
             k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
 
             x = self._get_or_subsample_x()
-            num_data = x.shape.as_list()[0]
+            num_data = tf.shape(x)[0]
 
             k_zx = self.kernel(self.z, x, name="k_zx")
-            assert k_zx.shape.as_list() == [self.num_inducing, num_data], "{} != {}".format(
-                k_zx.shape.as_list(), [self.num_inducing, num_data])
             k_xx = self.kernel(x, name="k_xx")
-            assert k_xx.shape.as_list() == [num_data, num_data], "{} != {}".format(
-                k_xx.shape.as_list(), [num_data, num_data])
 
             # a = Kzz^(-1) * Kzx
             a = tf.matmul(k_zz_inv, k_zx, name="a")
-            assert a.shape.as_list() == [self.num_inducing, num_data], "{} != {}".format(
-                a.shape.as_list(), [self.num_inducing, num_data])
+            a_tiled = tf.tile(tf.expand_dims(a, axis=0), multiples=[self.num_samples, 1, 1])
 
             # K~ = Kxx - Kxz * Kzz^(-1) * Kzx
             k_tilde_full = tf.subtract(k_xx, tf.matmul(k_zx, a, transpose_a=True), name="k_tilde_full")
-            assert k_tilde_full.shape.as_list() == [num_data, num_data], "{} != {}".format(
-                k_tilde_full.shape.as_list(), [num_data, num_data])
-
             k_tilde = tf.matrix_diag_part(k_tilde_full, name="diag_b")
-            assert k_tilde.shape.as_list() == [num_data], "{} != {}".format(
-                k_tilde.shape.as_list(), [num_data])
-
             k_tilde_pos = tf.maximum(k_tilde, 1e-16, name="pos_b")  # k_tilde can't be negative
-
-            a_tiled = tf.tile(tf.expand_dims(a, axis=0), multiples=[self.num_samples, 1, 1])
-            assert a_tiled.shape.as_list() == [self.num_samples, self.num_inducing, num_data], "{} != {}".format(
-                a_tiled.shape.as_list(), [self.num_samples, self.num_inducing, num_data])
-
             k_tilde_pos_tiled = tf.tile(tf.expand_dims(k_tilde_pos, axis=0), multiples=[self.num_samples, 1])
-            assert k_tilde_pos_tiled.shape.as_list() == [self.num_samples, num_data], "{} != {}".format(
-                k_tilde_pos_tiled.shape.as_list(), [self.num_samples, num_data])
 
             # f = a.T * u + sqrt(K~) * e_f, e_f ~ N(0,1)
             u_sample = self._sample_us()
@@ -128,9 +110,6 @@ class MLGP(InducingPointsModel):
             f_mean = tf.matmul(u_sample, a_tiled, name="f_mean")
             f_noise = tf.multiply(tf.expand_dims(tf.sqrt(k_tilde_pos_tiled), axis=1), e_f, name="f_noise")
             f_samples = tf.add(f_mean, f_noise, name="f_samples")
-            assert f_samples.shape.as_list() == [self.num_samples, self.ydim, num_data], "{} != {}".format(
-                f_samples.shape.as_list(), [self.num_samples, self.ydim, num_data])
-
         return f_samples
 
     def _get_or_subsample_x(self) -> tf.Tensor:
@@ -141,8 +120,6 @@ class MLGP(InducingPointsModel):
         e_u = tf.random_normal(shape=[self.num_samples, self.ydim, self.num_inducing], name="e_u")
         u_noise = tf.einsum("ijk,tik->tij", self.qu_scale, e_u, name="u_noise")
         u_samples = tf.add(self.qu_mean, u_noise, name="u_samples")
-        assert u_samples.shape.as_list() == [self.num_samples, self.ydim, self.num_inducing], "{} != {}".format(
-            u_samples.shape.as_list(), [self.num_samples, self.ydim, self.num_inducing])
         return u_samples
 
     def predict(self, xs: np.ndarray) -> Tuple[tf.Tensor, tf.Tensor]:

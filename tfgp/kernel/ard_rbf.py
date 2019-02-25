@@ -26,9 +26,6 @@ class ARDRBF(Kernel):
     def __call__(self, x1: tf.Tensor, x2: tf.Tensor = None, *, name: str = "") -> tf.Tensor:
         with tf.name_scope(name):
             _x2 = x1 if x2 is None else x2
-            for _x in [x1, _x2]:
-                if _x.shape.as_list()[-1] != self._xdim:
-                    raise ValueError(f"Last dimension of input must be {self._xdim}, but shape(x)={_x.shape.as_list()}")
             scaled_x1 = tf.multiply(x1, tf.sqrt(self._gamma))
             scaled_x2 = tf.multiply(_x2, tf.sqrt(self._gamma))
             x1_squared = tf.reduce_sum(tf.square(scaled_x1), axis=-1)
@@ -37,7 +34,7 @@ class ARDRBF(Kernel):
                            + tf.expand_dims(x1_squared, axis=-1)
                            + tf.expand_dims(x2_squared, axis=-2))
             rbf = self._variance * tf.exp(-square_dist)
-            return (rbf + self._eps * tf.eye(x1.shape.as_list()[-2])) if x2 is None else rbf
+            return (rbf + self._eps * tf.eye(tf.shape(x1)[-2])) if x2 is None else rbf
 
     def create_summaries(self) -> None:
         tf.summary.scalar(f"{self._name}_variance", tf.squeeze(self._variance), family=self._summary_family)
