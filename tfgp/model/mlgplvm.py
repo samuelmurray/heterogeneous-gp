@@ -101,6 +101,7 @@ class MLGPLVM(MLGP):
         return imputation
 
     def create_summaries(self) -> None:
+        tf.summary.scalar("kl_qx_px", self._kl_qx_px(), family="Model")
         tf.summary.histogram("qx_mean", self.qx_mean)
         tf.summary.histogram("qx_var", self.qx_var)
         super().create_summaries()
