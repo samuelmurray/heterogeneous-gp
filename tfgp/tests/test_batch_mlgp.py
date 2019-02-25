@@ -19,9 +19,7 @@ class TestMLGP(tf.test.TestCase):
             likelihood = MixedLikelihoodWrapper([Normal() for _ in range(self.output_dim)])
             num_inducing = 10
             self.batch_size = 5
-
-            self.m = BatchMLGP(self.x, self.y, likelihood=likelihood, num_inducing=num_inducing,
-                               batch_size=self.batch_size)
+            self.m = BatchMLGP(self.x, self.y, likelihood=likelihood, num_inducing=num_inducing)
             self.m.initialize()
 
     def tearDown(self) -> None:

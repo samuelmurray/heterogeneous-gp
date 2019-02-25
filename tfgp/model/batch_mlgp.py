@@ -10,26 +10,18 @@ class BatchMLGP(MLGP):
     def __init__(self, x: np.ndarray, y: np.ndarray, *,
                  kernel: Kernel = None,
                  num_inducing: int = 50,
-                 batch_size: int,
                  likelihood: MixedLikelihoodWrapper,
                  ) -> None:
         super().__init__(x, y, kernel=kernel, num_inducing=num_inducing, likelihood=likelihood)
-
-        self._batch_size = batch_size
-        if self.batch_size > self.num_data:
-            raise ValueError(f"Can't have larger batch size the number of data,"
-                             f"but batch_size={batch_size} and y.shape={y.shape}")
-        self.batch_indices = tf.placeholder(shape=self.batch_size, dtype=tf.int32, name="batch_indices")
+        self.batch_indices = tf.placeholder(shape=None, dtype=tf.int32, name="batch_indices")
         self.x_batch = tf.gather(self.x, self.batch_indices, name="y_batch")
         self.y_batch = tf.gather(self.y, self.batch_indices, name="y_batch")
 
-    @property
-    def batch_size(self) -> int:
-        return self._batch_size
-
     def _elbo(self) -> tf.Tensor:
         with tf.name_scope("elbo"):
-            scaled_kl_qu_pu = tf.multiply(self.batch_size / self.num_data, self._kl_qu_pu(), name="scaled_kl_qu_pu")
+            batch_size = tf.shape(self.batch_indices, name="batch_size")
+            fraction = tf.cast(tf.divide(batch_size, self.num_data), tf.float32, name="fraction")
+            scaled_kl_qu_pu = tf.multiply(fraction, self._kl_qu_pu(), name="scaled_kl_qu_pu")
             elbo = tf.identity(self._mc_expectation() - scaled_kl_qu_pu, name="elbo")
         return elbo
 
