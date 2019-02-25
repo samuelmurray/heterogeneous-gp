@@ -18,7 +18,7 @@ class TestBatchMLGPLVM(tf.test.TestCase):
             y, _ = make_blobs(self.num_data, self.output_dim, num_classes)
             likelihood = MixedLikelihoodWrapper([Normal() for _ in range(self.output_dim)])
             self.batch_size = 5
-            self.m = BatchMLGPLVM(y, self.latent_dim, likelihood=likelihood, batch_size=self.batch_size)
+            self.m = BatchMLGPLVM(y, self.latent_dim, likelihood=likelihood)
             self.m.initialize()
 
     def tearDown(self) -> None:
