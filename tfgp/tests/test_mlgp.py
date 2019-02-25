@@ -24,7 +24,7 @@ class TestMLGP(tf.test.TestCase):
     def tearDown(self) -> None:
         tf.reset_default_graph()
 
-    def test_train(self) -> None:
+    def test_train_loss(self) -> None:
         with tf.variable_scope("mlgp", reuse=tf.AUTO_REUSE):
             loss = tf.losses.get_total_loss()
             learning_rate = 0.1
@@ -34,10 +34,10 @@ class TestMLGP(tf.test.TestCase):
             init = tf.global_variables_initializer()
             with tf.Session() as sess:
                 sess.run(init)
-                initial_loss = sess.run(loss)
+                loss_before = sess.run(loss)
                 sess.run(train_all)
-                second_loss = sess.run(loss)
-            self.assertLess(second_loss, initial_loss)
+                loss_after = sess.run(loss)
+            self.assertLess(loss_after, loss_before)
 
     def test_predict(self):
         with tf.variable_scope("mlgp", reuse=tf.AUTO_REUSE):

@@ -26,7 +26,7 @@ class TestVAEMLGPLVM(tf.test.TestCase):
     def tearDown(self) -> None:
         tf.reset_default_graph()
 
-    def test_train(self) -> None:
+    def test_train_loss(self) -> None:
         with tf.variable_scope("vae_mlgplvm", reuse=tf.AUTO_REUSE):
             loss = tf.losses.get_total_loss()
             learning_rate = 0.1
@@ -38,10 +38,10 @@ class TestVAEMLGPLVM(tf.test.TestCase):
             feed_dict = {self.m.batch_indices: indices}
             with tf.Session() as sess:
                 sess.run(init)
-                initial_loss = sess.run(loss, feed_dict=feed_dict)
+                loss_before = sess.run(loss, feed_dict=feed_dict)
                 sess.run(train_all, feed_dict=feed_dict)
-                second_loss = sess.run(loss, feed_dict=feed_dict)
-            self.assertLess(second_loss, initial_loss)
+                loss_after = sess.run(loss, feed_dict=feed_dict)
+            self.assertLess(loss_after, loss_before)
 
     def test_train_encoder(self) -> None:
         with tf.variable_scope("vae_mlgplvm", reuse=tf.AUTO_REUSE):
@@ -55,12 +55,14 @@ class TestVAEMLGPLVM(tf.test.TestCase):
             with tf.Session() as sess:
                 sess.run(init)
                 encoder_variables = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="vae_mlgplvm/encoder")
-                variables_before_training = sess.run(encoder_variables)
+                variables_before = sess.run(encoder_variables)
+
                 # Run one training op
                 sess.run(train_all, feed_dict=feed_dict)
-                variables_after_training = sess.run(encoder_variables)
 
-            for i, (before, after) in enumerate(zip(variables_before_training, variables_after_training)):
+                variables_after = sess.run(encoder_variables)
+
+            for i, (before, after) in enumerate(zip(variables_before, variables_after)):
                 with self.subTest(status_code=[encoder_variables[i]]):
                     self.assertTrue((before != after).all())
 
