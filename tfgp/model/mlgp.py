@@ -80,7 +80,8 @@ class MLGP(InducingPointsModel):
 
     def _log_prob(self, samples: tf.Tensor) -> tf.Tensor:
         with tf.name_scope("log_prob"):
-            log_prob = self.likelihood.log_prob(tf.matrix_transpose(samples), self.y, name="log_prob")
+            y = self._get_or_subsample_y()
+            log_prob = self.likelihood.log_prob(tf.matrix_transpose(samples), y, name="log_prob")
         return log_prob
 
     def _sample_f(self) -> tf.Tensor:
@@ -114,6 +115,9 @@ class MLGP(InducingPointsModel):
 
     def _get_or_subsample_x(self) -> tf.Tensor:
         return self.x
+
+    def _get_or_subsample_y(self) -> tf.Tensor:
+        return self.y
 
     def _sample_u(self) -> tf.Tensor:
         # u = qu_mean + qu_scale * e_u, e_u ~ N(0,1)
