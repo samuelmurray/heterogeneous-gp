@@ -51,16 +51,13 @@ class TestBatchMLGPLVM(tf.test.TestCase):
             init = tf.global_variables_initializer()
             indices = np.arange(self.batch_size)
             feed_dict = {self.m.batch_indices: indices}
+            qx_mean = tf.get_variable("qx/mean")
+            qx_log_var = tf.get_variable("qx/log_var")
             with tf.Session() as sess:
                 sess.run(init)
-                qx_mean = tf.get_variable("qx/mean")
-                qx_log_var = tf.get_variable("qx/log_var")
                 qx_in_batch_before = sess.run([qx_mean[:self.batch_size], qx_log_var[:self.batch_size]])
                 qx_out_of_batch_before = sess.run([qx_mean[self.batch_size:], qx_log_var[self.batch_size:]])
-
-                # Run one training op
                 sess.run(train_all, feed_dict=feed_dict)
-
                 qx_in_batch_after = sess.run([qx_mean[:self.batch_size], qx_log_var[:self.batch_size]])
                 qx_out_of_batch_after = sess.run([qx_mean[self.batch_size:], qx_log_var[self.batch_size:]])
 
