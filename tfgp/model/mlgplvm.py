@@ -63,7 +63,7 @@ class MLGPLVM(MLGP):
             k_xx = self.kernel(x_samples, name="k_xx")
 
             # a = Kzz^(-1) * Kzx
-            a = tf.transpose(tf.tensordot(k_zz_inv, k_zx, axes=[1, 1]), [1, 0, 2], name="a")
+            a = tf.transpose(tf.tensordot(k_zz_inv, k_zx, axes=[1, 1]), perm=[1, 0, 2], name="a")
 
             # K~ = Kxx - Kxz * Kzz^(-1) * Kzx
             k_tilde_full = tf.subtract(k_xx, tf.matmul(k_zx, a, transpose_a=True), name="k_tilde_full")
