@@ -24,13 +24,14 @@ class RBF(Kernel):
     def __call__(self, x1: tf.Tensor, x2: tf.Tensor = None, *, name: str = "") -> tf.Tensor:
         with tf.name_scope(name):
             _x2 = x1 if x2 is None else x2
-            x1_squared = tf.reduce_sum(tf.square(x1), axis=-1)
-            x2_squared = tf.reduce_sum(tf.square(_x2), axis=-1)
-            square_dist = (-2.0 * tf.matmul(x1, _x2, transpose_b=True)
-                           + tf.expand_dims(x1_squared, axis=-1)
-                           + tf.expand_dims(x2_squared, axis=-2))
+            x1_squared = tf.reduce_sum(tf.square(x1), axis=-1, name="x1_squared")
+            x2_squared = tf.reduce_sum(tf.square(_x2), axis=-1, name="x2_squared")
+            square_dist = tf.identity(-2.0 * tf.matmul(x1, _x2, transpose_b=True)
+                                      + tf.expand_dims(x1_squared, axis=-1)
+                                      + tf.expand_dims(x2_squared, axis=-2),
+                                      name="square_dist")
             rbf = self._variance * tf.exp(-self._gamma * square_dist)
-            return (rbf + self._eps * tf.eye(tf.shape(x1)[-2])) if x2 is None else rbf
+        return (rbf + self._eps * tf.eye(tf.shape(x1)[-2])) if x2 is None else rbf
 
     def create_summaries(self) -> None:
         tf.summary.scalar(f"{self._name}_variance", tf.squeeze(self._variance), family=self._summary_family)
