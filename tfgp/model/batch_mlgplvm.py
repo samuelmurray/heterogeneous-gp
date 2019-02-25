@@ -33,7 +33,7 @@ class BatchMLGPLVM(MLGPLVM):
         return self._batch_size
 
     def _elbo(self) -> tf.Tensor:
-        scaled_kl_qu_pu = tf.multiply(self._batch_size / self.num_data, self._kl_qu_pu(), name="scaled_kl_qu_pu")
+        scaled_kl_qu_pu = tf.multiply(self.batch_size / self.num_data, self._kl_qu_pu(), name="scaled_kl_qu_pu")
         elbo = tf.identity(self._mc_expectation() - self._kl_qx_px() - scaled_kl_qu_pu, name="elbo")
         return elbo
 
