@@ -43,38 +43,26 @@ class TestVAEMLGPLVM(tf.test.TestCase):
                 second_loss = sess.run(loss, feed_dict=feed_dict)
             self.assertLess(second_loss, initial_loss)
 
-    def test_batch(self) -> None:
+    def test_train_encoder(self) -> None:
         with tf.variable_scope("vae_mlgplvm", reuse=tf.AUTO_REUSE):
             loss = tf.losses.get_total_loss()
             learning_rate = 0.1
             optimizer = tf.train.RMSPropOptimizer(learning_rate)
             train_all = optimizer.minimize(loss, var_list=tf.trainable_variables())
-
             init = tf.global_variables_initializer()
             indices = np.arange(self.batch_size)
             feed_dict = {self.m.batch_indices: indices}
             with tf.Session() as sess:
                 sess.run(init)
-                qx_mean = tf.get_variable("qx/mean")
-                qx_log_var = tf.get_variable("qx/log_var")
-                before_batch_qx_mean = sess.run(qx_mean[:self.batch_size])
-                before_batch_qx_log_var = sess.run(qx_log_var[:self.batch_size])
-                before_out_of_batch_qx_mean = sess.run(qx_mean[self.batch_size:])
-                before_out_of_batch_qx_log_var = sess.run(qx_log_var[self.batch_size:])
-
+                encoder_variables = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="vae_mlgplvm/encoder")
+                variables_before_training = sess.run(encoder_variables)
                 # Run one training op
                 sess.run(train_all, feed_dict=feed_dict)
+                variables_after_training = sess.run(encoder_variables)
 
-                after_batch_qx_mean = sess.run(qx_mean[:self.batch_size])
-                after_batch_qx_log_var = sess.run(qx_log_var[:self.batch_size])
-                after_out_of_batch_qx_mean = sess.run(qx_mean[self.batch_size:])
-                after_out_of_batch_qx_log_var = sess.run(qx_log_var[self.batch_size:])
-
-            # FIXME: This gives really bad error messages!
-            self.assertAllInSet(tf.math.not_equal(before_batch_qx_mean, after_batch_qx_mean), [True])
-            self.assertAllInSet(tf.math.not_equal(before_batch_qx_log_var, after_batch_qx_log_var), [True])
-            self.assertAllEqual(before_out_of_batch_qx_mean, after_out_of_batch_qx_mean)
-            self.assertAllEqual(before_out_of_batch_qx_log_var, after_out_of_batch_qx_log_var)
+            for i, (before, after) in enumerate(zip(variables_before_training, variables_after_training)):
+                with self.subTest(status_code=[encoder_variables[i]]):
+                    self.assertTrue((before != after).all())
 
     def test_impute(self) -> None:
         with tf.variable_scope("vae_mlgplvm", reuse=tf.AUTO_REUSE):
