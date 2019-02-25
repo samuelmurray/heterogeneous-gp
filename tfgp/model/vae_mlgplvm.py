@@ -41,6 +41,3 @@ class VAEMLGPLVM(BatchMLGPLVM):
 
     def _get_or_subsample_qx(self) -> Tuple[tf.Tensor, tf.Tensor]:
         return self.encoder
-
-    def _get_or_subsample_y(self) -> tf.Tensor:
-        return self.y_batch
