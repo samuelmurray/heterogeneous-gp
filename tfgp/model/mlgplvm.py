@@ -81,9 +81,6 @@ class MLGPLVM(MLGP):
     def _get_or_subsample_qx(self) -> Tuple[tf.Tensor, tf.Tensor]:
         return self.qx_mean, self.qx_var
 
-    def _get_or_subsample_y(self) -> tf.Tensor:
-        return self.y
-
     def impute(self) -> tf.Tensor:
         with tf.name_scope("impute"):
             k_zz = self.kernel(self.z, name="k_zz")
