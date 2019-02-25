@@ -74,10 +74,14 @@ class TestBatchMLGPLVM(tf.test.TestCase):
     def test_impute(self) -> None:
         with tf.variable_scope("batch_mlgplvm", reuse=tf.AUTO_REUSE):
             init = tf.global_variables_initializer()
+            indices = np.arange(self.batch_size)
+            feed_dict = {self.m.batch_indices: indices}
             with tf.Session() as sess:
                 sess.run(init)
                 y_impute = self.m.impute()
-            self.assertShapeEqual(np.empty((self.num_data, self.output_dim)), y_impute)
+                y_impute_arr = sess.run(y_impute, feed_dict=feed_dict)
+            self.assertEqual([None, self.output_dim], y_impute.shape.as_list())
+            self.assertEqual([self.batch_size, self.output_dim], list(y_impute_arr.shape))
 
 
 if __name__ == "__main__":
