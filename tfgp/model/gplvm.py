@@ -27,11 +27,13 @@ class GPLVM(Model):
         tf.losses.add_loss(self._loss())
 
     def _loss(self) -> tf.Tensor:
-        loss = tf.negative(self._log_joint(), name="loss")
+        with tf.name_scope("loss"):
+            loss = tf.negative(self._log_joint(), name="loss")
         return loss
 
     def _log_joint(self) -> tf.Tensor:
-        log_joint = tf.add(self._log_likelihood(), self._log_prior(), name="log_joint")
+        with tf.name_scope("log_joint"):
+            log_joint = tf.add(self._log_likelihood(), self._log_prior(), name="log_joint")
         return log_joint
 
     def _log_likelihood(self) -> tf.Tensor:
@@ -42,7 +44,7 @@ class GPLVM(Model):
             y_transp_a = tf.multiply(0.5, tf.trace(tf.matmul(self.y, a, transpose_a=True)), name="y_transp_a")
             chol_trace = tf.multiply(tf.reduce_sum(tf.log(tf.diag_part(chol_xx)), axis=0), self.ydim, name="chol_trace")
             const = tf.identity(self.ydim * self.num_data * self._HALF_LN2PI, name="const")
-            log_likelihood = tf.negative(y_transp_a + chol_trace + const, name="log_lik")
+            log_likelihood = tf.negative(y_transp_a + chol_trace + const, name="log_likelihood")
         return log_likelihood
 
     def _log_prior(self) -> tf.Tensor:

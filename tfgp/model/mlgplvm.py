@@ -32,7 +32,8 @@ class MLGPLVM(MLGP):
             self.qx_var = tf.exp(self.qx_log_var, name="var")
 
     def _elbo(self) -> tf.Tensor:
-        elbo = tf.identity(self._mc_expectation() - self._kl_qx_px() - self._kl_qu_pu(), name="elbo")
+        with tf.name_scope("elbo"):
+            elbo = tf.identity(self._mc_expectation() - self._kl_qx_px() - self._kl_qu_pu(), name="elbo")
         return elbo
 
     def _kl_qx_px(self) -> tf.Tensor:
@@ -70,7 +71,7 @@ class MLGPLVM(MLGP):
             k_tilde_pos = tf.maximum(k_tilde, 1e-16, name="k_tilde_pos")  # k_tilde can't be negative
 
             # f = a.T * u + sqrt(k_tilde) * e_f, e_f ~ N(0,1)
-            u_samples = self._sample_us()
+            u_samples = self._sample_u()
             e_f = tf.random_normal(shape=[self._num_samples, self.ydim, num_data], name="e_f")
             f_mean = tf.matmul(u_samples, a, name="f_mean")
             f_noise = tf.multiply(tf.expand_dims(tf.sqrt(k_tilde_pos), axis=1), e_f, name="f_noise")
@@ -81,20 +82,22 @@ class MLGPLVM(MLGP):
         return self.qx_mean, self.qx_var
 
     def impute(self) -> tf.Tensor:
-        k_zz = self.kernel(self.z)
-        k_zz_inv = tf.matrix_inverse(k_zz)
-        k_xz = self.kernel(self.qx_mean, self.z)
-        f_mean = tf.matmul(tf.matmul(k_xz, k_zz_inv), self.qu_mean, transpose_b=True)
-        posteriors = self.likelihood(tf.expand_dims(f_mean, 0))
-        modes = tf.concat(
-            [
-                tf.to_float(tf.squeeze(p.mode(), axis=0))
-                for p in posteriors
-            ],
-            axis=1
-        )
-        nan_mask = tf.is_nan(self.y)
-        imputation = tf.where(nan_mask, modes, self.y)
+        with tf.name_scope("impute"):
+            k_zz = self.kernel(self.z, name="k_zz")
+            k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
+            k_xz = self.kernel(self.qx_mean, self.z, name="k_xz")
+            f_mean = tf.matmul(tf.matmul(k_xz, k_zz_inv), self.qu_mean, transpose_b=True, name="f_mean")
+            posteriors = self.likelihood(tf.expand_dims(f_mean, 0))
+            modes = tf.concat(
+                [
+                    tf.to_float(tf.squeeze(p.mode(), axis=0))
+                    for p in posteriors
+                ],
+                axis=1,
+                name="modes"
+            )
+            nan_mask = tf.is_nan(self.y, name="nan_mask")
+            imputation = tf.where(nan_mask, modes, self.y, name="imputation")
         return imputation
 
     def create_summaries(self) -> None:

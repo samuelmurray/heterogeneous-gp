@@ -105,7 +105,7 @@ class MLGP(InducingPointsModel):
             k_tilde_pos_tiled = tf.tile(tf.expand_dims(k_tilde_pos, axis=0), multiples=[self.num_samples, 1])
 
             # f = a.T * u + sqrt(K~) * e_f, e_f ~ N(0,1)
-            u_sample = self._sample_us()
+            u_sample = self._sample_u()
             e_f = tf.random_normal(shape=[self.num_samples, self.ydim, num_data], name="e_f")
             f_mean = tf.matmul(u_sample, a_tiled, name="f_mean")
             f_noise = tf.multiply(tf.expand_dims(tf.sqrt(k_tilde_pos_tiled), axis=1), e_f, name="f_noise")
@@ -115,7 +115,7 @@ class MLGP(InducingPointsModel):
     def _get_or_subsample_x(self) -> tf.Tensor:
         return self.x
 
-    def _sample_us(self) -> tf.Tensor:
+    def _sample_u(self) -> tf.Tensor:
         # u = qu_mean + qu_scale * e_u, e_u ~ N(0,1)
         e_u = tf.random_normal(shape=[self.num_samples, self.ydim, self.num_inducing], name="e_u")
         u_noise = tf.einsum("ijk,tik->tij", self.qu_scale, e_u, name="u_noise")
@@ -126,17 +126,24 @@ class MLGP(InducingPointsModel):
         # TODO: Not clear how to report the variances.
         # Should we use qu_scale? Do we in the end want mean and std of f(x), h(f(x)) or p(y|x)=ExpFam(h(f(x)))?
         # For now, we just report mean and std of ExpFam(h(f_mean(x)))
-        xs = tf.convert_to_tensor(xs, dtype=tf.float32)
-        k_zz = self.kernel(self.z)
-        k_zz_inv = tf.matrix_inverse(k_zz)
-        k_xs_z = self.kernel(xs, self.z)
-        f_mean = tf.matmul(tf.matmul(k_xs_z, k_zz_inv), self.qu_mean, transpose_b=True)
+        with tf.name_scope("predict"):
+            xs = tf.convert_to_tensor(xs, dtype=tf.float32, name="xs")
+            k_zz = self.kernel(self.z, name="k_zz")
+            k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
+            k_xs_z = self.kernel(xs, self.z, name="k_xs_z")
+            f_mean = tf.matmul(tf.matmul(k_xs_z, k_zz_inv), self.qu_mean, transpose_b=True, name="f_mean")
 
-        # TODO: Below is hack to work with new likelihood
-        mean = tf.stack(
-            [likelihood(f_mean[:, i]).mean() for i, likelihood in enumerate(self.likelihood._likelihoods)], axis=1)
-        std = tf.stack(
-            [likelihood(f_mean[:, i]).stddev() for i, likelihood in enumerate(self.likelihood._likelihoods)], axis=1)
+            # TODO: Below is hack to work with new likelihood
+            mean = tf.stack(
+                [likelihood(f_mean[:, i]).mean() for i, likelihood in enumerate(self.likelihood._likelihoods)],
+                axis=1,
+                name="mean"
+            )
+            std = tf.stack(
+                [likelihood(f_mean[:, i]).stddev() for i, likelihood in enumerate(self.likelihood._likelihoods)],
+                axis=1,
+                name="std"
+            )
 
         """
         k_xsxs = self.kernel(xs)
