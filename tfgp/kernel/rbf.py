@@ -12,12 +12,10 @@ class RBF(Kernel):
         super().__init__(name)
         with tf.variable_scope(name):
             self._log_variance = tf.get_variable("log_variance", shape=[1],
-                                                 initializer=tf.constant_initializer(np.log(variance)),
-                                                 regularizer=tf.contrib.layers.l2_regularizer(1.))
+                                                 initializer=tf.constant_initializer(np.log(variance)))
             self._variance = tf.exp(self._log_variance, name="variance")
             self._log_gamma = tf.get_variable("log_gamma", shape=[1],
-                                              initializer=tf.constant_initializer(np.log(gamma)),
-                                              regularizer=tf.contrib.layers.l2_regularizer(1.))
+                                              initializer=tf.constant_initializer(np.log(gamma)))
             self._gamma = tf.exp(self._log_gamma, name="gamma")
             self._eps = eps
 
