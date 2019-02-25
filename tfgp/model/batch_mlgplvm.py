@@ -36,3 +36,6 @@ class BatchMLGPLVM(MLGPLVM):
 
     def _get_or_subsample_qx(self) -> Tuple[tf.Tensor, tf.Tensor]:
         return self.qx_mean_batch, self.qx_var_batch
+
+    def _get_or_subsample_y(self) -> tf.Tensor:
+        return self.y_batch
