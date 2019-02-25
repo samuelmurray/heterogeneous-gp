@@ -14,12 +14,14 @@ class BatchMLGP(MLGP):
                  likelihood: MixedLikelihoodWrapper,
                  ) -> None:
         super().__init__(x, y, kernel=kernel, num_inducing=num_inducing, likelihood=likelihood)
+
         self._batch_size = batch_size
         if self.batch_size > self.num_data:
             raise ValueError(f"Can't have larger batch size the number of data,"
                              f"but batch_size={batch_size} and y.shape={y.shape}")
-        self.x_batch = tf.placeholder(shape=[self.batch_size, self.xdim], dtype=tf.float32, name="x_batch")
-        self.y_batch = tf.placeholder(shape=[self.batch_size, self.ydim], dtype=tf.float32, name="y_batch")
+        self.batch_indices = tf.placeholder(shape=self.batch_size, dtype=tf.int32, name="batch_indices")
+        self.x_batch = tf.gather(self.x, self.batch_indices, name="y_batch")
+        self.y_batch = tf.gather(self.y, self.batch_indices, name="y_batch")
 
     @property
     def batch_size(self) -> int:

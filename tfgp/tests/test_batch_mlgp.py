@@ -36,8 +36,8 @@ class TestMLGP(tf.test.TestCase):
 
             init = tf.global_variables_initializer()
 
-            x_feed, y_feed = self.x[:self.batch_size], self.y[:self.batch_size]
-            feed_dict = {self.m.x_batch: x_feed, self.m.y_batch: y_feed}
+            indices = np.arange(self.batch_size)
+            feed_dict = {self.m.batch_indices: indices}
             with tf.Session() as sess:
                 sess.run(init)
                 loss_before = sess.run(loss, feed_dict=feed_dict)
