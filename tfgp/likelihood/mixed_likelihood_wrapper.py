@@ -40,7 +40,7 @@ class MixedLikelihoodWrapper:
                 axis=2
             )
             f_mask = tf.stack([nan_mask[:, sl.start] for sl in self._slices], axis=1, name="f_mask")
-            tiled_mask = tf.tile(tf.expand_dims(f_mask, axis=0), multiples=[f.shape[0], 1, 1], name="tiled_mask")
+            tiled_mask = tf.tile(tf.expand_dims(f_mask, axis=0), multiples=[tf.shape(f)[0], 1, 1], name="tiled_mask")
             filtered_log_prob = tf.where(tiled_mask, tf.zeros_like(log_prob), log_prob, name="filtered_log_prob")
         return filtered_log_prob
 
