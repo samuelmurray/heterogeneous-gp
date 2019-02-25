@@ -13,12 +13,10 @@ class VAEMLGPLVM(BatchMLGPLVM):
                  x: np.ndarray = None,
                  kernel: Kernel = None,
                  num_inducing: int = 50,
-                 batch_size: int,
                  num_hidden_units: int,
                  likelihood: MixedLikelihoodWrapper,
                  ) -> None:
-        super().__init__(y=y, xdim=xdim, x=x, kernel=kernel, num_inducing=num_inducing, likelihood=likelihood,
-                         batch_size=batch_size)
+        super().__init__(y=y, xdim=xdim, x=x, kernel=kernel, num_inducing=num_inducing, likelihood=likelihood)
         # qx is implicitly defined by neural network
         del self.qx_mean
         del self.qx_var
