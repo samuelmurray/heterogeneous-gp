@@ -29,11 +29,6 @@ class BatchMLGPLVM(MLGPLVM):
             elbo = tf.identity(self._mc_expectation() - self._kl_qx_px() - scaled_kl_qu_pu, name="elbo")
         return elbo
 
-    def _log_prob(self, samples: tf.Tensor) -> tf.Tensor:
-        with tf.name_scope("log_prob"):
-            log_prob = self.likelihood.log_prob(tf.matrix_transpose(samples), self.y_batch, name="log_prob")
-        return log_prob
-
     def _get_or_subsample_qx(self) -> Tuple[tf.Tensor, tf.Tensor]:
         return self.qx_mean_batch, self.qx_var_batch
 

@@ -25,10 +25,8 @@ class BatchMLGP(MLGP):
             elbo = tf.identity(self._mc_expectation() - scaled_kl_qu_pu, name="elbo")
         return elbo
 
-    def _log_prob(self, samples: tf.Tensor) -> tf.Tensor:
-        with tf.name_scope("log_prob"):
-            log_prob = self.likelihood.log_prob(tf.matrix_transpose(samples), self.y_batch, name="log_prob")
-        return log_prob
-
     def _get_or_subsample_x(self) -> tf.Tensor:
         return self.x_batch
+
+    def _get_or_subsample_y(self) -> tf.Tensor:
+        return self.y_batch
