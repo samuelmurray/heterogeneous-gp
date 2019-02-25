@@ -13,6 +13,7 @@ class MixedLikelihoodWrapper:
         dims = [l.num_dimensions for l in self._likelihoods]
         dims_cum_sum = np.cumsum(dims)
         self._num_dim = dims_cum_sum[-1]
+        self._num_likelihoods = len(self._likelihoods)
         self._slices = [slice(0, dims[0])]
         self._slices += [slice(dims_cum_sum[i], dims_cum_sum[i + 1]) for i in range(len(dims) - 1)]
 
@@ -25,7 +26,7 @@ class MixedLikelihoodWrapper:
 
     @property
     def num_likelihoods(self) -> int:
-        return len(self._likelihoods)
+        return self._num_likelihoods
 
     def log_prob(self, f: tf.Tensor, y: tf.Tensor, name="") -> tf.Tensor:
         with tf.name_scope(name):
