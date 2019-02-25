@@ -81,6 +81,9 @@ class MLGPLVM(MLGP):
     def _get_or_subsample_qx(self) -> Tuple[tf.Tensor, tf.Tensor]:
         return self.qx_mean, self.qx_var
 
+    def _get_or_subsample_y(self) -> tf.Tensor:
+        return self.y
+
     def impute(self) -> tf.Tensor:
         with tf.name_scope("impute"):
             k_zz = self.kernel(self.z, name="k_zz")
@@ -99,8 +102,9 @@ class MLGPLVM(MLGP):
                 axis=1,
                 name="modes"
             )
-            nan_mask = tf.is_nan(self.y, name="nan_mask")
-            imputation = tf.where(nan_mask, modes, self.y, name="imputation")
+            y = self._get_or_subsample_y()
+            nan_mask = tf.is_nan(y, name="nan_mask")
+            imputation = tf.where(nan_mask, modes, y, name="imputation")
         return imputation
 
     def create_summaries(self) -> None:
