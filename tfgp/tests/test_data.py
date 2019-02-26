@@ -156,3 +156,7 @@ class TestUnsupervisedData(tf.test.TestCase):
             self.assertIsInstance(y, np.ndarray)
             self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
             self.assertIsInstance(labels, np.ndarray)
+
+
+if __name__ == "__main__":
+    tf.test.main()
