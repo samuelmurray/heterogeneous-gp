@@ -43,7 +43,7 @@ class TestMLGP(tf.test.TestCase):
                 loss_after = sess.run(loss, feed_dict=feed_dict)
             self.assertLess(loss_after, loss_before)
 
-    def test_predict(self):
+    def test_predict(self) -> None:
         with tf.variable_scope("batch_mlgp", reuse=tf.AUTO_REUSE):
             num_test = 30
             init = tf.global_variables_initializer()
