@@ -16,8 +16,8 @@ class BatchMLGPLVM(MLGPLVM):
                  num_inducing: int = 50,
                  num_samples: int = 10,
                  ) -> None:
-        super().__init__(y=y, xdim=xdim, x=x, kernel=kernel, num_inducing=num_inducing, num_samples=num_samples,
-                         likelihood=likelihood)
+        super().__init__(y=y, xdim=xdim, x=x, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing,
+                         num_samples=num_samples)
         self.batch_indices = tf.placeholder(shape=[None], dtype=tf.int32, name="batch_indices")
         self.qx_mean_batch = tf.gather(self.qx_mean, self.batch_indices, name="qx_mean_batch")
         self.qx_var_batch = tf.gather(self.qx_var, self.batch_indices, name="qx_var_batch")

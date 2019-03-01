@@ -17,8 +17,8 @@ class VAEMLGPLVM(BatchMLGPLVM):
                  num_samples: int = 1,
                  num_hidden_units: int,
                  ) -> None:
-        super().__init__(y=y, xdim=xdim, x=x, kernel=kernel, num_inducing=num_inducing, num_samples=num_samples,
-                         likelihood=likelihood)
+        super().__init__(y=y, xdim=xdim, x=x, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing,
+                         num_samples=num_samples)
         # qx is implicitly defined by neural network
         del self.qx_mean
         del self.qx_var

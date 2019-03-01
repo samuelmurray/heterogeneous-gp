@@ -22,7 +22,7 @@ class MLGPLVM(MLGP):
         elif x.shape[1] != xdim:
             raise ValueError(f"Second dimension of x must be xdim, but x.shape={x.shape} and xdim={self.xdim}")
 
-        super().__init__(x, y, kernel=kernel, num_inducing=num_inducing, num_samples=num_samples, likelihood=likelihood)
+        super().__init__(x, y, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing, num_samples=num_samples)
         del self.x  # x is a latent variable in this model
 
         with tf.variable_scope("qx"):

@@ -13,7 +13,7 @@ class BatchMLGP(MLGP):
                  num_inducing: int = 50,
                  num_samples: int = 10,
                  ) -> None:
-        super().__init__(x, y, kernel=kernel, num_inducing=num_inducing, num_samples=num_samples, likelihood=likelihood)
+        super().__init__(x, y, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing, num_samples=num_samples)
         self.batch_indices = tf.placeholder(shape=[None], dtype=tf.int32, name="batch_indices")
         self.x_batch = tf.gather(self.x, self.batch_indices, name="y_batch")
         self.y_batch = tf.gather(self.y, self.batch_indices, name="y_batch")
