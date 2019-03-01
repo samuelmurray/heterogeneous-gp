@@ -49,6 +49,12 @@ class TestImportRun(tf.test.TestCase):
         except Exception as e:
             self.fail(f"'import run_mlgplvm' raised exception: {e}")
 
+    def test_run_vae_mlgplvm(self) -> None:
+        try:
+            from tfgp.examples import run_vae_mlgplvm
+        except Exception as e:
+            self.fail(f"'import run_vae_mlgplvm' raised exception: {e}")
+
 
 if __name__ == "__main__":
     tf.test.main()
