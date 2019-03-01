@@ -1,18 +1,17 @@
 import tensorflow as tf
 
-from tfgp.model import Model
+from tfgp.likelihood import Normal
 
 
-class TestModel(tf.test.TestCase):
+class TestNormal(tf.test.TestCase):
     def setUp(self) -> None:
         pass
 
     def tearDown(self) -> None:
         tf.reset_default_graph()
 
-    def test_abc(self) -> None:
-        with self.assertRaises(TypeError):
-            Model(0, 0, 0)
+    def test_create(self) -> None:
+        self.assertIsInstance(Normal(), Normal)
 
 
 if __name__ == "__main__":

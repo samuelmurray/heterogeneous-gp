@@ -3,11 +3,11 @@ Package for all supported kernels
 """
 
 __all__ = [
-    "Kernel",
     "ARDRBF",
+    "Kernel",
     "RBF",
 ]
 
-from .kernel import Kernel
 from .ard_rbf import ARDRBF
+from .kernel import Kernel
 from .rbf import RBF

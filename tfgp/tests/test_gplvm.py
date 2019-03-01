@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.datasets import make_blobs
 import tensorflow as tf
 
+from tfgp.kernel import RBF
 from tfgp.model import GPLVM
 
 
@@ -15,13 +16,14 @@ class TestGPLVM(tf.test.TestCase):
             output_dim = 5
             num_classes = 3
             y, _ = make_blobs(num_data, output_dim, num_classes)
-            self.m = GPLVM(y, latent_dim)
+            kernel = RBF()
+            self.m = GPLVM(y, latent_dim, kernel=kernel)
             self.m.initialize()
 
     def tearDown(self) -> None:
         tf.reset_default_graph()
 
-    def test_train(self) -> None:
+    def test_train_loss(self) -> None:
         with tf.variable_scope("gplvm", reuse=tf.AUTO_REUSE):
             loss = tf.losses.get_total_loss()
             learning_rate = 0.1
@@ -31,10 +33,10 @@ class TestGPLVM(tf.test.TestCase):
             init = tf.global_variables_initializer()
             with tf.Session() as sess:
                 sess.run(init)
-                initial_loss = sess.run(loss)
+                loss_before = sess.run(loss)
                 sess.run(train_all)
-                second_loss = sess.run(loss)
-            self.assertLess(second_loss, initial_loss)
+                loss_after = sess.run(loss)
+            self.assertLess(loss_after, loss_before)
 
 
 if __name__ == "__main__":

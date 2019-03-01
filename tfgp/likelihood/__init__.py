@@ -3,8 +3,8 @@ Package for all supported likelihoods
 """
 
 __all__ = [
-    "Likelihood",
     "Bernoulli",
+    "Likelihood",
     "MixedLikelihoodWrapper",
     "Normal",
     "OneHotCategorical",
@@ -12,8 +12,8 @@ __all__ = [
     "QuantizedNormal",
 ]
 
-from .likelihood import Likelihood
 from .bernoulli import Bernoulli
+from .likelihood import Likelihood
 from .mixed_likelihood_wrapper import MixedLikelihoodWrapper
 from .normal import Normal
 from .one_hot_categorical import OneHotCategorical

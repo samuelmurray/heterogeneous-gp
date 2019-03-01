@@ -4,39 +4,46 @@ import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
 
-from .mlgplvm import MLGPLVM
+from .batch_mlgplvm import BatchMLGPLVM
 from tfgp.kernel import Kernel
 from tfgp.likelihood import MixedLikelihoodWrapper
 
 
-class BatchMLGPLVM(MLGPLVM):
+class VAEMLGPLVM(BatchMLGPLVM):
     def __init__(self, y: np.ndarray, xdim: int, *,
                  x: np.ndarray = None,
                  kernel: Kernel,
                  likelihood: MixedLikelihoodWrapper,
                  num_inducing: int = 50,
-                 num_samples: int = 10,
+                 num_samples: int = 1,
+                 num_hidden: int,
                  ) -> None:
         super().__init__(y=y, xdim=xdim, x=x, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing,
                          num_samples=num_samples)
-        self.batch_indices = tf.placeholder(shape=[None], dtype=tf.int32, name="batch_indices")
-        self.qx_mean_batch = tf.gather(self.qx_mean, self.batch_indices, name="qx_mean_batch")
-        self.qx_var_batch = tf.gather(self.qx_var, self.batch_indices, name="qx_var_batch")
-        self.y_batch = tf.gather(self.y, self.batch_indices, name="y_batch")
+        # qx is implicitly defined by neural network
+        del self.qx_mean
+        del self.qx_var
+        del self.qx_log_var
+        del self.qx_mean_batch
+        del self.qx_var_batch
 
-    def _elbo(self) -> tf.Tensor:
-        with tf.name_scope("elbo"):
-            batch_size = tf.shape(self.batch_indices, name="batch_size")
-            fraction = tf.cast(tf.divide(batch_size, self.num_data), tf.float32, name="fraction")
-            scaled_kl_qu_pu = tf.multiply(fraction, self._kl_qu_pu(), name="scaled_kl_qu_pu")
-            elbo = tf.identity(self._mc_expectation() - self._kl_qx_px() - scaled_kl_qu_pu, name="elbo")
-        return elbo
+        self._num_hidden = num_hidden
+        self.encoder = self._encoder()
+
+    @property
+    def num_hidden(self) -> int:
+        return self._num_hidden
+
+    def _encoder(self) -> Tuple[tf.Tensor, tf.Tensor]:
+        with tf.variable_scope("encoder"):
+            hidden = tf.layers.dense(self.y_batch, units=self.num_hidden, activation=tf.tanh, name="hidden")
+            mean = tf.layers.dense(hidden, units=self.xdim, activation=None, name="mean")
+            log_var = tf.layers.dense(hidden, units=self.xdim, activation=None, name="log_var")
+            var = tf.exp(log_var, name="var")
+        return mean, var
 
     def _get_or_subsample_qx(self) -> Tuple[tf.Tensor, tf.Tensor]:
-        return self.qx_mean_batch, self.qx_var_batch
-
-    def _get_or_subsample_y(self) -> tf.Tensor:
-        return self.y_batch
+        return self.encoder
 
     def create_summaries(self) -> None:
         # FIXME: A bit ugly that we need to override the entire function
@@ -47,8 +54,6 @@ class BatchMLGPLVM(MLGPLVM):
         # tf.summary.scalar("elbo_loss", self._loss(), family="Loss")
         # TODO: Find a way to add encoder to summary
         tf.summary.histogram("z", self.z)
-        tf.summary.histogram("qx_mean", self.qx_mean)
-        tf.summary.histogram("qx_var", self.qx_var)
         tf.summary.histogram("qu_mean", self.qu_mean)
         tf.summary.histogram("qu_scale", tfp.distributions.fill_triangular_inverse(self.qu_scale))
         self.kernel.create_summaries()

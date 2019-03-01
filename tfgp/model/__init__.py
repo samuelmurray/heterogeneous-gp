@@ -10,7 +10,8 @@ __all__ = [
     "InducingPointsModel",
     "MLGP",
     "MLGPLVM",
-    "Model"
+    "Model",
+    "VAEMLGPLVM",
 ]
 
 from .batch_mlgp import BatchMLGP
@@ -21,3 +22,4 @@ from .inducing_points_model import InducingPointsModel
 from .mlgp import MLGP
 from .mlgplvm import MLGPLVM
 from .model import Model
+from .vae_mlgplvm import VAEMLGPLVM

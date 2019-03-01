@@ -1,9 +1,9 @@
 import tensorflow as tf
 
-from tfgp.model import Model
+from tfgp.likelihood import Likelihood
 
 
-class TestModel(tf.test.TestCase):
+class TestLikelihood(tf.test.TestCase):
     def setUp(self) -> None:
         pass
 
@@ -12,7 +12,7 @@ class TestModel(tf.test.TestCase):
 
     def test_abc(self) -> None:
         with self.assertRaises(TypeError):
-            Model(0, 0, 0)
+            Likelihood(1)
 
 
 if __name__ == "__main__":

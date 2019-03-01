@@ -1,9 +1,9 @@
 import tensorflow as tf
 
-from tfgp.model import Model
+from tfgp.kernel import Kernel
 
 
-class TestModel(tf.test.TestCase):
+class TestKernel(tf.test.TestCase):
     def setUp(self) -> None:
         pass
 
@@ -12,7 +12,7 @@ class TestModel(tf.test.TestCase):
 
     def test_abc(self) -> None:
         with self.assertRaises(TypeError):
-            Model(0, 0, 0)
+            Kernel("kernel")
 
 
 if __name__ == "__main__":
