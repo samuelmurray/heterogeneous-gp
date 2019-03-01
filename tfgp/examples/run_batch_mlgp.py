@@ -6,6 +6,7 @@ import numpy as np
 import seaborn as sns
 import tensorflow as tf
 
+from tfgp.kernel import RBF
 from tfgp.model import BatchMLGP
 from tfgp.util import data
 
@@ -16,10 +17,10 @@ if __name__ == "__main__":
     x, likelihood, y = data.make_sin(num_data)
     num_inducing = 20
     batch_size = 5
-    # batch_size = num_data
 
     print("Creating model...")
-    m = BatchMLGP(x, y, likelihood=likelihood, num_inducing=num_inducing, batch_size=batch_size)
+    kernel = RBF(name="rbf")
+    m = BatchMLGP(x, y, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing)
     m.initialize()
 
     print("Building graph...")
@@ -33,7 +34,7 @@ if __name__ == "__main__":
                                        name="train")
     with tf.name_scope("summary"):
         m.create_summaries()
-        tf.summary.scalar("total_loss", loss, family="Loss")
+        # tf.summary.scalar("total_loss", loss, family="Loss")
         for reg_loss in tf.losses.get_regularization_losses():
             tf.summary.scalar(f"{reg_loss.name}", reg_loss, family="Loss")
         merged_summary = tf.summary.merge_all()
@@ -52,16 +53,15 @@ if __name__ == "__main__":
         print("Starting training...")
         n_iter = 50000
         n_print = 300
+        all_indices = np.arange(num_data)
         for i in range(n_iter):
-            feed_idx = i * batch_size % num_data
-            x_feed, y_feed = x[feed_idx:feed_idx + batch_size], y[feed_idx:feed_idx + batch_size]
-            # x_feed, y_feed = x, y
-            sess.run(train_all, feed_dict={m.x_batch: x_feed, m.y_batch: y_feed})
+            batch_indices = np.random.choice(num_data, batch_size, replace=False)
+            sess.run(train_all, feed_dict={m.batch_indices: batch_indices})
             if i % n_print == 0:
                 run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
                 run_metadata = tf.RunMetadata()
                 train_loss, summary = sess.run([loss, merged_summary], options=run_options, run_metadata=run_metadata,
-                                               feed_dict={m.x_batch: x_feed, m.y_batch: y_feed})
+                                               feed_dict={m.batch_indices: all_indices})
                 summary_writer.add_run_metadata(run_metadata, f"step{i}")
                 summary_writer.add_summary(summary, i)
                 loss_print = f"Step {i} - Loss: {train_loss}"

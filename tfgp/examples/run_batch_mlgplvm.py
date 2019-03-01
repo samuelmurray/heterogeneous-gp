@@ -25,7 +25,7 @@ if __name__ == "__main__":
 
     print("Creating model...")
     kernel = tfgp.kernel.ARDRBF(xdim=latent_dim, name="ardrbf")
-    m = BatchMLGPLVM(y, latent_dim, x=x, kernel=kernel, likelihood=likelihood, batch_size=batch_size)
+    m = BatchMLGPLVM(y, latent_dim, x=x, kernel=kernel, likelihood=likelihood)
     m.initialize()
 
     print("Building graph...")
@@ -38,7 +38,7 @@ if __name__ == "__main__":
                                        name="train")
     with tf.name_scope("summary"):
         m.create_summaries()
-        tf.summary.scalar("total_loss", loss, family="Loss")
+        # tf.summary.scalar("total_loss", loss, family="Loss")
         for reg_loss in tf.losses.get_regularization_losses():
             tf.summary.scalar(f"{reg_loss.name}", reg_loss, family="Loss")
         merged_summary = tf.summary.merge_all()
@@ -48,7 +48,7 @@ if __name__ == "__main__":
     plt.axis([-5, 5, -5, 5])
     plt.ion()
     with tf.Session() as sess:
-        log_dir = f"../../log/mlgplvm/{time.strftime('%Y%m%d%H%M%S')}"
+        log_dir = f"../../log/batch_mlgplvm/{time.strftime('%Y%m%d%H%M%S')}"
         summary_writer = tf.summary.FileWriter(log_dir, sess.graph)
         print("Initializing variables...")
         sess.run(init)
@@ -56,6 +56,7 @@ if __name__ == "__main__":
         print("Starting training...")
         n_iter = 50000
         n_print = 1000
+        all_indices = np.arange(num_data)
         for i in range(n_iter):
             batch_indices = np.random.choice(num_data, batch_size, replace=False)
             sess.run(train_all, feed_dict={m.batch_indices: batch_indices})
@@ -63,7 +64,7 @@ if __name__ == "__main__":
                 run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
                 run_metadata = tf.RunMetadata()
                 train_loss, summary = sess.run([loss, merged_summary], options=run_options, run_metadata=run_metadata,
-                                               feed_dict={m.batch_indices: batch_indices})
+                                               feed_dict={m.batch_indices: all_indices})
                 summary_writer.add_run_metadata(run_metadata, f"step{i}")
                 summary_writer.add_summary(summary, i)
                 loss_print = f"Step {i} - Loss: {train_loss}"
