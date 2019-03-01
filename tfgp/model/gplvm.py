@@ -3,13 +3,12 @@ import tensorflow as tf
 
 from .model import Model
 from tfgp.kernel import Kernel
-from tfgp.kernel import RBF
 
 
 class GPLVM(Model):
     def __init__(self, y: np.ndarray, xdim: int, *,
                  x: np.ndarray = None,
-                 kernel: Kernel = None,
+                 kernel: Kernel,
                  ) -> None:
         super().__init__(xdim, y.shape[1], y.shape[0])
         self._HALF_LN2PI = 0.5 * tf.log(2 * np.pi)
@@ -21,7 +20,7 @@ class GPLVM(Model):
             raise ValueError(f"Second dimension of x must be xdim, but x.shape={x.shape} and xdim={self.xdim}")
         self.y = tf.convert_to_tensor(y, dtype=tf.float32, name="y")
         self.x = tf.get_variable("x", shape=[self.num_data, self.xdim], initializer=tf.constant_initializer(x))
-        self.kernel = kernel if (kernel is not None) else RBF(0.1, eps=0.1)
+        self.kernel = kernel
 
     def initialize(self) -> None:
         tf.losses.add_loss(self._loss())

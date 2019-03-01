@@ -12,7 +12,7 @@ from tfgp.likelihood import MixedLikelihoodWrapper
 class MLGPLVM(MLGP):
     def __init__(self, y: np.ndarray, xdim: int, *,
                  x: np.ndarray = None,
-                 kernel: Kernel = None,
+                 kernel: Kernel,
                  likelihood: MixedLikelihoodWrapper,
                  num_inducing: int = 50,
                  num_samples: int = 10,

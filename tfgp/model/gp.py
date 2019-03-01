@@ -5,12 +5,11 @@ import tensorflow as tf
 
 from .model import Model
 from tfgp.kernel import Kernel
-from tfgp.kernel import RBF
 
 
 class GP(Model):
     def __init__(self, x: np.ndarray, y: np.ndarray, *,
-                 kernel: Kernel = None
+                 kernel: Kernel,
                  ) -> None:
         if x.shape[0] != y.shape[0]:
             raise ValueError(f"First dimension of x and y must match, "
@@ -18,7 +17,7 @@ class GP(Model):
         super().__init__(x.shape[1], y.shape[1], x.shape[0])
         self.x = tf.convert_to_tensor(x, dtype=tf.float32, name="x")
         self.y = tf.convert_to_tensor(y, dtype=tf.float32, name="y")
-        self.kernel = kernel if (kernel is not None) else RBF()
+        self.kernel = kernel
         self.k_xx = self.kernel(self.x, name="k_xx")
         self.chol_xx = tf.cholesky(self.k_xx, name="chol_xx")
         self.a = tf.matrix_solve(tf.transpose(self.chol_xx), tf.matrix_solve(self.chol_xx, self.y), name="a")

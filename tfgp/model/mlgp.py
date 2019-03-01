@@ -12,7 +12,7 @@ from tfgp.likelihood import MixedLikelihoodWrapper
 
 class MLGP(InducingPointsModel):
     def __init__(self, x: np.ndarray, y: np.ndarray, *,
-                 kernel: Kernel = None,
+                 kernel: Kernel,
                  likelihood: MixedLikelihoodWrapper,
                  num_inducing: int = 50,
                  num_samples: int = 10,
@@ -32,8 +32,8 @@ class MLGP(InducingPointsModel):
         if likelihood.num_dim != self.ydim:
             raise ValueError(f"The likelihood must have as many dimensions as y, "
                              f"but likelihood.num_dim={likelihood.num_dim} and y.shape={y.shape}")
+        self.kernel = kernel
         self.likelihood = likelihood
-        self.kernel = kernel if (kernel is not None) else RBF()
         self.z = tf.get_variable("z", shape=[self.num_inducing, self.xdim], initializer=tf.constant_initializer(z))
         with tf.variable_scope("qu"):
             self.qu_mean = tf.get_variable("mean", shape=[self.ydim, self.num_inducing],

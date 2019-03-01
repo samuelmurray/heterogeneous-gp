@@ -8,7 +8,7 @@ from tfgp.likelihood import MixedLikelihoodWrapper
 
 class BatchMLGP(MLGP):
     def __init__(self, x: np.ndarray, y: np.ndarray, *,
-                 kernel: Kernel = None,
+                 kernel: Kernel,
                  likelihood: MixedLikelihoodWrapper,
                  num_inducing: int = 50,
                  num_samples: int = 10,
