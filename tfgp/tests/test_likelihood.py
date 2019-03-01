@@ -4,6 +4,9 @@ from tfgp.likelihood import Likelihood
 
 
 class TestLikelihood(tf.test.TestCase):
+    def setUp(self) -> None:
+        pass
+
     def tearDown(self) -> None:
         tf.reset_default_graph()
 
