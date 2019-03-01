@@ -5,6 +5,7 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 import tensorflow as tf
 
+from tfgp.kernel import RBF
 from tfgp.model import GPLVM
 from tfgp.util import data, pca_reduce
 
@@ -18,7 +19,8 @@ if __name__ == "__main__":
     x = pca_reduce(y, latent_dim)
 
     print("Creating model...")
-    m = GPLVM(y, latent_dim, x=x)
+    kernel = RBF()
+    m = GPLVM(y, latent_dim, x=x, kernel=kernel)
     m.initialize()
 
     print("Building graph...")

@@ -6,9 +6,9 @@ import numpy as np
 import seaborn as sns
 import tensorflow as tf
 
-import tfgp
+from tfgp.kernel import ARDRBF
 from tfgp.model import MLGPLVM
-from tfgp.util import data
+from tfgp.util import data, pca_reduce
 
 if __name__ == "__main__":
     sns.set()
@@ -19,10 +19,10 @@ if __name__ == "__main__":
     output_dim = 5
     num_classes = 5
     y, likelihood, labels = data.make_circle(num_data, output_dim)
-    x = tfgp.util.pca_reduce(y, latent_dim)
+    x = pca_reduce(y, latent_dim)
 
     print("Creating model...")
-    kernel = tfgp.kernel.ARDRBF(xdim=latent_dim, name="ardrbf")
+    kernel = ARDRBF(xdim=latent_dim)
     m = MLGPLVM(y, latent_dim, x=x, kernel=kernel, likelihood=likelihood)
     m.initialize()
 

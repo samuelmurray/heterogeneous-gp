@@ -6,6 +6,7 @@ import numpy as np
 import seaborn as sns
 import tensorflow as tf
 
+from tfgp.kernel import RBF
 from tfgp.model import MLGP
 from tfgp.util import data
 
@@ -17,7 +18,8 @@ if __name__ == "__main__":
     num_inducing = 20
 
     print("Creating model...")
-    m = MLGP(x, y, likelihood=likelihood, num_inducing=num_inducing)
+    kernel = RBF()
+    m = MLGP(x, y, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing)
     m.initialize()
 
     print("Building graph...")

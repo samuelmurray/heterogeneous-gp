@@ -3,6 +3,7 @@ import numpy as np
 import seaborn as sns
 import tensorflow as tf
 
+from tfgp.kernel import RBF
 from tfgp.model import GP
 from tfgp.util import data
 
@@ -12,8 +13,8 @@ if __name__ == "__main__":
     x_train, _, y_train = data.make_sin(num_data)
     x = tf.convert_to_tensor(x_train, dtype=tf.float32)
     y = tf.convert_to_tensor(y_train, dtype=tf.float32)
-
-    m = GP(x, y)
+    kernel = RBF()
+    m = GP(x, y, kernel=kernel)
 
     init = tf.global_variables_initializer()
     with tf.Session() as sess:
