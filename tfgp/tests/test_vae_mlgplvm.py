@@ -20,9 +20,8 @@ class TestVAEMLGPLVM(tf.test.TestCase):
             kernel = RBF()
             likelihood = MixedLikelihoodWrapper([Normal() for _ in range(self.output_dim)])
             self.batch_size = 5
-            num_hidden_units = 10
-            self.m = VAEMLGPLVM(y, self.latent_dim, kernel=kernel, likelihood=likelihood,
-                                num_hidden_units=num_hidden_units)
+            num_hidden = 10
+            self.m = VAEMLGPLVM(y, self.latent_dim, kernel=kernel, likelihood=likelihood, num_hidden=num_hidden)
             self.m.initialize()
 
     def tearDown(self) -> None:

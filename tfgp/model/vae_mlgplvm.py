@@ -15,7 +15,7 @@ class VAEMLGPLVM(BatchMLGPLVM):
                  likelihood: MixedLikelihoodWrapper,
                  num_inducing: int = 50,
                  num_samples: int = 1,
-                 num_hidden_units: int,
+                 num_hidden: int,
                  ) -> None:
         super().__init__(y=y, xdim=xdim, x=x, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing,
                          num_samples=num_samples)
@@ -26,16 +26,16 @@ class VAEMLGPLVM(BatchMLGPLVM):
         del self.qx_mean_batch
         del self.qx_var_batch
 
-        self._num_hidden_units = num_hidden_units
+        self._num_hidden = num_hidden
         self.encoder = self._encoder()
 
     @property
-    def num_hidden_units(self) -> int:
-        return self._num_hidden_units
+    def num_hidden(self) -> int:
+        return self._num_hidden
 
     def _encoder(self) -> Tuple[tf.Tensor, tf.Tensor]:
         with tf.variable_scope("encoder"):
-            hidden = tf.layers.dense(self.y_batch, units=self.num_hidden_units, activation=tf.tanh, name="hidden")
+            hidden = tf.layers.dense(self.y_batch, units=self.num_hidden, activation=tf.tanh, name="hidden")
             mean = tf.layers.dense(hidden, units=self.xdim, activation=None, name="mean")
             log_var = tf.layers.dense(hidden, units=self.xdim, activation=None, name="log_var")
             var = tf.exp(log_var, name="var")
