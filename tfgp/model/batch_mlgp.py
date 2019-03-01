@@ -1,5 +1,6 @@
 import numpy as np
 import tensorflow as tf
+import tensorflow_probability as tfp
 
 from .mlgp import MLGP
 from tfgp.kernel import Kernel
@@ -31,3 +32,15 @@ class BatchMLGP(MLGP):
 
     def _get_or_subsample_y(self) -> tf.Tensor:
         return self.y_batch
+
+    def create_summaries(self) -> None:
+        # FIXME: A bit ugly that we need to override the entire function
+        tf.summary.scalar("kl_qu_pu", self._kl_qu_pu(), family="Model")
+        tf.summary.scalar("expectation", self._mc_expectation(), family="Model")
+        # TODO: Find a way to include loss
+        # tf.summary.scalar("elbo_loss", self._loss(), family="Loss")
+        tf.summary.histogram("z", self.z)
+        tf.summary.histogram("qu_mean", self.qu_mean)
+        tf.summary.histogram("qu_scale", tfp.distributions.fill_triangular_inverse(self.qu_scale))
+        self.kernel.create_summaries()
+        self.likelihood.create_summaries()
