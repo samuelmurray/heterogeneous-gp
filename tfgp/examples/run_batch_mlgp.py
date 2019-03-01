@@ -44,16 +44,16 @@ if __name__ == "__main__":
     plt.axis([-5, 5, -5, 5])
     plt.ion()
     x_test = np.linspace(np.min(x) - 1, np.max(x) + 1, 100)[:, None]
+    all_indices = np.arange(num_data)
     with tf.Session() as sess:
         log_dir = f"../../log/batch_mlgp/{time.strftime('%Y%m%d%H%M%S')}"
         summary_writer = tf.summary.FileWriter(log_dir, sess.graph)
         print("Initializing variables...")
         sess.run(init)
-        # print(f"Initial loss: {sess.run(loss)}")
+        print(f"Initial loss: {sess.run(loss, feed_dict={m.batch_indices: all_indices})}")
         print("Starting training...")
         n_iter = 50000
         n_print = 300
-        all_indices = np.arange(num_data)
         for i in range(n_iter):
             batch_indices = np.random.choice(num_data, batch_size, replace=False)
             sess.run(train_all, feed_dict={m.batch_indices: batch_indices})
