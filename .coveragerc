@@ -1,0 +1,15 @@
+# .coveragerc to control coverage.py
+
+[run]
+branch = True
+source = tfgp
+omit = ./tfgp/examples/*.py, ./tfgp/notebooks/*.py, ./tfgp/tests/*.py, ./tfgp/__version__.py, setup.py
+
+[report]
+exclude_lines =
+    if self.debug:
+    pragma: no cover
+    raise NotImplementedError
+    if __name__ == .__main__.:
+
+ignore_errors = True
