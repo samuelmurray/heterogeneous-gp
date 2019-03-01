@@ -13,9 +13,9 @@ from tfgp.likelihood import MixedLikelihoodWrapper
 class MLGP(InducingPointsModel):
     def __init__(self, x: np.ndarray, y: np.ndarray, *,
                  kernel: Kernel = None,
+                 likelihood: MixedLikelihoodWrapper,
                  num_inducing: int = 50,
                  num_samples: int = 10,
-                 likelihood: MixedLikelihoodWrapper,
                  ) -> None:
         if x.shape[0] != y.shape[0]:
             raise ValueError(f"First dimension of x and y must match, but x.shape={x.shape} and y.shape={y.shape}")

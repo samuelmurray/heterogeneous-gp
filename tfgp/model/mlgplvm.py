@@ -13,9 +13,9 @@ class MLGPLVM(MLGP):
     def __init__(self, y: np.ndarray, xdim: int, *,
                  x: np.ndarray = None,
                  kernel: Kernel = None,
+                 likelihood: MixedLikelihoodWrapper,
                  num_inducing: int = 50,
                  num_samples: int = 10,
-                 likelihood: MixedLikelihoodWrapper,
                  ) -> None:
         if x is None:
             x = np.random.normal(size=(y.shape[0], xdim))

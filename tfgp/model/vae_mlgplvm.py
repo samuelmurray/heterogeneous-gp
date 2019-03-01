@@ -12,10 +12,10 @@ class VAEMLGPLVM(BatchMLGPLVM):
     def __init__(self, y: np.ndarray, xdim: int, *,
                  x: np.ndarray = None,
                  kernel: Kernel = None,
+                 likelihood: MixedLikelihoodWrapper,
                  num_inducing: int = 50,
                  num_samples: int = 1,
                  num_hidden_units: int,
-                 likelihood: MixedLikelihoodWrapper,
                  ) -> None:
         super().__init__(y=y, xdim=xdim, x=x, kernel=kernel, num_inducing=num_inducing, num_samples=num_samples,
                          likelihood=likelihood)
