@@ -13,7 +13,8 @@ class TestGP(tf.test.TestCase):
             self.output_dim = 1
             x_train = np.linspace(0, 2 * np.pi, 10)[:, None]
             y_train = np.sin(x_train)
-            self.m = GP(x_train, y_train)
+            kernel = RBF()
+            self.m = GP(x_train, y_train, kernel=kernel)
             self.m.initialize()
 
     def tearDown(self) -> None:

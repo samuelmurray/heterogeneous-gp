@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.datasets import make_blobs
 import tensorflow as tf
 
+from tfgp.kernel import RBF
 from tfgp.model import GPLVM
 
 
@@ -15,7 +16,8 @@ class TestGPLVM(tf.test.TestCase):
             output_dim = 5
             num_classes = 3
             y, _ = make_blobs(num_data, output_dim, num_classes)
-            self.m = GPLVM(y, latent_dim)
+            kernel = RBF()
+            self.m = GPLVM(y, latent_dim, kernel=kernel)
             self.m.initialize()
 
     def tearDown(self) -> None:

@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.datasets import make_blobs
 import tensorflow as tf
 
+from tfgp.kernel import RBF
 from tfgp.likelihood import MixedLikelihoodWrapper, Normal
 from tfgp.model import BatchMLGPLVM
 
@@ -16,9 +17,10 @@ class TestBatchMLGPLVM(tf.test.TestCase):
             self.output_dim = 5
             num_classes = 3
             y, _ = make_blobs(self.num_data, self.output_dim, num_classes)
+            kernel = RBF()
             likelihood = MixedLikelihoodWrapper([Normal() for _ in range(self.output_dim)])
             self.batch_size = 5
-            self.m = BatchMLGPLVM(y, self.latent_dim, likelihood=likelihood)
+            self.m = BatchMLGPLVM(y, self.latent_dim, kernel=kernel, likelihood=likelihood)
             self.m.initialize()
 
     def tearDown(self) -> None:

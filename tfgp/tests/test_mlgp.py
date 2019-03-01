@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.datasets import make_regression
 import tensorflow as tf
 
+from tfgp.kernel import RBF
 from tfgp.likelihood import MixedLikelihoodWrapper, Normal
 from tfgp.model import MLGP
 
@@ -16,9 +17,10 @@ class TestMLGP(tf.test.TestCase):
             self.output_dim = 1
             x, y = make_regression(num_data, input_dim, input_dim, self.output_dim)
             y = y.reshape(num_data, self.output_dim)
+            kernel = RBF()
             likelihood = MixedLikelihoodWrapper([Normal() for _ in range(self.output_dim)])
             num_inducing = 10
-            self.m = MLGP(x, y, likelihood=likelihood, num_inducing=num_inducing)
+            self.m = MLGP(x, y, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing)
             self.m.initialize()
 
     def tearDown(self) -> None:
