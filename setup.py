@@ -7,27 +7,14 @@ DESCRIPTION = "MLGPLVM implementation in TF"
 URL = "https://github.com/samuelmurray/TF-GP"
 EMAIL = "samuelmu@kth.se"
 AUTHOR = "Samuel Murray"
-REQUIRES_PYTHON = ">=3.6.0"
+PYTHON_VERSION = ">=3.6.0"
 LICENSE = "GNU General Public License v3.0"
 TEST_DIR = "tests"
 
-SCIKIT_LEARN_VERSION = ">=0.20"
 TENSORFLOW_VERSION = ">=1.12.0"
 TENSORFLOW_PROBABILITY_VERSION = ">=0.5.0"
 
-REQUIRED = [
-    "numpy",
-]
-
 EXTRA_REQUIRED = {
-    "examples": [
-        "IPython",
-        "jupyter",
-        "matplotlib",
-        "scikit-learn" + SCIKIT_LEARN_VERSION,
-        "scipy",
-        "seaborn",
-    ],
     "oilflow": [
         "pods",
     ],
@@ -38,10 +25,6 @@ EXTRA_REQUIRED = {
     "tf_gpu": [
         "tensorflow-gpu" + TENSORFLOW_VERSION,
         "tensorflow-probability" + TENSORFLOW_PROBABILITY_VERSION,
-    ],
-    "test": [
-        "scikit-learn" + SCIKIT_LEARN_VERSION,
-        "scipy",
     ],
 }
 
@@ -58,11 +41,10 @@ setup(
     description=DESCRIPTION,
     author=AUTHOR,
     author_email=EMAIL,
-    python_requires=REQUIRES_PYTHON,
+    python_requires=PYTHON_VERSION,
     url=URL,
     packages=find_packages(exclude=(TEST_DIR,)),
     test_suite=NAME + "." + TEST_DIR,
-    install_requires=REQUIRED,
     extras_require=EXTRA_REQUIRED,
     include_package_data=True,
     license=LICENSE,

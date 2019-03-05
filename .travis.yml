@@ -6,6 +6,10 @@ python:
   - "3.6"
   - "3.7"
 install:
-  - pip install .[tf,test,examples]
+  - pip install pipenv
+  - pipenv install --dev --ignore-pipfile --system
+  - pipenv install .[tf] --skip-lock
+  - pipenv install pytest-cov --skip-lock
+  - pipenv install codecov --skip-lock
 script:
-  - pytest --testexamples
+  - pipenv run pytest --testexamples
