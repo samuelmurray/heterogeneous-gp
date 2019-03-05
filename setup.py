@@ -11,19 +11,10 @@ PYTHON_VERSION = ">=3.7.0"
 LICENSE = "GNU General Public License v3.0"
 TEST_DIR = "tests"
 
-SCIKIT_LEARN_VERSION = ">=0.20"
 TENSORFLOW_VERSION = ">=1.12.0"
 TENSORFLOW_PROBABILITY_VERSION = ">=0.5.0"
 
 EXTRA_REQUIRED = {
-    "examples": [
-        "IPython",
-        "jupyter",
-        "matplotlib",
-        "scikit-learn" + SCIKIT_LEARN_VERSION,
-        "scipy",
-        "seaborn",
-    ],
     "oilflow": [
         "pods",
     ],

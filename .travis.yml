@@ -6,6 +6,6 @@ python:
   - "3.7"
 install:
   - pip install pipenv
-  - pipenv install .[tf,examples]
+  - pipenv install .[tf] --dev
 script:
-  - pytest --testexamples
+  - pipenv run pytest --testexamples
