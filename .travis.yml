@@ -3,9 +3,9 @@ os:
 language: python
 dist: xenial
 python:
-  - "3.6"
   - "3.7"
 install:
-  - pip install .[tf,test,examples]
+  - pip install pipenv
+  - pipenv install .[tf,examples]
 script:
   - pytest --testexamples
