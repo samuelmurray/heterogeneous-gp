@@ -9,7 +9,5 @@ install:
   - pip install pipenv
   - pipenv install --dev --ignore-pipfile --system
   - pipenv install .[tf] --skip-lock
-  - pipenv install pytest-cov --skip-lock
-  - pipenv install codecov --skip-lock
 script:
   - pipenv run pytest --testexamples

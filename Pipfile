@@ -11,10 +11,15 @@ numpy = "*"
 tfgp = {editable = true,path = "."}
 
 [dev-packages]
+coverage = "*"
 IPython = "*"
 jupyter = "*"
 matplotlib = "*"
 pytest = "*"
+pytest-cov = "*"
+pytest-flakes = "*"
+pytest-pep8 = "*"
+pytest-pylint = "*"
 scikit-learn = ">=0.20"
 scipy = "*"
 seaborn = "*"
