@@ -13,7 +13,7 @@ from tfgp.model import BatchMLGP
 from tfgp.util import data
 
 ROOT_PATH = os.path.dirname(tfgp.__file__)
-LOG_DIR_PATH = os.path.join(ROOT_PATH, "log")
+LOG_DIR_PATH = os.path.join(ROOT_PATH, os.pardir, "log")
 
 if __name__ == "__main__":
     sns.set()

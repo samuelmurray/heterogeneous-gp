@@ -91,9 +91,9 @@ def mlgplvm(data_train: np.ndarray, data_test: np.ndarray) -> Tuple[np.ndarray, 
         # Setup
         name = "mimic"
         start_time = f"{time.strftime('%Y%m%d%H%M%S')}"
-        log_dir = os.path.join(ROOT_PATH, "log", name, start_time)
-        save_dir = os.path.join(ROOT_PATH, "save", name, start_time)
-        output_dir = os.path.join(ROOT_PATH, "output", name, start_time)
+        log_dir = os.path.join(ROOT_PATH, os.pardir, "log", name, start_time)
+        save_dir = os.path.join(ROOT_PATH, os.pardir, "save", name, start_time)
+        output_dir = os.path.join(ROOT_PATH, os.pardir, "output", name, start_time)
         os.makedirs(save_dir)
         os.makedirs(output_dir)
         summary_writer = tf.summary.FileWriter(log_dir, sess.graph)
