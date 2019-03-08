@@ -14,6 +14,8 @@ import tfgp
 from tfgp.model import MLGPLVM
 from tfgp.util import data
 
+ROOT_PATH = os.path.dirname(tfgp.__file__)
+
 
 def logistic_regression(data_train: np.ndarray, label_train: np.ndarray, data_test: np.ndarray) -> np.ndarray:
     m = LogisticRegression()
@@ -87,12 +89,11 @@ def mlgplvm(data_train: np.ndarray, data_test: np.ndarray) -> Tuple[np.ndarray, 
 
     with tf.Session() as sess:
         # Setup
-        root_dir = f"../.."
         name = "mimic"
         start_time = f"{time.strftime('%Y%m%d%H%M%S')}"
-        log_dir = f"{root_dir}/log/{name}/{start_time}"
-        save_dir = f"{root_dir}/save/{name}/{start_time}"
-        output_dir = f"{root_dir}/output/{name}/{start_time}"
+        log_dir = os.path.join(ROOT_PATH, "log", name, start_time)
+        save_dir = os.path.join(ROOT_PATH, "save", name, start_time)
+        output_dir = os.path.join(ROOT_PATH, "output", name, start_time)
         os.makedirs(save_dir)
         os.makedirs(output_dir)
         summary_writer = tf.summary.FileWriter(log_dir, sess.graph)

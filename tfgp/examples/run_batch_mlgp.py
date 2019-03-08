@@ -1,3 +1,4 @@
+import os
 import time
 
 from IPython import embed
@@ -6,9 +7,13 @@ import numpy as np
 import seaborn as sns
 import tensorflow as tf
 
+import tfgp
 from tfgp.kernel import RBF
 from tfgp.model import BatchMLGP
 from tfgp.util import data
+
+ROOT_PATH = os.path.dirname(tfgp.__file__)
+LOG_DIR_PATH = os.path.join(ROOT_PATH, "log")
 
 if __name__ == "__main__":
     sns.set()
@@ -46,7 +51,7 @@ if __name__ == "__main__":
     x_test = np.linspace(np.min(x) - 1, np.max(x) + 1, 100)[:, None]
     all_indices = np.arange(num_data)
     with tf.Session() as sess:
-        log_dir = f"../../log/batch_mlgp/{time.strftime('%Y%m%d%H%M%S')}"
+        log_dir = os.path.join(LOG_DIR_PATH, "batch_mlgp", f"{time.strftime('%Y%m%d%H%M%S')}")
         summary_writer = tf.summary.FileWriter(log_dir, sess.graph)
         print("Initializing variables...")
         sess.run(init)

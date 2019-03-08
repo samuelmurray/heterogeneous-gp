@@ -1,3 +1,4 @@
+import os
 import time
 
 from IPython import embed
@@ -9,6 +10,9 @@ import tensorflow as tf
 import tfgp
 from tfgp.model import BatchMLGPLVM
 from tfgp.util import data
+
+ROOT_PATH = os.path.dirname(tfgp.__file__)
+LOG_DIR_PATH = os.path.join(ROOT_PATH, "log")
 
 if __name__ == "__main__":
     sns.set()
@@ -49,7 +53,7 @@ if __name__ == "__main__":
     plt.ion()
     all_indices = np.arange(num_data)
     with tf.Session() as sess:
-        log_dir = f"../../log/batch_mlgplvm/{time.strftime('%Y%m%d%H%M%S')}"
+        log_dir = os.path.join(LOG_DIR_PATH, "batch_mlgplvm", f"{time.strftime('%Y%m%d%H%M%S')}")
         summary_writer = tf.summary.FileWriter(log_dir, sess.graph)
         print("Initializing variables...")
         sess.run(init)

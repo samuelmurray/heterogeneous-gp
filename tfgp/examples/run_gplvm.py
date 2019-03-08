@@ -1,3 +1,4 @@
+import os
 import time
 
 from IPython import embed
@@ -5,9 +6,13 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 import tensorflow as tf
 
+import tfgp
 from tfgp.kernel import RBF
 from tfgp.model import GPLVM
 from tfgp.util import data, pca_reduce
+
+ROOT_PATH = os.path.dirname(tfgp.__file__)
+LOG_DIR_PATH = os.path.join(ROOT_PATH, "log")
 
 if __name__ == "__main__":
     sns.set()
@@ -42,7 +47,7 @@ if __name__ == "__main__":
     plt.axis([-5, 5, -5, 5])
     plt.ion()
     with tf.Session() as sess:
-        log_dir = f"../../log/gplvm/{time.strftime('%Y%m%d%H%M%S')}"
+        log_dir = os.path.join(LOG_DIR_PATH, "gplvm", f"{time.strftime('%Y%m%d%H%M%S')}")
         summary_writer = tf.summary.FileWriter(log_dir, sess.graph)
         print("Initializing variables...")
         sess.run(init)
