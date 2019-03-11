@@ -25,7 +25,7 @@ def knn_rmse(x: np.ndarray, labels: np.ndarray, k: int) -> float:
     return np.sqrt(np.mean(np.square(labels - guess)))
 
 
-def _nrmse(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray, *, use_mean: bool) -> float:
+def _nrmse(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray, *, use_mean: bool) -> np.ndarray:
     nan_mask = np.isnan(y_missing)
     y_filtered = y_true.copy()
     y_filtered[~nan_mask] = np.nan
@@ -36,15 +36,15 @@ def _nrmse(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray, 
     if use_mean:
         nrmse = rmse / np.nanmean(y_filtered, axis=0)
     else:
-        nrmse = rmse / (np.max(y_filtered) - np.min(y_filtered))
+        nrmse = rmse / (np.nanmax(y_filtered, axis=0) - np.nanmin(y_filtered, axis=0))
     return nrmse
 
 
-def nrmse_mean(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray) -> float:
+def nrmse_mean(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray) -> np.ndarray:
     return _nrmse(y_imputation, y_missing, y_true, use_mean=True)
 
 
-def nrmse_range(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray) -> float:
+def nrmse_range(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray) -> np.ndarray:
     return _nrmse(y_imputation, y_missing, y_true, use_mean=False)
 
 
