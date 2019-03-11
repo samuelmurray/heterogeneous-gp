@@ -254,6 +254,41 @@ def make_mimic(num_data: int = None) -> DataTuple:
     return y, likelihood, labels
 
 
+def make_mimic_labeled(num_data: int = None) -> DataTuple:
+    try:
+        data = np.genfromtxt(os.path.join(DATA_DIR_PATH, "mimic_onehot_train.csv"), delimiter=",", filling_values=None)
+    except OSError as e:
+        print("You need to have the MIMIC 3 dataset")
+        raise e
+    data_size = data.shape[0]
+    data_indices = np.random.permutation(data_size)[:num_data]
+    y = data[data_indices]
+    labels = np.zeros(y.shape[0])
+    likelihood = MixedLikelihoodWrapper(
+        [
+            Normal(),
+            Normal(),
+            Normal(),
+            OneHotCategorical(4),
+            OneHotCategorical(6),
+            Normal(),
+            OneHotCategorical(6),
+            Normal(),
+            Normal(),
+            Normal(),
+            Normal(),
+            Normal(),
+            Normal(),
+            Normal(),
+            Normal(),
+            Normal(),
+            Normal(),
+            Bernoulli(),
+        ]
+    )
+    return y, likelihood, labels
+
+
 def make_mimic_test(num_data: int = None) -> DataTuple:
     try:
         data = np.genfromtxt(os.path.join(DATA_DIR_PATH, "mimic_onehot_test.csv"), delimiter=",", filling_values=None)
