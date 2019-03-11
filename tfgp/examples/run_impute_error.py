@@ -38,9 +38,10 @@ def train_impute(model: BatchMLGPLVM):
         sess.run(init)
         print(f"Initial loss: {sess.run(loss, feed_dict={model.batch_indices: all_indices})}")
         print("Starting training...")
-        n_iter = 20000
+        n_epoch = 10000
+        batch_size = 1000
+        n_iter = int(model.num_data / batch_size * n_epoch)
         n_print = 1000
-        batch_size = 200
         for i in range(n_iter):
             batch_indices = np.random.choice(num_data, batch_size, replace=False)
             sess.run(train_all, feed_dict={model.batch_indices: batch_indices})
