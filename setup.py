@@ -11,20 +11,9 @@ PYTHON_VERSION = ">=3.6.0"
 LICENSE = "GNU General Public License v3.0"
 TEST_DIR = "tests"
 
-TENSORFLOW_VERSION = ">=1.12.0"
-TENSORFLOW_PROBABILITY_VERSION = ">=0.5.0"
-
 EXTRA_REQUIRED = {
     "oilflow": [
         "pods",
-    ],
-    "tf": [
-        "tensorflow" + TENSORFLOW_VERSION,
-        "tensorflow-probability" + TENSORFLOW_PROBABILITY_VERSION,
-    ],
-    "tf_gpu": [
-        "tensorflow-gpu" + TENSORFLOW_VERSION,
-        "tensorflow-probability" + TENSORFLOW_PROBABILITY_VERSION,
     ],
 }
 
