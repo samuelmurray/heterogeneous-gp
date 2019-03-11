@@ -8,6 +8,5 @@ python:
 install:
   - pip install pipenv
   - pipenv install --dev --ignore-pipfile --system
-  - pipenv install .[tf] --skip-lock
 script:
   - pipenv run pytest --testexamples
