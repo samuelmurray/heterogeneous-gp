@@ -9,4 +9,4 @@ install:
   - pip install pipenv
   - pipenv install --dev --ignore-pipfile --system
 script:
-  - pipenv run pytest --testexamples
+  - pipenv run pytest
