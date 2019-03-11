@@ -36,7 +36,9 @@ class VAEMLGPLVM(BatchMLGPLVM):
 
     def _encoder(self) -> Tuple[tf.Tensor, tf.Tensor]:
         with tf.variable_scope("encoder"):
-            hidden = tf.layers.dense(self.y_batch, units=self.num_hidden, activation=tf.tanh, name="hidden")
+            nan_mask = tf.is_nan(self.y_batch, name="nan_mask")
+            y_batch_wo_nans = tf.where(nan_mask, tf.zeros_like(self.y_batch), self.y_batch, name="y_batch_wo_nans")
+            hidden = tf.layers.dense(y_batch_wo_nans, units=self.num_hidden, activation=tf.tanh, name="hidden")
             mean = tf.layers.dense(hidden, units=self.xdim, activation=None, name="mean")
             log_var = tf.layers.dense(hidden, units=self.xdim, activation=None, name="log_var")
             var = tf.exp(log_var, name="var")
