@@ -68,12 +68,6 @@ def make_xsin_count(num_data: int) -> DataTuple:
 # UNSUPERVISED #
 ################
 
-def make_gaussian_blobs(num_data: int, output_dim: int, num_classes: int) -> DataTuple:
-    y, labels = make_blobs(num_data, output_dim, num_classes)
-    likelihood = MixedLikelihoodWrapper([Normal() for _ in range(output_dim)])
-    return y, likelihood, labels
-
-
 def make_circle(num_data: int, output_dim: int, *, gaussian: bool = True) -> DataTuple:
     t = np.linspace(0, 2 * np.pi, num_data, endpoint=False)
     x = np.array([np.cos(t), np.sin(t)]).T
@@ -96,6 +90,12 @@ def make_circle(num_data: int, output_dim: int, *, gaussian: bool = True) -> Dat
     return y, likelihood, labels
 
 
+def make_gaussian_blobs(num_data: int, output_dim: int, num_classes: int) -> DataTuple:
+    y, labels = make_blobs(num_data, output_dim, num_classes)
+    likelihood = MixedLikelihoodWrapper([Normal() for _ in range(output_dim)])
+    return y, likelihood, labels
+
+
 def make_normal_binary(num_data: int) -> DataTuple:
     y = np.empty((num_data, 3))
     labels = np.empty(num_data)
@@ -114,20 +114,16 @@ def make_normal_binary(num_data: int) -> DataTuple:
     return y, likelihood, labels
 
 
-def make_oilflow(num_data: int = None, output_dim: int = None, *, one_hot_labels: bool = False) -> DataTuple:
+def make_abalone(num_data: int = None) -> DataTuple:
     try:
-        import pods
-    except ModuleNotFoundError as e:
-        print("You need to install the package 'pods' (pip install pods) to use the Oilflow dataset")
+        data = np.loadtxt(os.path.join(DATA_DIR_PATH, "abalone.csv"), delimiter=",")
+    except OSError as e:
+        print("You need to have the Abalone dataset")
         raise e
-    oil = pods.datasets.oil()
-    data_indices = np.random.permutation(1000)[:num_data]
-    dim_indices = np.random.permutation(12)[:output_dim]
-    y = oil['X'][data_indices[:, None], dim_indices]
-    labels = oil['Y'][data_indices, :]
-    likelihood = MixedLikelihoodWrapper([Normal() for _ in range(y.shape[1])])
-    if not one_hot_labels:
-        labels = np.argmax(labels, axis=1)
+    data_indices = np.random.permutation(4177)[:num_data]
+    y = data[data_indices, :-1]
+    labels = data[data_indices, -1]
+    likelihood = MixedLikelihoodWrapper([OneHotCategorical(3)] + [Normal() for _ in range(7)])
     return y, likelihood, labels
 
 
@@ -163,35 +159,6 @@ def make_binaryalphadigits_test(num_data: int = None, num_classes: int = 36) -> 
     return y, likelihood, labels
 
 
-def make_cleveland_quantized(num_data: int = None) -> DataTuple:
-    try:
-        data = np.loadtxt(os.path.join(DATA_DIR_PATH, "cleveland_onehot.csv"), delimiter=",")
-    except OSError as e:
-        print("You need to have the Cleveland dataset")
-        raise e
-    data_indices = np.random.permutation(297)[:num_data]
-    y = data[data_indices, :-1]
-    labels = data[data_indices, -1]
-    likelihood = MixedLikelihoodWrapper(
-        [
-            QuantizedNormal(),
-            Bernoulli(),
-            OneHotCategorical(4),
-            QuantizedNormal(),
-            QuantizedNormal(),
-            Bernoulli(),
-            OneHotCategorical(3),
-            QuantizedNormal(),
-            Bernoulli(),
-            Normal(),
-            OneHotCategorical(3),
-            OneHotCategorical(4),
-            OneHotCategorical(3),
-        ]
-    )
-    return y, likelihood, labels
-
-
 def make_cleveland(num_data: int = None) -> DataTuple:
     try:
         data = np.loadtxt(os.path.join(DATA_DIR_PATH, "cleveland_onehot.csv"), delimiter=",")
@@ -221,16 +188,32 @@ def make_cleveland(num_data: int = None) -> DataTuple:
     return y, likelihood, labels
 
 
-def make_abalone(num_data: int = None) -> DataTuple:
+def make_cleveland_quantized(num_data: int = None) -> DataTuple:
     try:
-        data = np.loadtxt(os.path.join(DATA_DIR_PATH, "abalone.csv"), delimiter=",")
+        data = np.loadtxt(os.path.join(DATA_DIR_PATH, "cleveland_onehot.csv"), delimiter=",")
     except OSError as e:
-        print("You need to have the Abalone dataset")
+        print("You need to have the Cleveland dataset")
         raise e
-    data_indices = np.random.permutation(4177)[:num_data]
+    data_indices = np.random.permutation(297)[:num_data]
     y = data[data_indices, :-1]
     labels = data[data_indices, -1]
-    likelihood = MixedLikelihoodWrapper([OneHotCategorical(3)] + [Normal() for _ in range(7)])
+    likelihood = MixedLikelihoodWrapper(
+        [
+            QuantizedNormal(),
+            Bernoulli(),
+            OneHotCategorical(4),
+            QuantizedNormal(),
+            QuantizedNormal(),
+            Bernoulli(),
+            OneHotCategorical(3),
+            QuantizedNormal(),
+            Bernoulli(),
+            Normal(),
+            OneHotCategorical(3),
+            OneHotCategorical(4),
+            OneHotCategorical(3),
+        ]
+    )
     return y, likelihood, labels
 
 
@@ -297,6 +280,23 @@ def make_mimic_test(num_data: int = None) -> DataTuple:
             Normal(),
         ]
     )
+    return y, likelihood, labels
+
+
+def make_oilflow(num_data: int = None, output_dim: int = None, *, one_hot_labels: bool = False) -> DataTuple:
+    try:
+        import pods
+    except ModuleNotFoundError as e:
+        print("You need to install the package 'pods' (pip install pods) to use the Oilflow dataset")
+        raise e
+    oil = pods.datasets.oil()
+    data_indices = np.random.permutation(1000)[:num_data]
+    dim_indices = np.random.permutation(12)[:output_dim]
+    y = oil['X'][data_indices[:, None], dim_indices]
+    labels = oil['Y'][data_indices, :]
+    likelihood = MixedLikelihoodWrapper([Normal() for _ in range(y.shape[1])])
+    if not one_hot_labels:
+        labels = np.argmax(labels, axis=1)
     return y, likelihood, labels
 
 
