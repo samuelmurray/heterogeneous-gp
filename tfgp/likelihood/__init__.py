@@ -11,6 +11,7 @@ __all__ = [
     "OneHotCategorical",
     "Poisson",
     "QuantizedNormal",
+    "TruncatedNormal",
 ]
 
 from .bernoulli import Bernoulli
@@ -21,3 +22,4 @@ from .normal import Normal
 from .one_hot_categorical import OneHotCategorical
 from .poisson import Poisson
 from .quantized_normal import QuantizedNormal
+from .truncated_normal import TruncatedNormal
