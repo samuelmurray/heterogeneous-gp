@@ -298,3 +298,16 @@ def make_mimic_test(num_data: int = None) -> DataTuple:
         ]
     )
     return y, likelihood, labels
+
+
+def make_wine(num_data: int = None) -> DataTuple:
+    try:
+        data = np.loadtxt(os.path.join(DATA_DIR_PATH, "wine.csv"), delimiter=",")
+    except OSError as e:
+        print("You need to have the Wine dataset")
+        raise e
+    data_indices = np.random.permutation(4177)[:num_data]
+    y = data[data_indices]
+    labels = np.zeros(y.shape[0])
+    likelihood = MixedLikelihoodWrapper([Normal() for _ in range(11)] + [Poisson(), OneHotCategorical(2)])
+    return y, likelihood, labels
