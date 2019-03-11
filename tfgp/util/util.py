@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
 
-from tfgp.likelihood import MixedLikelihoodWrapper
+from tfgp.likelihood import MixedLikelihoodWrapper, OneHotCategorical
 
 
 def knn_abs_error(x: np.ndarray, labels: np.ndarray, k: int) -> float:
@@ -46,6 +46,28 @@ def nrmse_mean(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarr
 
 def nrmse_range(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray) -> np.ndarray:
     return _nrmse(y_imputation, y_missing, y_true, use_mean=False)
+
+
+def accuracy(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray) -> float:
+    nan_mask = np.isnan(y_missing)
+    y_filtered = y_true.copy()
+    y_filtered[~nan_mask] = np.nan
+    error_indicator = np.sum(np.abs(y_imputation - y_filtered), axis=1, keepdims=True) / y_imputation.shape[1]
+    error = np.nanmean(error_indicator)
+    acc = 1 - error
+    return acc
+
+
+def imputation_error(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray,
+                     likelihood: MixedLikelihoodWrapper) -> float:
+    cum_error = 0
+    for sli, lik in zip(likelihood._slices, likelihood._likelihoods):
+        if isinstance(lik, OneHotCategorical):
+            cum_error += accuracy(y_imputation[:, sli], y_missing[:, sli], y_true[:, sli])
+        else:
+            cum_error += nrmse_range(y_imputation[:, sli], y_missing[:, sli], y_true[:, sli])
+    avg_error = cum_error / likelihood.num_likelihoods
+    return avg_error
 
 
 def pca_reduce(x: np.ndarray, latent_dim: int, *, whiten: bool = False) -> np.ndarray:

@@ -3,6 +3,8 @@ Utility functions for GP
 """
 
 __all__ = [
+    "accuracy",
+    "imputation_error",
     "knn_abs_error",
     "knn_error",
     "knn_rmse",
@@ -12,6 +14,8 @@ __all__ = [
     "remove_data",
 ]
 
+from .util import accuracy
+from .util import imputation_error
 from .util import knn_abs_error
 from .util import knn_error
 from .util import knn_rmse
