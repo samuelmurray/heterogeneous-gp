@@ -120,7 +120,8 @@ def make_abalone(num_data: int = None) -> DataTuple:
     except OSError as e:
         print("You need to have the Abalone dataset")
         raise e
-    data_indices = np.random.permutation(4177)[:num_data]
+    data_size = data.shape[0]
+    data_indices = np.random.permutation(data_size)[:num_data]
     y = data[data_indices, :-1]
     labels = data[data_indices, -1]
     likelihood = MixedLikelihoodWrapper([OneHotCategorical(3)] + [Normal() for _ in range(7)])
@@ -165,7 +166,8 @@ def make_cleveland(num_data: int = None) -> DataTuple:
     except OSError as e:
         print("You need to have the Cleveland dataset")
         raise e
-    data_indices = np.random.permutation(297)[:num_data]
+    data_size = data.shape[0]
+    data_indices = np.random.permutation(data_size)[:num_data]
     y = data[data_indices, :-1]
     labels = data[data_indices, -1]
     likelihood = MixedLikelihoodWrapper(
@@ -194,7 +196,8 @@ def make_cleveland_quantized(num_data: int = None) -> DataTuple:
     except OSError as e:
         print("You need to have the Cleveland dataset")
         raise e
-    data_indices = np.random.permutation(297)[:num_data]
+    data_size = data.shape[0]
+    data_indices = np.random.permutation(data_size)[:num_data]
     y = data[data_indices, :-1]
     labels = data[data_indices, -1]
     likelihood = MixedLikelihoodWrapper(
@@ -223,7 +226,8 @@ def make_mimic(num_data: int = None) -> DataTuple:
     except OSError as e:
         print("You need to have the MIMIC 3 dataset")
         raise e
-    data_indices = np.random.permutation(17903)[:num_data]
+    data_size = data.shape[0]
+    data_indices = np.random.permutation(data_size)[:num_data]
     y = data[data_indices, :-1]
     labels = data[data_indices, -1]
     likelihood = MixedLikelihoodWrapper(
@@ -256,7 +260,8 @@ def make_mimic_test(num_data: int = None) -> DataTuple:
     except OSError as e:
         print("You need to have the MIMIC 3 dataset")
         raise e
-    data_indices = np.random.permutation(3236)[:num_data]
+    data_size = data.shape[0]
+    data_indices = np.random.permutation(data_size)[:num_data]
     y = data[data_indices, :-1]
     labels = data[data_indices, -1]
     likelihood = MixedLikelihoodWrapper(
@@ -290,7 +295,8 @@ def make_oilflow(num_data: int = None, output_dim: int = None, *, one_hot_labels
         print("You need to install the package 'pods' (pip install pods) to use the Oilflow dataset")
         raise e
     oil = pods.datasets.oil()
-    data_indices = np.random.permutation(1000)[:num_data]
+    data_size = oil['X'].shape[0]
+    data_indices = np.random.permutation(data_size)[:num_data]
     dim_indices = np.random.permutation(12)[:output_dim]
     y = oil['X'][data_indices[:, None], dim_indices]
     labels = oil['Y'][data_indices, :]
@@ -306,7 +312,8 @@ def make_wine(num_data: int = None) -> DataTuple:
     except OSError as e:
         print("You need to have the Wine dataset")
         raise e
-    data_indices = np.random.permutation(4177)[:num_data]
+    data_size = data.shape[0]
+    data_indices = np.random.permutation(data_size)[:num_data]
     y = data[data_indices]
     labels = np.zeros(y.shape[0])
     likelihood = MixedLikelihoodWrapper([Normal() for _ in range(11)] + [Poisson(), OneHotCategorical(2)])
