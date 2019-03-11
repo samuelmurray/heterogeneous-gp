@@ -24,11 +24,10 @@ if __name__ == "__main__":
     output_dim = 5
     num_classes = 5
     y, likelihood, labels = data.make_circle(num_data, output_dim)
-    x = pca_reduce(y, latent_dim)
 
     print("Creating model...")
     kernel = ARDRBF(xdim=latent_dim)
-    m = MLGPLVM(y, latent_dim, x=x, kernel=kernel, likelihood=likelihood)
+    m = MLGPLVM(y, latent_dim, kernel=kernel, likelihood=likelihood)
     m.initialize()
 
     print("Building graph...")

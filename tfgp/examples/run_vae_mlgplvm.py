@@ -24,13 +24,12 @@ if __name__ == "__main__":
     y, likelihood, labels = data.make_oilflow(num_data, output_dim)
     if num_data is None:
         num_data = y.shape[0]
-    x = tfgp.util.pca_reduce(y, latent_dim)
     batch_size = 1000
 
     print("Creating model...")
     kernel = tfgp.kernel.ARDRBF(xdim=latent_dim)
     num_hidden = 100
-    m = VAEMLGPLVM(y, latent_dim, x=x, kernel=kernel, likelihood=likelihood, num_hidden=num_hidden)
+    m = VAEMLGPLVM(y, latent_dim, kernel=kernel, likelihood=likelihood, num_hidden=num_hidden)
     m.initialize()
 
     print("Building graph...")

@@ -21,15 +21,12 @@ if __name__ == "__main__":
     num_data = 100
     latent_dim = 2
     output_dim = 5
-    num_classes = 5
-    # y, likelihood, labels = data.make_circle(num_data, output_dim)
     y, likelihood, labels = data.make_oilflow(num_data, output_dim)
-    x = tfgp.util.pca_reduce(y, latent_dim)
     batch_size = 10
 
     print("Creating model...")
     kernel = tfgp.kernel.ARDRBF(xdim=latent_dim, name="ardrbf")
-    m = BatchMLGPLVM(y, latent_dim, x=x, kernel=kernel, likelihood=likelihood)
+    m = BatchMLGPLVM(y, latent_dim, kernel=kernel, likelihood=likelihood)
     m.initialize()
 
     print("Building graph...")
