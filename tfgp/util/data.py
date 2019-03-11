@@ -318,3 +318,17 @@ def make_wine(num_data: int = None) -> DataTuple:
     labels = np.zeros(y.shape[0])
     likelihood = MixedLikelihoodWrapper([Normal() for _ in range(11)] + [Poisson(), OneHotCategorical(2)])
     return y, likelihood, labels
+
+
+def make_wine_pos(num_data: int = None) -> DataTuple:
+    try:
+        data = np.loadtxt(os.path.join(DATA_DIR_PATH, "wine.csv"), delimiter=",")
+    except OSError as e:
+        print("You need to have the Wine dataset")
+        raise e
+    data_size = data.shape[0]
+    data_indices = np.random.permutation(data_size)[:num_data]
+    y = data[data_indices]
+    labels = np.zeros(y.shape[0])
+    likelihood = MixedLikelihoodWrapper([LogNormal() for _ in range(12)] + [OneHotCategorical(2)])
+    return y, likelihood, labels
