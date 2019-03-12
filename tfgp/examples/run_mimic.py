@@ -56,7 +56,7 @@ def train_predict(model: BatchMLGPLVM):
                 imputation = sess.run(model.impute(), feed_dict={model.batch_indices: np.arange(train_split, num_data)})
                 prediction = imputation[:, -1]
                 print(f"Step {i} \tLoss: {train_loss}")
-                print(sklearn.metrics.classification_report(labels, prediction, target_names=["Alive", "Deceased"]))
+                print(sklearn.metrics.confusion_matrix(labels, prediction))
 
 
 if __name__ == "__main__":
@@ -75,11 +75,11 @@ if __name__ == "__main__":
     y_noisy = y.copy()
     y_noisy[train_split:] = np.nan
     labels = y[train_split:, -1]
-
     with tf.name_scope("VAEMLGPLVM"):
         print("Creating model...")
         kernel = tfgp.kernel.ARDRBF(xdim=latent_dim)
+        num_inducing = 100
         num_hidden = 100
-        m = VAEMLGPLVM(y_noisy, latent_dim, kernel=kernel, likelihood=likelihood, num_hidden=num_hidden)
+        m = VAEMLGPLVM(y_noisy, latent_dim, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing, num_hidden=num_hidden)
         train_predict(m)
 
