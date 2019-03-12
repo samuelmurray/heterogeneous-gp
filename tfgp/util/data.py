@@ -262,7 +262,10 @@ def make_mimic_labeled(num_data: int = None) -> DataTuple:
         raise e
     data_size = data.shape[0]
     data_indices = np.random.permutation(data_size)[:num_data]
-    y = data[data_indices]
+    y_tmp = data[data_indices]
+    y = np.hstack((y_tmp, np.empty((y_tmp.shape[0], 1))))
+    y[:, -2] = (y[:, -1] == 0)
+    y[:, -1] = (y[:, -1] == 1)
     labels = np.zeros(y.shape[0])
     likelihood = MixedLikelihoodWrapper(
         [
@@ -283,7 +286,7 @@ def make_mimic_labeled(num_data: int = None) -> DataTuple:
             Normal(),
             Normal(),
             Normal(),
-            Bernoulli(),
+            OneHotCategorical(2),
         ]
     )
     return y, likelihood, labels
