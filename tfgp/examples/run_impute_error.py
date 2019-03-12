@@ -75,6 +75,7 @@ if __name__ == "__main__":
         print("Creating model...")
         kernel = tfgp.kernel.ARDRBF(xdim=latent_dim)
         num_hidden = 100
-        m = VAEMLGPLVM(y_noisy, latent_dim, kernel=kernel, likelihood=likelihood, num_hidden=num_hidden)
+        num_layers = 1
+        m = VAEMLGPLVM(y_noisy, latent_dim, kernel=kernel, likelihood=likelihood, num_hidden=num_hidden,
+                       num_layers=num_layers)
         train_impute(m)
-

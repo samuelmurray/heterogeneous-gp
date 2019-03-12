@@ -22,8 +22,9 @@ class TestVAEMLGPLVM(tf.test.TestCase):
             self.batch_size = 5
             num_hidden = 10
             num_samples = 10
+            num_layers = 1
             self.m = VAEMLGPLVM(y, self.latent_dim, kernel=kernel, likelihood=likelihood, num_hidden=num_hidden,
-                                num_samples=num_samples)
+                                num_samples=num_samples, num_layers=num_layers)
             self.m.initialize()
 
     def tearDown(self) -> None:
