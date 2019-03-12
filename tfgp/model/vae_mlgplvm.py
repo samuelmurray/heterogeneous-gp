@@ -17,6 +17,7 @@ class VAEMLGPLVM(BatchMLGPLVM):
                  num_inducing: int = 50,
                  num_samples: int = 1,
                  num_hidden: int,
+                 num_layers: int,
                  ) -> None:
         super().__init__(y=y, xdim=xdim, x=x, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing,
                          num_samples=num_samples)
@@ -28,17 +29,24 @@ class VAEMLGPLVM(BatchMLGPLVM):
         del self.qx_var_batch
 
         self._num_hidden = num_hidden
+        self._num_layers = num_layers
         self.encoder = self._encoder()
 
     @property
     def num_hidden(self) -> int:
         return self._num_hidden
 
+    @property
+    def num_layers(self) -> int:
+        return self._num_layers
+
     def _encoder(self) -> Tuple[tf.Tensor, tf.Tensor]:
         with tf.variable_scope("encoder"):
             nan_mask = tf.is_nan(self.y_batch, name="nan_mask")
             y_batch_wo_nans = tf.where(nan_mask, tf.zeros_like(self.y_batch), self.y_batch, name="y_batch_wo_nans")
-            hidden = tf.layers.dense(y_batch_wo_nans, units=self.num_hidden, activation=tf.tanh, name="hidden")
+            hidden = y_batch_wo_nans
+            for i in range(self.num_layers):
+                hidden = tf.layers.dense(hidden, units=self.num_hidden, activation=tf.tanh, name=f"hidden_{i}")
             mean = tf.layers.dense(hidden, units=self.xdim, activation=None, name="mean")
             log_var = tf.layers.dense(hidden, units=self.xdim, activation=None, name="log_var")
             var = tf.exp(log_var, name="var")
