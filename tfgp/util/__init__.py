@@ -11,7 +11,7 @@ __all__ = [
     "nrmse_mean",
     "nrmse_range",
     "pca_reduce",
-    "remove_data",
+    "remove_data_randomly",
 ]
 
 from .util import accuracy
@@ -23,3 +23,4 @@ from .util import nrmse_mean
 from .util import nrmse_range
 from .util import pca_reduce
 from .util import remove_data
+from .util import remove_data_randomly

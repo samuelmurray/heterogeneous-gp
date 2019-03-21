@@ -80,7 +80,17 @@ def pca_reduce(x: np.ndarray, latent_dim: int, *, whiten: bool = False) -> np.nd
     return x_reduced
 
 
-def remove_data(y: np.ndarray, frac: float, likelihood: MixedLikelihoodWrapper) -> np.ndarray:
+def remove_data(y: np.ndarray, indices: np.ndarray, likelihood: MixedLikelihoodWrapper) -> np.ndarray:
+    y_noisy = y.copy()
+    idx = np.zeros(y.shape, dtype=bool)
+    indices = indices.astype(np.int)
+    for data, dim in indices:
+        idx[data, likelihood._slices[dim]] = True
+    y_noisy[idx] = np.nan
+    return y_noisy
+
+
+def remove_data_randomly(y: np.ndarray, frac: float, likelihood: MixedLikelihoodWrapper) -> np.ndarray:
     y_noisy = y.copy()
     num_missing = int(frac * likelihood.num_likelihoods)
     dims_missing = np.repeat([np.arange(likelihood.num_likelihoods)], y.shape[0], axis=0)
