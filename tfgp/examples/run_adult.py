@@ -69,7 +69,7 @@ if __name__ == "__main__":
     y, likelihood, _ = data.make_adult(num_data)
     if num_data is None:
         num_data = y.shape[0]
-    y_noisy = tfgp.util.remove_data(y, 0.2, likelihood)
+    y_noisy = tfgp.util.remove_data_randomly(y, 0.2, likelihood)
 
     with tf.name_scope("BatchMLGPLVM"):
         print("Creating model...")

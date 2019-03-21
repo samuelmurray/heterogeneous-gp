@@ -69,7 +69,7 @@ if __name__ == "__main__":
         num_data = y.shape[0]
 
     frac_missing = 0.2
-    y_noisy = tfgp.util.remove_data(y, frac_missing, likelihood)
+    y_noisy = tfgp.util.remove_data_randomly(y, frac_missing, likelihood)
 
     with tf.name_scope("VAEMLGPLVM"):
         print("Creating model...")
