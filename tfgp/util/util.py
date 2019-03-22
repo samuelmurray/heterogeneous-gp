@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
 
@@ -59,7 +61,7 @@ def accuracy(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray
 
 
 def imputation_error(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray,
-                     likelihood: MixedLikelihoodWrapper) -> float:
+                     likelihood: MixedLikelihoodWrapper) -> Tuple[float, float]:
     numerical_error = 0
     num_numerical = 0
     nominal_error = 0
