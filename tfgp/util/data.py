@@ -284,6 +284,45 @@ def make_cleveland_quantized(num_data: int = None) -> DataTuple:
     return y, likelihood, labels
 
 
+def make_default_credit(num_data: int = None) -> DataTuple:
+    try:
+        data = np.loadtxt(os.path.join(DATA_DIR_PATH, "default_credit_onehot.csv"), delimiter=",")
+    except OSError as e:
+        print("You need to have the DefaultCredit dataset")
+        raise e
+    y = data[:num_data]
+    labels = np.zeros(y.shape[0])
+    likelihood = MixedLikelihoodWrapper(
+        [
+            Normal(),
+            OneHotCategorical(3),
+            OneHotCategorical(7),
+            OneHotCategorical(4),
+            Normal(),
+            OneHotCategorical(11),
+            OneHotCategorical(11),
+            OneHotCategorical(11),
+            OneHotCategorical(11),
+            OneHotCategorical(11),
+            OneHotCategorical(11),
+            Normal(),
+            Normal(),
+            Normal(),
+            Normal(),
+            Normal(),
+            Normal(),
+            Normal(),
+            Normal(),
+            Normal(),
+            Normal(),
+            Normal(),
+            Normal(),
+            OneHotCategorical(2),
+        ]
+    )
+    return y, likelihood, labels
+
+
 def make_mimic(num_data: int = None) -> DataTuple:
     try:
         data = np.genfromtxt(os.path.join(DATA_DIR_PATH, "mimic_onehot_train.csv"), delimiter=",", filling_values=None)
