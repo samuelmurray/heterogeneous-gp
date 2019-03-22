@@ -59,14 +59,14 @@ class TestUnsupervisedData(tf.test.TestCase):
     def tearDown(self) -> None:
         tf.reset_default_graph()
 
-    def test_gaussian_blobs(self) -> None:
-        y, likelihood, labels = data.make_gaussian_blobs(self.num_data, 2, 2)
+    def test_circle(self) -> None:
+        y, likelihood, labels = data.make_circle(self.num_data, 2)
         self.assertIsInstance(y, np.ndarray)
         self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
         self.assertIsInstance(labels, np.ndarray)
 
-    def test_circle(self) -> None:
-        y, likelihood, labels = data.make_circle(self.num_data, 2)
+    def test_gaussian_blobs(self) -> None:
+        y, likelihood, labels = data.make_gaussian_blobs(self.num_data, 2, 2)
         self.assertIsInstance(y, np.ndarray)
         self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
         self.assertIsInstance(labels, np.ndarray)
@@ -77,28 +77,18 @@ class TestUnsupervisedData(tf.test.TestCase):
         self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
         self.assertIsInstance(labels, np.ndarray)
 
+    def test_abalone(self) -> None:
+        if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "abalone.csv")):
+            with self.assertRaises(OSError):
+                data.make_abalone(self.num_data)
+        else:
+            y, likelihood, labels = data.make_abalone(self.num_data)
+            self.assertIsInstance(y, np.ndarray)
+            self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
+            self.assertIsInstance(labels, np.ndarray)
+
     def test_adult(self) -> None:
         if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "adult_onehot.csv")):
-            with self.assertRaises(OSError):
-                data.make_binaryalphadigits(self.num_data)
-        else:
-            y, likelihood, labels = data.make_binaryalphadigits(self.num_data)
-            self.assertIsInstance(y, np.ndarray)
-            self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
-            self.assertIsInstance(labels, np.ndarray)
-
-    def test_wine(self) -> None:
-        if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "wine.csv")):
-            with self.assertRaises(OSError):
-                data.make_binaryalphadigits(self.num_data)
-        else:
-            y, likelihood, labels = data.make_binaryalphadigits(self.num_data)
-            self.assertIsInstance(y, np.ndarray)
-            self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
-            self.assertIsInstance(labels, np.ndarray)
-
-    def test_default_credit(self) -> None:
-        if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "default_credit_onehot.csv")):
             with self.assertRaises(OSError):
                 data.make_binaryalphadigits(self.num_data)
         else:
@@ -113,16 +103,6 @@ class TestUnsupervisedData(tf.test.TestCase):
                 data.make_binaryalphadigits(self.num_data)
         else:
             y, likelihood, labels = data.make_binaryalphadigits(self.num_data)
-            self.assertIsInstance(y, np.ndarray)
-            self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
-            self.assertIsInstance(labels, np.ndarray)
-
-    def test_oilflow(self) -> None:
-        if not importlib.util.find_spec("pods"):
-            with self.assertRaises(ModuleNotFoundError):
-                data.make_oilflow(self.num_data)
-        else:
-            y, likelihood, labels = data.make_oilflow(self.num_data)
             self.assertIsInstance(y, np.ndarray)
             self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
             self.assertIsInstance(labels, np.ndarray)
@@ -167,12 +147,12 @@ class TestUnsupervisedData(tf.test.TestCase):
             self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
             self.assertIsInstance(labels, np.ndarray)
 
-    def test_abalone(self) -> None:
-        if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "abalone.csv")):
+    def test_default_credit(self) -> None:
+        if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "default_credit_onehot.csv")):
             with self.assertRaises(OSError):
-                data.make_abalone(self.num_data)
+                data.make_binaryalphadigits(self.num_data)
         else:
-            y, likelihood, labels = data.make_abalone(self.num_data)
+            y, likelihood, labels = data.make_binaryalphadigits(self.num_data)
             self.assertIsInstance(y, np.ndarray)
             self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
             self.assertIsInstance(labels, np.ndarray)
@@ -193,6 +173,26 @@ class TestUnsupervisedData(tf.test.TestCase):
                 data.make_mimic_test(self.num_data)
         else:
             y, likelihood, labels = data.make_mimic_test(self.num_data)
+            self.assertIsInstance(y, np.ndarray)
+            self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
+            self.assertIsInstance(labels, np.ndarray)
+
+    def test_oilflow(self) -> None:
+        if not importlib.util.find_spec("pods"):
+            with self.assertRaises(ModuleNotFoundError):
+                data.make_oilflow(self.num_data)
+        else:
+            y, likelihood, labels = data.make_oilflow(self.num_data)
+            self.assertIsInstance(y, np.ndarray)
+            self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
+            self.assertIsInstance(labels, np.ndarray)
+
+    def test_wine(self) -> None:
+        if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "wine.csv")):
+            with self.assertRaises(OSError):
+                data.make_binaryalphadigits(self.num_data)
+        else:
+            y, likelihood, labels = data.make_binaryalphadigits(self.num_data)
             self.assertIsInstance(y, np.ndarray)
             self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
             self.assertIsInstance(labels, np.ndarray)
