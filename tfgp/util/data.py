@@ -416,7 +416,7 @@ def make_wine(num_data: int = None) -> DataTuple:
         raise e
     y = data[:num_data]
     labels = np.zeros(y.shape[0])
-    likelihood = MixedLikelihoodWrapper([Normal() for _ in range(11)] + [Poisson(), OneHotCategorical(2)])
+    likelihood = MixedLikelihoodWrapper([Normal() for _ in range(12)] + [OneHotCategorical(2)])
     return y, likelihood, labels
 
 
