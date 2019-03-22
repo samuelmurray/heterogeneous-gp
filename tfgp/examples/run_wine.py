@@ -85,7 +85,7 @@ if __name__ == "__main__":
         idx_to_remove -= 1  # The files are 1-index for some reason
         y_noisy = tfgp.util.remove_data(y, idx_to_remove, likelihood)
 
-        with tf.name_scope("BatchMLGPLVM"):
+        with tf.name_scope(f"BatchMLGPLVM_{i}"):
             print("Creating model...")
             kernel = tfgp.kernel.ARDRBF(xdim=latent_dim)
             num_inducing = 100
