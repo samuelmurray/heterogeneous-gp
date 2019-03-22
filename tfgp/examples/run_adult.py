@@ -15,7 +15,7 @@ LOG_DIR_PATH = os.path.join(ROOT_PATH, os.pardir, "log")
 NAME = "atr"
 
 
-def train_predict(model: BatchMLGPLVM):
+def train_predict(model: BatchMLGPLVM) -> float:
     model.initialize()
     print("Building graph...")
     loss = tf.losses.get_total_loss()
@@ -42,8 +42,9 @@ def train_predict(model: BatchMLGPLVM):
         print("Starting training...")
         n_epoch = 10000
         batch_size = 100
-        n_iter = int(model.num_data / batch_size * n_epoch)
-        n_print = 1000
+        #n_iter = int(model.num_data / batch_size * n_epoch)
+        n_iter = 100000
+        n_print = 5000
         for i in range(n_iter):
             batch_indices = np.random.choice(num_data, batch_size, replace=False)
             sess.run(train_all, feed_dict={model.batch_indices: batch_indices})
@@ -57,6 +58,11 @@ def train_predict(model: BatchMLGPLVM):
                 imputation = sess.run(imputation_op, feed_dict={model.batch_indices: all_indices})
                 imputation_error = tfgp.util.imputation_error(imputation, y_noisy, y, likelihood)
                 print(f"Step {i} \tLoss: {train_loss} \tImputation error: {imputation_error}")
+        
+        imputation = sess.run(imputation_op, feed_dict={model.batch_indices: all_indices})
+        imputation_error = tfgp.util.imputation_error(imputation, y_noisy, y, likelihood)
+        print(f"FINAL ERROR: {imputation_error}\n")
+    return imputation_error
 
 
 if __name__ == "__main__":
@@ -64,18 +70,31 @@ if __name__ == "__main__":
     np.random.seed(114123)
     tf.random.set_random_seed(135314)
     print("Generating data...")
-    num_data = 1000
+    num_data = None
     latent_dim = 10
-    y, likelihood, _ = data.make_adult(num_data)
-    if num_data is None:
-        num_data = y.shape[0]
-    y_noisy = tfgp.util.remove_data_randomly(y, 0.2, likelihood)
 
-    with tf.name_scope("BatchMLGPLVM"):
-        print("Creating model...")
-        kernel = tfgp.kernel.ARDRBF(xdim=latent_dim)
-        num_inducing = 100
-        num_hidden = 100
-        num_layers = 1
-        m = BatchMLGPLVM(y_noisy, latent_dim, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing)
-        train_predict(m)
+    numerical_errors = []
+    nominal_errors = []
+    for i in range(1, 11):
+        tf.reset_default_graph()
+        y, likelihood, _ = data.make_adult(num_data)
+        if num_data is None:
+            num_data = y.shape[0]
+
+        idx_to_remove = np.loadtxt(os.path.join(ROOT_PATH, os.pardir, "util", "adult", f"Missing20_{i}.csv"), delimiter=",")
+        idx_to_remove -= 1  # The files are 1-index for some reason
+        y_noisy = tfgp.util.remove_data(y, idx_to_remove, likelihood)
+
+        with tf.name_scope("BatchMLGPLVM"):
+            print("Creating model...")
+            kernel = tfgp.kernel.ARDRBF(xdim=latent_dim)
+            num_inducing = 100
+            num_hidden = 100
+            num_layers = 1
+            m = BatchMLGPLVM(y_noisy, latent_dim, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing)
+            numerical_error, nominal_error  = train_predict(m)
+            numerical_errors.append(numerical_error)
+            nominal_errors.append(nominal_error)
+    print(f"Numerical error over all 10 runs: {np.mean(numerical_errors)} +- {np.std(numerical_errors)}")
+    print(f"Nominal error over all 10 runs: {np.mean(nominal_errors)} +- {np.std(nominal_errors)}")
+
