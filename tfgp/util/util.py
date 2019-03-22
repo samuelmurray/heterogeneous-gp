@@ -50,14 +50,13 @@ def nrmse_range(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndar
     return _nrmse(y_imputation, y_missing, y_true, use_mean=False)
 
 
-def accuracy(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray) -> float:
+def categorical_error(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray) -> float:
     nan_mask = np.isnan(y_missing)
     y_filtered = y_true.copy()
     y_filtered[~nan_mask] = np.nan
-    error_indicator = np.sum(np.abs(y_imputation - y_filtered), axis=1, keepdims=True) / y_imputation.shape[1]
+    error_indicator = np.sum(np.abs(y_imputation - y_filtered), axis=1) / y_imputation.shape[1]
     error = np.nanmean(error_indicator)
-    acc = 1 - error
-    return acc
+    return error
 
 
 def imputation_error(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray,
@@ -68,7 +67,7 @@ def imputation_error(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np
     num_nominal = 0
     for sli, lik in zip(likelihood._slices, likelihood._likelihoods):
         if isinstance(lik, OneHotCategorical):
-            nominal_error += accuracy(y_imputation[:, sli], y_missing[:, sli], y_true[:, sli])
+            nominal_error += categorical_error(y_imputation[:, sli], y_missing[:, sli], y_true[:, sli])
             num_nominal += 1
         else:
             numerical_error += nrmse_range(y_imputation[:, sli], y_missing[:, sli], y_true[:, sli])
