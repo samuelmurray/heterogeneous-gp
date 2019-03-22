@@ -87,13 +87,14 @@ if __name__ == "__main__":
         idx_to_remove -= 1  # The files are 1-index for some reason
         y_noisy = tfgp.util.remove_data(y, idx_to_remove, likelihood)
 
-        with tf.name_scope(f"BatchMLGPLVM_{i}"):
-            print("Creating model...")
+        model_name = f"BatchMLGPLVM_{i}"
+        with tf.name_scope(model_name):
+            print(f"Creating model {model_name}...")
             kernel = tfgp.kernel.ARDRBF(xdim=latent_dim)
             num_inducing = 100
             num_hidden = 100
             num_layers = 1
-            m = BatchMLGPLVM(y_noisy, latent_dim, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing)
+            m = VAEMLGPLVM(y_noisy, latent_dim, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing, num_hidden=num_hidden, num_layers=num_layers)
             numerical_error, nominal_error = train_predict(m)
             numerical_errors.append(numerical_error)
             nominal_errors.append(nominal_error)

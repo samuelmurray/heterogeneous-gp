@@ -87,8 +87,9 @@ if __name__ == "__main__":
         idx_to_remove -= 1  # The files are 1-index for some reason
         y_noisy = tfgp.util.remove_data(y, idx_to_remove, likelihood)
 
-        with tf.name_scope(f"VAEMLGPLVM_{i}"):
-            print("Creating model...")
+        model_name = f"VAEMLGPLVM_{i}"
+        with tf.name_scope(model_name):
+            print(f"Creating model {model_name}...")
             kernel = tfgp.kernel.ARDRBF(xdim=latent_dim)
             num_inducing = 100
             num_hidden = 100
