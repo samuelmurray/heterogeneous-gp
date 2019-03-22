@@ -295,7 +295,7 @@ def make_default_credit(num_data: int = None) -> DataTuple:
     likelihood = MixedLikelihoodWrapper(
         [
             Normal(),
-            OneHotCategorical(3),
+            OneHotCategorical(2),  # One category missing?
             OneHotCategorical(7),
             OneHotCategorical(4),
             Normal(),
@@ -303,8 +303,8 @@ def make_default_credit(num_data: int = None) -> DataTuple:
             OneHotCategorical(11),
             OneHotCategorical(11),
             OneHotCategorical(11),
-            OneHotCategorical(11),
-            OneHotCategorical(11),
+            OneHotCategorical(10),  # One value missing?
+            OneHotCategorical(10),  # One value missing?
             Normal(),
             Normal(),
             Normal(),
