@@ -10,6 +10,7 @@ __all__ = [
     "knn_rmse",
     "nrmse_mean",
     "nrmse_range",
+    "ordinal_error",
     "pca_reduce",
     "remove_data_randomly",
 ]
@@ -21,6 +22,7 @@ from .util import knn_error
 from .util import knn_rmse
 from .util import nrmse_mean
 from .util import nrmse_range
+from .util import ordinal_error
 from .util import pca_reduce
 from .util import remove_data
 from .util import remove_data_randomly

@@ -54,9 +54,19 @@ def categorical_error(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: n
     nan_mask = np.isnan(y_missing)
     y_filtered = y_true.copy()
     y_filtered[~nan_mask] = np.nan
-    error_indicator = np.sum(np.abs(y_imputation - y_filtered), axis=1) / y_imputation.shape[1]
-    error = np.nanmean(error_indicator)
-    return error
+    error = np.sum(np.abs(y_imputation - y_filtered), axis=1) / y_imputation.shape[1]
+    mean_error = np.nanmean(error)
+    return mean_error
+
+
+def ordinal_error(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray) -> float:
+    nan_mask = np.isnan(y_missing)
+    y_filtered = y_true.copy()
+    y_filtered[~nan_mask] = np.nan
+    diff = y_imputation - y_filtered
+    error = np.abs(np.argmax(diff, axis=1) - np.argmin(diff, axis=1)) / y_imputation.shape[1]
+    mean_error = np.nanmean(error)
+    return mean_error
 
 
 def imputation_error(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray,
