@@ -37,7 +37,7 @@ def _nrmse(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray, 
         nrmse = rmse / np.nanmean(y_filtered, axis=0)
     else:
         nrmse = rmse / (np.nanmax(y_filtered, axis=0) - np.nanmin(y_filtered, axis=0))
-    return nrmse
+    return nrmse[0]
 
 
 def nrmse_mean(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray) -> np.ndarray:
@@ -60,14 +60,20 @@ def accuracy(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray
 
 def imputation_error(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray,
                      likelihood: MixedLikelihoodWrapper) -> float:
-    cum_error = 0
+    numerical_error = 0
+    num_numerical = 0
+    nominal_error = 0
+    num_nominal = 0
     for sli, lik in zip(likelihood._slices, likelihood._likelihoods):
         if isinstance(lik, OneHotCategorical):
-            cum_error += accuracy(y_imputation[:, sli], y_missing[:, sli], y_true[:, sli])
+            nominal_error += accuracy(y_imputation[:, sli], y_missing[:, sli], y_true[:, sli])
+            num_nominal += 1
         else:
-            cum_error += nrmse_range(y_imputation[:, sli], y_missing[:, sli], y_true[:, sli])
-    avg_error = cum_error / likelihood.num_likelihoods
-    return avg_error
+            numerical_error += nrmse_range(y_imputation[:, sli], y_missing[:, sli], y_true[:, sli])
+            num_numerical += 1
+    avg_numerical_error = numerical_error / num_numerical
+    avg_nominal_error = nominal_error / num_nominal
+    return avg_numerical_error, avg_nominal_error
 
 
 def pca_reduce(x: np.ndarray, latent_dim: int, *, whiten: bool = False) -> np.ndarray:
