@@ -44,8 +44,8 @@ def train_predict(model: BatchMLGPLVM) -> Tuple[float, float]:
         n_epoch = 10000
         batch_size = 100
         # n_iter = int(model.num_data / batch_size * n_epoch)
-        n_iter = 100000
-        n_print = 5000
+        n_iter = 10000
+        n_print = 1000
         for i in range(n_iter):
             batch_indices = np.random.choice(num_data, batch_size, replace=False)
             sess.run(train_all, feed_dict={model.batch_indices: batch_indices})
