@@ -77,6 +77,46 @@ class TestUnsupervisedData(tf.test.TestCase):
         self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
         self.assertIsInstance(labels, np.ndarray)
 
+    def test_adult(self) -> None:
+        if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "adult_onehot.csv")):
+            with self.assertRaises(OSError):
+                data.make_binaryalphadigits(self.num_data)
+        else:
+            y, likelihood, labels = data.make_binaryalphadigits(self.num_data)
+            self.assertIsInstance(y, np.ndarray)
+            self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
+            self.assertIsInstance(labels, np.ndarray)
+
+    def test_wine(self) -> None:
+        if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "wine.csv")):
+            with self.assertRaises(OSError):
+                data.make_binaryalphadigits(self.num_data)
+        else:
+            y, likelihood, labels = data.make_binaryalphadigits(self.num_data)
+            self.assertIsInstance(y, np.ndarray)
+            self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
+            self.assertIsInstance(labels, np.ndarray)
+
+    def test_default_credit(self) -> None:
+        if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "default_credit_onehot.csv")):
+            with self.assertRaises(OSError):
+                data.make_binaryalphadigits(self.num_data)
+        else:
+            y, likelihood, labels = data.make_binaryalphadigits(self.num_data)
+            self.assertIsInstance(y, np.ndarray)
+            self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
+            self.assertIsInstance(labels, np.ndarray)
+
+    def test_atr(self) -> None:
+        if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "atr_onehot.csv")):
+            with self.assertRaises(OSError):
+                data.make_binaryalphadigits(self.num_data)
+        else:
+            y, likelihood, labels = data.make_binaryalphadigits(self.num_data)
+            self.assertIsInstance(y, np.ndarray)
+            self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
+            self.assertIsInstance(labels, np.ndarray)
+
     def test_oilflow(self) -> None:
         if not importlib.util.find_spec("pods"):
             with self.assertRaises(ModuleNotFoundError):
