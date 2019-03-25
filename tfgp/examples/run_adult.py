@@ -105,4 +105,3 @@ if __name__ == "__main__":
                 nominal_errors.append(nominal_error)
     print(f"Numerical error over all 10 runs: {np.mean(numerical_errors)} +- {np.std(numerical_errors)}")
     print(f"Nominal error over all 10 runs: {np.mean(nominal_errors)} +- {np.std(nominal_errors)}")
-

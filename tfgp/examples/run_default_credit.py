@@ -94,7 +94,8 @@ if __name__ == "__main__":
             num_inducing = 100
             num_hidden = 100
             num_layers = 1
-            m = VAEMLGPLVM(y_noisy, latent_dim, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing, num_hidden=num_hidden, num_layers=num_layers)
+            m = VAEMLGPLVM(y_noisy, latent_dim, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing,
+                           num_hidden=num_hidden, num_layers=num_layers)
             try:
                 numerical_error, nominal_error = train_predict(m)
             except Exception as e:
