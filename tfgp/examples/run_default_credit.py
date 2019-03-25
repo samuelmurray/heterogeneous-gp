@@ -13,7 +13,7 @@ from tfgp.util import data
 
 ROOT_PATH = os.path.dirname(tfgp.__file__)
 LOG_DIR_PATH = os.path.join(ROOT_PATH, os.pardir, "log")
-NAME = "atr"
+NAME = "default_credit"
 
 
 def train_predict(model: BatchMLGPLVM) -> Tuple[float, float]:
@@ -42,10 +42,10 @@ def train_predict(model: BatchMLGPLVM) -> Tuple[float, float]:
         print(f"Initial loss: {sess.run(loss, feed_dict={model.batch_indices: all_indices})}")
         print("Starting training...")
         n_epoch = 10000
-        batch_size = 100
+        batch_size = 1000
         # n_iter = int(model.num_data / batch_size * n_epoch)
-        n_iter = 1000
-        n_print = 5000
+        n_iter = 10000
+        n_print = 1000
         for i in range(n_iter):
             batch_indices = np.random.choice(num_data, batch_size, replace=False)
             sess.run(train_all, feed_dict={model.batch_indices: batch_indices})
@@ -82,21 +82,25 @@ if __name__ == "__main__":
         if num_data is None:
             num_data = y.shape[0]
 
-        idx_to_remove = np.loadtxt(os.path.join(ROOT_PATH, os.pardir, "util", "default_credit", f"Missing20_{i}.csv"),
+        idx_to_remove = np.loadtxt(os.path.join(ROOT_PATH, os.pardir, "util", NAME, f"Missing20_{i}.csv"),
                                    delimiter=",")
         idx_to_remove -= 1  # The files are 1-index for some reason
         y_noisy = tfgp.util.remove_data(y, idx_to_remove, likelihood)
 
-        model_name = f"BatchMLGPLVM_{i}"
+        model_name = f"VAEMLGPLVM_{i}"
         with tf.name_scope(model_name):
             print(f"Creating model {model_name}...")
             kernel = tfgp.kernel.ARDRBF(xdim=latent_dim)
             num_inducing = 100
             num_hidden = 100
             num_layers = 1
-            m = BatchMLGPLVM(y_noisy, latent_dim, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing)
-            numerical_error, nominal_error = train_predict(m)
-            numerical_errors.append(numerical_error)
-            nominal_errors.append(nominal_error)
+            m = VAEMLGPLVM(y_noisy, latent_dim, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing, num_hidden=num_hidden, num_layers=num_layers)
+            try:
+                numerical_error, nominal_error = train_predict(m)
+            except Exception as e:
+                print(e)
+            else:
+                numerical_errors.append(numerical_error)
+                nominal_errors.append(nominal_error)
     print(f"Numerical error over all 10 runs: {np.mean(numerical_errors)} +- {np.std(numerical_errors)}")
     print(f"Nominal error over all 10 runs: {np.mean(nominal_errors)} +- {np.std(nominal_errors)}")

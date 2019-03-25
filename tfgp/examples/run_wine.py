@@ -13,7 +13,7 @@ from tfgp.util import data
 
 ROOT_PATH = os.path.dirname(tfgp.__file__)
 LOG_DIR_PATH = os.path.join(ROOT_PATH, os.pardir, "log")
-NAME = "atr"
+NAME = "wine"
 
 
 def train_predict(model: BatchMLGPLVM) -> Tuple[float, float]:
@@ -82,7 +82,7 @@ if __name__ == "__main__":
         if num_data is None:
             num_data = y.shape[0]
 
-        idx_to_remove = np.loadtxt(os.path.join(ROOT_PATH, os.pardir, "util", "wine", f"Missing20_{i}.csv"),
+        idx_to_remove = np.loadtxt(os.path.join(ROOT_PATH, os.pardir, "util", NAME, f"Missing20_{i}.csv"),
                                    delimiter=",")
         idx_to_remove -= 1  # The files are 1-index for some reason
         y_noisy = tfgp.util.remove_data(y, idx_to_remove, likelihood)
