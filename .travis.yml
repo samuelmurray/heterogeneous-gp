@@ -7,7 +7,7 @@ python:
   - "3.7"
 install:
   - pip install pipenv
-  - pipenv install --dev --ignore-pipfile --system
+  - pipenv sync --dev
 script:
   - pipenv run pytest --cov=./
 after_success:
