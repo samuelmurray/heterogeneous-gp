@@ -70,6 +70,15 @@ class TestMLGP(tf.test.TestCase):
         with self.assertRaises(ValueError):
             _ = MLGP(x, y, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing)
 
+    def test_likelihood_output_dim_exception(self) -> None:
+        output_dim = 5
+        x, y = np.empty((10, 1)), np.empty((10, output_dim))
+        kernel = RBF()
+        likelihood = MixedLikelihoodWrapper([Normal() for _ in range(output_dim + 1)])
+        num_inducing = 5
+        with self.assertRaises(ValueError):
+            _ = MLGP(x, y, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing)
+
 
 if __name__ == "__main__":
     tf.test.main()
