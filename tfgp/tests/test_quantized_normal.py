@@ -23,6 +23,10 @@ class TestQuantizedNormal(tf.test.TestCase):
         merged_summary = tf.summary.merge_all()
         self.assertIsNotNone(merged_summary)
 
+    def test_new_id(self) -> None:
+        new_likelihood = QuantizedNormal()
+        self.assertEqual(new_likelihood._id, self.likelihood._id + 1)
+
 
 if __name__ == "__main__":
     tf.test.main()
