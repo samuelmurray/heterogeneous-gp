@@ -53,17 +53,19 @@ class TestMLGP(tf.test.TestCase):
             self.assertShapeEqual(np.empty([num_test, self.output_dim]), std)
 
     def test_shape_mismatch_exception(self) -> None:
-        x, y = np.empty((10, 5)), np.empty((6, 5))
+        output_dim = 5
+        x, y = np.empty((10, 1)), np.empty((6, output_dim))
         kernel = RBF()
-        likelihood = MixedLikelihoodWrapper([Normal() for _ in range(self.output_dim)])
+        likelihood = MixedLikelihoodWrapper([Normal() for _ in range(output_dim)])
         num_inducing = 10
         with self.assertRaises(ValueError):
             _ = MLGP(x, y, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing)
 
     def test_too_many_inducing_points_exception(self) -> None:
-        x, y = np.empty((10, 5)), np.empty((10, 5))
+        output_dim = 5
+        x, y = np.empty((10, 1)), np.empty((10, output_dim))
         kernel = RBF()
-        likelihood = MixedLikelihoodWrapper([Normal() for _ in range(self.output_dim)])
+        likelihood = MixedLikelihoodWrapper([Normal() for _ in range(output_dim)])
         num_inducing = 20
         with self.assertRaises(ValueError):
             _ = MLGP(x, y, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing)
