@@ -17,6 +17,12 @@ class TestBernoulli(tf.test.TestCase):
         ret = self.likelihood(f)
         self.assertIsInstance(ret, tfp.distributions.Bernoulli)
         self.assertEqual((10, 5), ret.batch_shape)
+        self.likelihood.create_summaries()
+
+    def test_create_summary(self) -> None:
+        self.likelihood.create_summaries()
+        merged_summary = tf.summary.merge_all()
+        self.assertIsNone(merged_summary)
 
 
 if __name__ == "__main__":

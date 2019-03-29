@@ -18,6 +18,11 @@ class TestPoisson(tf.test.TestCase):
         self.assertIsInstance(ret, tfp.distributions.Poisson)
         self.assertEqual((10, 5), ret.batch_shape)
 
+    def test_create_summary(self) -> None:
+        self.likelihood.create_summaries()
+        merged_summary = tf.summary.merge_all()
+        self.assertIsNone(merged_summary)
+
 
 if __name__ == "__main__":
     tf.test.main()

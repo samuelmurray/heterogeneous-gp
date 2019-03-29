@@ -57,6 +57,11 @@ class TestMLGPLVM(tf.test.TestCase):
         with self.assertRaises(ValueError):
             _ = MLGPLVM(y, latent_dim + 1, x=x, kernel=kernel, likelihood=likelihood)
 
+    def test_create_summary(self) -> None:
+        self.m.create_summaries()
+        merged_summary = tf.summary.merge_all()
+        self.assertIsNotNone(merged_summary)
+
 
 if __name__ == "__main__":
     tf.test.main()

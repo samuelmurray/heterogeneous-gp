@@ -85,6 +85,11 @@ class TestBatchMLGPLVM(tf.test.TestCase):
             self.assertEqual([None, self.output_dim], y_impute.shape.as_list())
             self.assertEqual([self.batch_size, self.output_dim], list(y_impute_arr.shape))
 
+    def test_create_summary(self) -> None:
+        self.m.create_summaries()
+        merged_summary = tf.summary.merge_all()
+        self.assertIsNotNone(merged_summary)
+
 
 if __name__ == "__main__":
     tf.test.main()

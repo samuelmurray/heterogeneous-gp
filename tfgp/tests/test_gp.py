@@ -37,6 +37,11 @@ class TestGP(tf.test.TestCase):
         with self.assertRaises(ValueError):
             _ = GP(x, y, kernel=kernel)
 
+    def test_create_summary(self) -> None:
+        self.m.create_summaries()
+        merged_summary = tf.summary.merge_all()
+        self.assertIsNotNone(merged_summary)
+
 
 if __name__ == "__main__":
     tf.test.main()

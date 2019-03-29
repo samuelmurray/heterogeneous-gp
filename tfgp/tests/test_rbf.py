@@ -48,6 +48,11 @@ class TestRBF(tf.test.TestCase):
             k_ab = k_rbf.eval()
         self.assertAllClose(k_ab, k_sklearn)
 
+    def test_create_summary(self) -> None:
+        self.rbf.create_summaries()
+        merged_summary = tf.summary.merge_all()
+        self.assertIsNotNone(merged_summary)
+
 
 if __name__ == "__main__":
     tf.test.main()

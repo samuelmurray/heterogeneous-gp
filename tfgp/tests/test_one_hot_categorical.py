@@ -19,6 +19,11 @@ class TestOneHotCategorical(tf.test.TestCase):
         self.assertEqual(shape[0], ret.batch_shape[0])
         self.assertEqual(shape[1], ret.event_shape[0])
 
+    def test_create_summary(self) -> None:
+        self.likelihood.create_summaries()
+        merged_summary = tf.summary.merge_all()
+        self.assertIsNone(merged_summary)
+
 
 if __name__ == "__main__":
     tf.test.main()

@@ -79,6 +79,11 @@ class TestMLGP(tf.test.TestCase):
         with self.assertRaises(ValueError):
             _ = MLGP(x, y, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing)
 
+    def test_create_summary(self) -> None:
+        self.m.create_summaries()
+        merged_summary = tf.summary.merge_all()
+        self.assertIsNotNone(merged_summary)
+
 
 if __name__ == "__main__":
     tf.test.main()
