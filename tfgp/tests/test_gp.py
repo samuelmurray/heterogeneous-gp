@@ -31,6 +31,12 @@ class TestGP(tf.test.TestCase):
             self.assertShapeEqual(np.empty([num_test, self.output_dim]), mean)
             self.assertShapeEqual(np.empty([num_test, num_test]), cov)
 
+    def test_shape_mismatch_exception(self) -> None:
+        x, y = np.empty((10, 5)), np.empty((6, 5))
+        kernel = RBF()
+        with self.assertRaises(ValueError):
+            self.m = GP(x, y, kernel=kernel)
+
 
 if __name__ == "__main__":
     tf.test.main()
