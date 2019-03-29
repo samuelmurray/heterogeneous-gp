@@ -20,6 +20,9 @@ class TestMixedLikelihoodWrapper(tf.test.TestCase):
         log_prob = self.likelihood.log_prob(f, y)
         self.assertShapeEqual(np.empty((1, 1, 3)), log_prob)
 
+    def test_num_likelihoods(self) -> None:
+        self.assertEqual(self.likelihood.num_likelihoods, 3)
+
     def test_create_summary(self) -> None:
         self.likelihood.create_summaries()
         merged_summary = tf.summary.merge_all()
