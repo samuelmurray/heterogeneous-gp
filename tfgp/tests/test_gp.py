@@ -35,7 +35,7 @@ class TestGP(tf.test.TestCase):
         x, y = np.empty((10, 5)), np.empty((6, 5))
         kernel = RBF()
         with self.assertRaises(ValueError):
-            self.m = GP(x, y, kernel=kernel)
+            _ = GP(x, y, kernel=kernel)
 
 
 if __name__ == "__main__":
