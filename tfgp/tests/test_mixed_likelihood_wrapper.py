@@ -1,5 +1,6 @@
 import numpy as np
 import tensorflow as tf
+import tensorflow_probability as tfp
 
 from tfgp.likelihood import *
 
@@ -13,6 +14,14 @@ class TestMixedLikelihoodWrapper(tf.test.TestCase):
 
     def tearDown(self) -> None:
         tf.reset_default_graph()
+
+    def test_call(self) -> None:
+        f = tf.constant(np.array([[[0.7, 0.4, 0.4, 0.2, 2.]]]), dtype=tf.float32)
+        ret = self.likelihood(f)
+        self.assertEqual(3, len(ret))
+        self.assertIsInstance(ret[0], tfp.distributions.Bernoulli)
+        self.assertIsInstance(ret[1], tfp.distributions.OneHotCategorical)
+        self.assertIsInstance(ret[2], tfp.distributions.Normal)
 
     def test_log_prob(self) -> None:
         f = tf.constant(np.array([[[0.7, 0.4, 0.4, 0.2, 2.]]]), dtype=tf.float32)
