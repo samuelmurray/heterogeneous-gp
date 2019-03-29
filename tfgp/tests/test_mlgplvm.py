@@ -48,6 +48,15 @@ class TestMLGPLVM(tf.test.TestCase):
                 y_impute = self.m.impute()
             self.assertShapeEqual(np.empty((self.num_data, self.output_dim)), y_impute)
 
+    def test_xdim_exception(self) -> None:
+        latent_dim = 1
+        output_dim = 5
+        x, y = np.empty((10, latent_dim)), np.empty((6, output_dim))
+        kernel = RBF()
+        likelihood = MixedLikelihoodWrapper([Normal() for _ in range(output_dim)])
+        with self.assertRaises(ValueError):
+            _ = MLGPLVM(y, latent_dim + 1, x=x, kernel=kernel, likelihood=likelihood)
+
 
 if __name__ == "__main__":
     tf.test.main()
