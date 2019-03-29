@@ -10,7 +10,7 @@ import tensorflow as tf
 import tfgp
 from tfgp.kernel import ARDRBF
 from tfgp.model import MLGPLVM
-from tfgp.util import data, pca_reduce
+from tfgp.util import data
 
 ROOT_PATH = os.path.dirname(tfgp.__file__)
 LOG_DIR_PATH = os.path.join(ROOT_PATH, os.pardir, "log")

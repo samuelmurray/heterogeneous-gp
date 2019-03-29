@@ -2,7 +2,6 @@ import os
 import time
 from typing import Tuple
 
-from IPython import embed
 import numpy as np
 import seaborn as sns
 import tensorflow as tf
@@ -41,9 +40,7 @@ def train_predict(model: BatchMLGPLVM) -> Tuple[float, float]:
         sess.run(init)
         print(f"Initial loss: {sess.run(loss, feed_dict={model.batch_indices: all_indices})}")
         print("Starting training...")
-        n_epoch = 10000
         batch_size = 1000
-        # n_iter = int(model.num_data / batch_size * n_epoch)
         n_iter = 10000
         n_print = 1000
         for i in range(n_iter):

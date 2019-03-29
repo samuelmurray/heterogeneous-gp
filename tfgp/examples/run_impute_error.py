@@ -1,7 +1,6 @@
 import os
 import time
 
-from IPython import embed
 import numpy as np
 import seaborn as sns
 import tensorflow as tf
