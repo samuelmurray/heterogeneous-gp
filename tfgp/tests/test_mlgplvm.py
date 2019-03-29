@@ -51,7 +51,8 @@ class TestMLGPLVM(tf.test.TestCase):
     def test_xdim_exception(self) -> None:
         latent_dim = 1
         output_dim = 5
-        x, y = np.empty((10, latent_dim)), np.empty((6, output_dim))
+        num_data = 10
+        x, y = np.empty((num_data, latent_dim)), np.empty((num_data, output_dim))
         kernel = RBF()
         likelihood = MixedLikelihoodWrapper([Normal() for _ in range(output_dim)])
         with self.assertRaises(ValueError):
