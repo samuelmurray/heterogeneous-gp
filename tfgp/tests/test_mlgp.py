@@ -52,6 +52,14 @@ class TestMLGP(tf.test.TestCase):
             self.assertShapeEqual(np.empty([num_test, self.output_dim]), mean)
             self.assertShapeEqual(np.empty([num_test, self.output_dim]), std)
 
+    def test_shape_mismatch_exception(self) -> None:
+        x, y = np.empty((10, 5)), np.empty((6, 5))
+        kernel = RBF()
+        likelihood = MixedLikelihoodWrapper([Normal() for _ in range(self.output_dim)])
+        num_inducing = 10
+        with self.assertRaises(ValueError):
+            _ = MLGP(x, y, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing)
+
 
 if __name__ == "__main__":
     tf.test.main()
