@@ -38,6 +38,15 @@ class TestGPLVM(tf.test.TestCase):
                 loss_after = sess.run(loss)
             self.assertLess(loss_after, loss_before)
 
+    def test_x_num_data_exception(self) -> None:
+        latent_dim = 1
+        output_dim = 5
+        num_data = 10
+        x, y = np.empty((num_data + 1, latent_dim)), np.empty((num_data, output_dim))
+        kernel = RBF()
+        with self.assertRaises(ValueError):
+            _ = GPLVM(y, latent_dim, x=x, kernel=kernel)
+
     def test_xdim_exception(self) -> None:
         latent_dim = 1
         output_dim = 5
