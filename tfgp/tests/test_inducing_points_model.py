@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import tensorflow as tf
 
 from tfgp.model import InducingPointsModel
@@ -13,6 +15,15 @@ class TestInducingPointsModel(tf.test.TestCase):
     def test_abc(self) -> None:
         with self.assertRaises(TypeError):
             InducingPointsModel(0, 0, 0, 0)
+
+    @patch.multiple(InducingPointsModel, __abstractmethods__=set())
+    def test_num_inducing(self) -> None:
+        xdim = 5
+        ydim = 4
+        num_data = 10
+        num_inducing = 3
+        m = InducingPointsModel(xdim, ydim, num_data, num_inducing)
+        self.assertEqual(num_inducing, m.num_inducing)
 
 
 if __name__ == "__main__":
