@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
 
-from tfgp.likelihood import *
+from tfgp.likelihood import Bernoulli, MixedLikelihoodWrapper, Normal, OneHotCategorical
 
 
 class TestMixedLikelihoodWrapper(tf.test.TestCase):

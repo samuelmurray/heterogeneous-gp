@@ -7,7 +7,8 @@ from sklearn.metrics.pairwise import rbf_kernel
 from sklearn.datasets import make_blobs
 
 import tfgp
-from tfgp.likelihood import *
+from tfgp.likelihood import Bernoulli, LogNormal, MixedLikelihoodWrapper, Normal, OneHotCategorical, Poisson, \
+    QuantizedNormal
 
 DataTuple = Tuple[np.ndarray, MixedLikelihoodWrapper, np.ndarray]
 ROOT_PATH = os.path.dirname(tfgp.__file__)
