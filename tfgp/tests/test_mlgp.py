@@ -26,6 +26,10 @@ class TestMLGP(tf.test.TestCase):
     def tearDown(self) -> None:
         tf.reset_default_graph()
 
+    def test_initialize(self) -> None:
+        num_losses = len(tf.losses.get_losses())
+        self.assertGreaterEqual(num_losses, 1)
+
     def test_train_loss(self) -> None:
         with tf.variable_scope("mlgp", reuse=tf.AUTO_REUSE):
             loss = tf.losses.get_total_loss()
