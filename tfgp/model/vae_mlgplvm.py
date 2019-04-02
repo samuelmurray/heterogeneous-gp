@@ -10,7 +10,7 @@ from tfgp.likelihood import MixedLikelihoodWrapper
 
 
 class VAEMLGPLVM(BatchMLGPLVM):
-    def __init__(self, y: np.ndarray, xdim: int, *,
+    def __init__(self, y: np.ndarray, x_dim: int, *,
                  x: np.ndarray = None,
                  kernel: Kernel,
                  likelihood: MixedLikelihoodWrapper,
@@ -19,7 +19,7 @@ class VAEMLGPLVM(BatchMLGPLVM):
                  num_hidden: int,
                  num_layers: int,
                  ) -> None:
-        super().__init__(y=y, xdim=xdim, x=x, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing,
+        super().__init__(y=y, x_dim=x_dim, x=x, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing,
                          num_samples=num_samples)
         # qx is implicitly defined by neural network
         del self.qx_mean
@@ -47,8 +47,8 @@ class VAEMLGPLVM(BatchMLGPLVM):
             hidden = y_batch_wo_nans
             for i in range(self.num_layers):
                 hidden = tf.layers.dense(hidden, units=self.num_hidden, activation=tf.tanh, name=f"hidden_{i}")
-            mean = tf.layers.dense(hidden, units=self.xdim, activation=None, name="mean")
-            log_var = tf.layers.dense(hidden, units=self.xdim, activation=None, name="log_var")
+            mean = tf.layers.dense(hidden, units=self.x_dim, activation=None, name="mean")
+            log_var = tf.layers.dense(hidden, units=self.x_dim, activation=None, name="log_var")
             var = tf.exp(log_var, name="var")
         return mean, var
 
