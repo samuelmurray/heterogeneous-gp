@@ -19,10 +19,10 @@ class TestInducingPointsModel(tf.test.TestCase):
     @patch.multiple(InducingPointsModel, __abstractmethods__=set())
     def test_num_inducing(self) -> None:
         x_dim = 5
-        ydim = 4
+        y_dim = 4
         num_data = 10
         num_inducing = 3
-        m = InducingPointsModel(x_dim, ydim, num_data, num_inducing)
+        m = InducingPointsModel(x_dim, y_dim, num_data, num_inducing)
         self.assertEqual(num_inducing, m.num_inducing)
 
 

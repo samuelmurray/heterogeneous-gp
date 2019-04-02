@@ -28,17 +28,17 @@ class MLGP(InducingPointsModel):
         # TODO: Try changing to float64 and see if it solves Cholesky inversion problems!
         self.x = tf.convert_to_tensor(x, dtype=tf.float32, name="x")
         self.y = tf.convert_to_tensor(y, dtype=tf.float32, name="y")
-        if likelihood.num_dim != self.ydim:
+        if likelihood.num_dim != self.y_dim:
             raise ValueError(f"The likelihood must have as many dimensions as y, "
                              f"but likelihood.num_dim={likelihood.num_dim} and y.shape={y.shape}")
         self.kernel = kernel
         self.likelihood = likelihood
         self.z = tf.get_variable("z", shape=[self.num_inducing, self.x_dim], initializer=tf.constant_initializer(z))
         with tf.variable_scope("qu"):
-            self.qu_mean = tf.get_variable("mean", shape=[self.ydim, self.num_inducing],
+            self.qu_mean = tf.get_variable("mean", shape=[self.y_dim, self.num_inducing],
                                            initializer=tf.random_normal_initializer())
             self.qu_log_scale_vec = tf.get_variable("log_scale_vec",
-                                                    shape=[self.ydim, self.num_inducing * (self.num_inducing + 1) / 2],
+                                                    shape=[self.y_dim, self.num_inducing * (self.num_inducing + 1) / 2],
                                                     initializer=tf.zeros_initializer())
             self.qu_log_scale = tfp.distributions.fill_triangular(self.qu_log_scale_vec, name="log_scale")
             self.qu_scale = tf.identity(self.qu_log_scale
@@ -107,7 +107,7 @@ class MLGP(InducingPointsModel):
 
             # f = a.T * u + sqrt(K~) * e_f, e_f ~ N(0,1)
             u_sample = self._sample_u()
-            e_f = tf.random_normal(shape=[self.num_samples, self.ydim, num_data], name="e_f")
+            e_f = tf.random_normal(shape=[self.num_samples, self.y_dim, num_data], name="e_f")
             f_mean = tf.matmul(u_sample, a_tiled, name="f_mean")
             f_noise = tf.multiply(tf.expand_dims(tf.sqrt(k_tilde_pos_tiled), axis=1), e_f, name="f_noise")
             f_samples = tf.add(f_mean, f_noise, name="f_samples")
@@ -121,7 +121,7 @@ class MLGP(InducingPointsModel):
 
     def _sample_u(self) -> tf.Tensor:
         # u = qu_mean + qu_scale * e_u, e_u ~ N(0,1)
-        e_u = tf.random_normal(shape=[self.num_samples, self.ydim, self.num_inducing], name="e_u")
+        e_u = tf.random_normal(shape=[self.num_samples, self.y_dim, self.num_inducing], name="e_u")
         u_noise = tf.einsum("ijk,tik->tij", self.qu_scale, e_u, name="u_noise")
         u_samples = tf.add(self.qu_mean, u_noise, name="u_samples")
         return u_samples

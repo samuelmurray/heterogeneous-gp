@@ -19,25 +19,25 @@ class TestModel(tf.test.TestCase):
     @patch.multiple(Model, __abstractmethods__=set())
     def test_x_dim(self) -> None:
         x_dim = 5
-        ydim = 4
+        y_dim = 4
         num_data = 10
-        m = Model(x_dim, ydim, num_data)
+        m = Model(x_dim, y_dim, num_data)
         self.assertEqual(x_dim, m.x_dim)
 
     @patch.multiple(Model, __abstractmethods__=set())
     def test_ydim(self) -> None:
         x_dim = 5
-        ydim = 4
+        y_dim = 4
         num_data = 10
-        m = Model(x_dim, ydim, num_data)
-        self.assertEqual(ydim, m.ydim)
+        m = Model(x_dim, y_dim, num_data)
+        self.assertEqual(y_dim, m.y_dim)
 
     @patch.multiple(Model, __abstractmethods__=set())
     def test_num_data(self) -> None:
         x_dim = 5
-        ydim = 4
+        y_dim = 4
         num_data = 10
-        m = Model(x_dim, ydim, num_data)
+        m = Model(x_dim, y_dim, num_data)
         self.assertEqual(num_data, m.num_data)
 
 

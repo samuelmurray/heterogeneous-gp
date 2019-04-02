@@ -2,9 +2,9 @@ import abc
 
 
 class Model(abc.ABC):
-    def __init__(self, x_dim: int, ydim: int, num_data: int) -> None:
+    def __init__(self, x_dim: int, y_dim: int, num_data: int) -> None:
         self._x_dim = x_dim
-        self._ydim = ydim
+        self._y_dim = y_dim
         self._num_data = num_data
 
     @property
@@ -12,8 +12,8 @@ class Model(abc.ABC):
         return self._x_dim
 
     @property
-    def ydim(self) -> int:
-        return self._ydim
+    def y_dim(self) -> int:
+        return self._y_dim
 
     @property
     def num_data(self) -> int:
