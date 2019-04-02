@@ -17,7 +17,7 @@ class TestModel(tf.test.TestCase):
             Model(0, 0, 0)
 
     @patch.multiple(Model, __abstractmethods__=set())
-    def test_xdim(self) -> None:
+    def test_x_dim(self) -> None:
         x_dim = 5
         ydim = 4
         num_data = 10

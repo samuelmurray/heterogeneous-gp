@@ -48,7 +48,7 @@ class TestMLGPLVM(tf.test.TestCase):
                 y_impute = self.m.impute()
             self.assertShapeEqual(np.empty((self.num_data, self.output_dim)), y_impute)
 
-    def test_xdim_exception(self) -> None:
+    def test_x_dim_exception(self) -> None:
         latent_dim = 1
         output_dim = 5
         num_data = 10

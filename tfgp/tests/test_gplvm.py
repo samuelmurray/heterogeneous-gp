@@ -47,7 +47,7 @@ class TestGPLVM(tf.test.TestCase):
         with self.assertRaises(ValueError):
             _ = GPLVM(y, latent_dim, x=x, kernel=kernel)
 
-    def test_xdim_exception(self) -> None:
+    def test_x_dim_exception(self) -> None:
         latent_dim = 1
         output_dim = 5
         num_data = 10
