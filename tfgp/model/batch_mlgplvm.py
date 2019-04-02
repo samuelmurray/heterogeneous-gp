@@ -10,14 +10,14 @@ from tfgp.likelihood import MixedLikelihoodWrapper
 
 
 class BatchMLGPLVM(MLGPLVM):
-    def __init__(self, y: np.ndarray, xdim: int, *,
+    def __init__(self, y: np.ndarray, x_dim: int, *,
                  x: np.ndarray = None,
                  kernel: Kernel,
                  likelihood: MixedLikelihoodWrapper,
                  num_inducing: int = 50,
                  num_samples: int = 10,
                  ) -> None:
-        super().__init__(y=y, xdim=xdim, x=x, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing,
+        super().__init__(y=y, x_dim=x_dim, x=x, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing,
                          num_samples=num_samples)
         self.batch_indices = tf.placeholder(shape=[None], dtype=tf.int32, name="batch_indices")
         self.qx_mean_batch = tf.gather(self.qx_mean, self.batch_indices, name="qx_mean_batch")

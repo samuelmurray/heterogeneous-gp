@@ -6,17 +6,17 @@ from .kernel import Kernel
 
 class ARDRBF(Kernel):
     def __init__(self, variance: float = 1., gamma: float = 0.5, *,
-                 xdim: int,
+                 x_dim: int,
                  eps: float = 1e-4,
                  name: str = "ardrbf",
                  ) -> None:
         super().__init__(name)
         with tf.variable_scope(name):
-            self._xdim = xdim
+            self._x_dim = x_dim
             self._log_variance = tf.get_variable("log_variance", shape=[1],
                                                  initializer=tf.constant_initializer(np.log(variance)))
             self._variance = tf.exp(self._log_variance, name="variance")
-            self._log_gamma = tf.get_variable("log_gamma", shape=[xdim],
+            self._log_gamma = tf.get_variable("log_gamma", shape=[x_dim],
                                               initializer=tf.constant_initializer(np.log(gamma)))
             self._gamma = tf.exp(self._log_gamma, name="gamma")
             self._eps = eps

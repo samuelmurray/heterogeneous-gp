@@ -87,7 +87,7 @@ if __name__ == "__main__":
         model_name = f"VAEMLGPLVM_{i}"
         with tf.name_scope(model_name):
             print(f"Creating model {model_name}...")
-            kernel = tfgp.kernel.ARDRBF(xdim=latent_dim)
+            kernel = tfgp.kernel.ARDRBF(x_dim=latent_dim)
             num_inducing = 100
             num_hidden = 100
             num_layers = 1

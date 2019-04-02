@@ -6,20 +6,20 @@ from tfgp.kernel import Kernel
 
 
 class GPLVM(Model):
-    def __init__(self, y: np.ndarray, xdim: int, *,
+    def __init__(self, y: np.ndarray, x_dim: int, *,
                  x: np.ndarray = None,
                  kernel: Kernel,
                  ) -> None:
-        super().__init__(xdim, y.shape[1], y.shape[0])
+        super().__init__(x_dim, y.shape[1], y.shape[0])
         self._HALF_LN2PI = 0.5 * tf.log(2 * np.pi)
         if x is None:
-            x = np.random.normal(size=(self.num_data, self.xdim))
+            x = np.random.normal(size=(self.num_data, self.x_dim))
         elif x.shape[0] != self.num_data:
             raise ValueError(f"First dimension of x and y must match, but x.shape={x.shape} and y.shape={y.shape}")
-        elif x.shape[1] != self.xdim:
-            raise ValueError(f"Second dimension of x must be xdim, but x.shape={x.shape} and xdim={self.xdim}")
+        elif x.shape[1] != self.x_dim:
+            raise ValueError(f"Second dimension of x must be x_dim, but x.shape={x.shape} and x_dim={self.x_dim}")
         self.y = tf.convert_to_tensor(y, dtype=tf.float32, name="y")
-        self.x = tf.get_variable("x", shape=[self.num_data, self.xdim], initializer=tf.constant_initializer(x))
+        self.x = tf.get_variable("x", shape=[self.num_data, self.x_dim], initializer=tf.constant_initializer(x))
         self.kernel = kernel
 
     def initialize(self) -> None:
@@ -49,7 +49,7 @@ class GPLVM(Model):
     def _log_prior(self) -> tf.Tensor:
         with tf.name_scope("log_prior"):
             x_square_sum = tf.multiply(0.5, tf.reduce_sum(tf.square(self.x)), name="x_square_sum")
-            const = tf.identity(self.xdim * self.num_data * self._HALF_LN2PI, name="const")
+            const = tf.identity(self.x_dim * self.num_data * self._HALF_LN2PI, name="const")
             log_prior = tf.negative(x_square_sum + const, name="log_prior")
         return log_prior
 

@@ -26,7 +26,7 @@ if __name__ == "__main__":
     y, likelihood, labels = data.make_circle(num_data, output_dim)
 
     print("Creating model...")
-    kernel = ARDRBF(xdim=latent_dim)
+    kernel = ARDRBF(x_dim=latent_dim)
     m = MLGPLVM(y, latent_dim, kernel=kernel, likelihood=likelihood)
     m.initialize()
 

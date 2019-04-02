@@ -33,7 +33,7 @@ class MLGP(InducingPointsModel):
                              f"but likelihood.num_dim={likelihood.num_dim} and y.shape={y.shape}")
         self.kernel = kernel
         self.likelihood = likelihood
-        self.z = tf.get_variable("z", shape=[self.num_inducing, self.xdim], initializer=tf.constant_initializer(z))
+        self.z = tf.get_variable("z", shape=[self.num_inducing, self.x_dim], initializer=tf.constant_initializer(z))
         with tf.variable_scope("qu"):
             self.qu_mean = tf.get_variable("mean", shape=[self.ydim, self.num_inducing],
                                            initializer=tf.random_normal_initializer())

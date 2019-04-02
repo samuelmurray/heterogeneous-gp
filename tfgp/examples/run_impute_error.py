@@ -72,7 +72,7 @@ if __name__ == "__main__":
 
     with tf.name_scope("VAEMLGPLVM"):
         print("Creating model...")
-        kernel = tfgp.kernel.ARDRBF(xdim=latent_dim)
+        kernel = tfgp.kernel.ARDRBF(x_dim=latent_dim)
         num_hidden = 100
         num_layers = 1
         m = VAEMLGPLVM(y_noisy, latent_dim, kernel=kernel, likelihood=likelihood, num_hidden=num_hidden,

@@ -10,7 +10,7 @@ from tfgp.likelihood import MixedLikelihoodWrapper
 
 
 class MLGPLVM(MLGP):
-    def __init__(self, y: np.ndarray, xdim: int, *,
+    def __init__(self, y: np.ndarray, x_dim: int, *,
                  x: np.ndarray = None,
                  kernel: Kernel,
                  likelihood: MixedLikelihoodWrapper,
@@ -18,17 +18,17 @@ class MLGPLVM(MLGP):
                  num_samples: int = 10,
                  ) -> None:
         if x is None:
-            x = np.random.normal(size=(y.shape[0], xdim))
-        elif x.shape[1] != xdim:
-            raise ValueError(f"Second dimension of x must be xdim, but x.shape={x.shape} and xdim={xdim}")
+            x = np.random.normal(size=(y.shape[0], x_dim))
+        elif x.shape[1] != x_dim:
+            raise ValueError(f"Second dimension of x must be x_dim, but x.shape={x.shape} and x_dim={x_dim}")
 
         super().__init__(x, y, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing, num_samples=num_samples)
         del self.x  # x is a latent variable in this model
 
         with tf.variable_scope("qx"):
-            self.qx_mean = tf.get_variable("mean", shape=[self.num_data, self.xdim],
+            self.qx_mean = tf.get_variable("mean", shape=[self.num_data, self.x_dim],
                                            initializer=tf.constant_initializer(x.T))
-            self.qx_log_var = tf.get_variable("log_var", shape=[self.num_data, self.xdim],
+            self.qx_log_var = tf.get_variable("log_var", shape=[self.num_data, self.x_dim],
                                               initializer=tf.constant_initializer(0.1))
             self.qx_var = tf.exp(self.qx_log_var, name="var")
 
@@ -55,7 +55,7 @@ class MLGPLVM(MLGP):
             num_data = tf.shape(qx_mean)[0]
 
             # x = qx_mean + qx_std * e_x, e_x ~ N(0,1)
-            e_x = tf.random_normal(shape=[self._num_samples, num_data, self.xdim], name="e_x")
+            e_x = tf.random_normal(shape=[self._num_samples, num_data, self.x_dim], name="e_x")
             x_noise = tf.multiply(tf.sqrt(qx_var), e_x, name="x_noise")
             x_samples = tf.add(qx_mean, x_noise, name="x_samples")
 

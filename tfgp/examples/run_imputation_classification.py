@@ -65,7 +65,7 @@ def mlgplvm(data_train: np.ndarray, data_test: np.ndarray) -> Tuple[np.ndarray, 
     data = np.vstack([data_train, data_test])
     latent_dim = 10
     num_inducing = 50
-    kernel = tfgp.kernel.ARDRBF(variance=0.5, gamma=0.5, xdim=latent_dim, name="kernel")
+    kernel = tfgp.kernel.ARDRBF(variance=0.5, gamma=0.5, x_dim=latent_dim, name="kernel")
     m = MLGPLVM(data, latent_dim, num_inducing=num_inducing, kernel=kernel, likelihood=likelihood)
     m.initialize()
 

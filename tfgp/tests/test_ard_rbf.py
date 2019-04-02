@@ -10,7 +10,7 @@ class TestARDRBF(tf.test.TestCase):
         np.random.seed(1363431413)
         tf.random.set_random_seed(1534135313)
         with tf.variable_scope("ardrbf", reuse=tf.AUTO_REUSE):
-            self.kernel = ARDRBF(1., 0.5, xdim=5)
+            self.kernel = ARDRBF(1., 0.5, x_dim=5)
 
     def tearDown(self) -> None:
         tf.reset_default_graph()

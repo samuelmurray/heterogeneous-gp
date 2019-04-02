@@ -25,7 +25,7 @@ if __name__ == "__main__":
     batch_size = 10
 
     print("Creating model...")
-    kernel = tfgp.kernel.ARDRBF(xdim=latent_dim, name="ardrbf")
+    kernel = tfgp.kernel.ARDRBF(x_dim=latent_dim, name="ardrbf")
     m = BatchMLGPLVM(y, latent_dim, kernel=kernel, likelihood=likelihood)
     m.initialize()
 

@@ -2,14 +2,14 @@ import abc
 
 
 class Model(abc.ABC):
-    def __init__(self, xdim: int, ydim: int, num_data: int) -> None:
-        self._xdim = xdim
+    def __init__(self, x_dim: int, ydim: int, num_data: int) -> None:
+        self._x_dim = x_dim
         self._ydim = ydim
         self._num_data = num_data
 
     @property
-    def xdim(self) -> int:
-        return self._xdim
+    def x_dim(self) -> int:
+        return self._x_dim
 
     @property
     def ydim(self) -> int:
