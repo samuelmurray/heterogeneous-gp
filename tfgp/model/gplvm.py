@@ -41,7 +41,9 @@ class GPLVM(Model):
             chol_xx = tf.cholesky(k_xx, name="chol_xx")
             a = tf.matrix_solve(tf.transpose(chol_xx), tf.matrix_solve(chol_xx, self.y), name="a")
             y_transp_a = tf.multiply(0.5, tf.trace(tf.matmul(self.y, a, transpose_a=True)), name="y_transp_a")
-            chol_trace = tf.multiply(tf.reduce_sum(tf.log(tf.diag_part(chol_xx)), axis=0), self.y_dim, name="chol_trace")
+            chol_trace = tf.multiply(tf.reduce_sum(tf.log(tf.diag_part(chol_xx)), axis=0),
+                                     self.y_dim,
+                                     name="chol_trace")
             const = tf.identity(self.y_dim * self.num_data * self._HALF_LN2PI, name="const")
             log_likelihood = tf.negative(y_transp_a + chol_trace + const, name="log_likelihood")
         return log_likelihood
