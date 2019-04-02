@@ -25,7 +25,7 @@ class TestModel(tf.test.TestCase):
         self.assertEqual(x_dim, m.x_dim)
 
     @patch.multiple(Model, __abstractmethods__=set())
-    def test_ydim(self) -> None:
+    def test_y_dim(self) -> None:
         x_dim = 5
         y_dim = 4
         num_data = 10
