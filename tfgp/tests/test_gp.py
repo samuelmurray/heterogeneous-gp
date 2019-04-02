@@ -20,10 +20,6 @@ class TestGP(tf.test.TestCase):
     def tearDown(self) -> None:
         tf.reset_default_graph()
 
-    def test_initialize(self) -> None:
-        num_losses = len(tf.losses.get_losses())
-        self.assertGreaterEqual(num_losses, 1)
-
     def test_predict(self) -> None:
         with tf.variable_scope("gp", reuse=tf.AUTO_REUSE):
             num_test = 30
