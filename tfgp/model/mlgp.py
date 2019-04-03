@@ -95,20 +95,37 @@ class MLGP(InducingPointsModel):
             log_prob = self.likelihood.log_prob(tf.matrix_transpose(samples), y, name="log_prob")
         return log_prob
 
+    def _get_or_subsample_y(self) -> tf.Tensor:
+        return self.y
+
     def _sample_f(self) -> tf.Tensor:
         with tf.name_scope("sample_f"):
             x = self._get_or_subsample_x()
-            a = self._compute_a(x)
-            k_tilde = self._compute_k_tilde(x, a)
             u_samples = self._sample_u()
-            f_samples = self._sample_f_from_x_and_u(x, u_samples, a, k_tilde)
+            f_samples = self._sample_f_from_x_and_u(x, u_samples)
         return f_samples
 
     def _get_or_subsample_x(self) -> tf.Tensor:
         return self.x
 
-    def _get_or_subsample_y(self) -> tf.Tensor:
-        return self.y
+    def _sample_u(self) -> tf.Tensor:
+        # u = qu_mean + qu_scale * e_u, e_u ~ N(0,1)
+        e_u = tf.random_normal(shape=[self.num_samples, self.y_dim, self.num_inducing], name="e_u")
+        u_noise = tf.einsum("ijk,tik->tij", self.qu_scale, e_u, name="u_noise")
+        u_samples = tf.add(self.qu_mean, u_noise, name="u_samples")
+        return u_samples
+
+    def _sample_f_from_x_and_u(self, x, u) -> tf.Tensor:
+        # f = a.T * u + sqrt(K~) * e_f, e_f ~ N(0,1)
+        a = self._compute_a(x)
+        k_tilde = self._compute_k_tilde(x, a)
+        num_data = tf.shape(x)[0]
+        e_f = tf.random_normal(shape=[self.num_samples, self.y_dim, num_data], name="e_f")
+        f_mean = tf.matmul(u, a, name="f_mean")
+        f_noise = tf.multiply(tf.expand_dims(tf.sqrt(k_tilde), axis=1), e_f,
+                              name="f_noise")
+        f_samples = tf.add(f_mean, f_noise, name="f_samples")
+        return f_samples
 
     def _compute_a(self, k_zx) -> tf.Tensor:
         # a = Kzz^(-1) * Kzx
@@ -129,23 +146,6 @@ class MLGP(InducingPointsModel):
         k_tilde_pos_tiled = tf.tile(tf.expand_dims(k_tilde_pos, axis=0),
                                     multiples=[self.num_samples, 1])
         return k_tilde_pos_tiled
-
-    def _sample_u(self) -> tf.Tensor:
-        # u = qu_mean + qu_scale * e_u, e_u ~ N(0,1)
-        e_u = tf.random_normal(shape=[self.num_samples, self.y_dim, self.num_inducing], name="e_u")
-        u_noise = tf.einsum("ijk,tik->tij", self.qu_scale, e_u, name="u_noise")
-        u_samples = tf.add(self.qu_mean, u_noise, name="u_samples")
-        return u_samples
-
-    def _sample_f_from_x_and_u(self, x, u_sample, a, k_tilde) -> tf.Tensor:
-        # f = a.T * u + sqrt(K~) * e_f, e_f ~ N(0,1)
-        num_data = tf.shape(x)[0]
-        e_f = tf.random_normal(shape=[self.num_samples, self.y_dim, num_data], name="e_f")
-        f_mean = tf.matmul(u_sample, a, name="f_mean")
-        f_noise = tf.multiply(tf.expand_dims(tf.sqrt(k_tilde), axis=1), e_f,
-                              name="f_noise")
-        f_samples = tf.add(f_mean, f_noise, name="f_samples")
-        return f_samples
 
     def predict(self, xs: np.ndarray) -> Tuple[tf.Tensor, tf.Tensor]:
         # TODO: Not clear how to report the variances.
