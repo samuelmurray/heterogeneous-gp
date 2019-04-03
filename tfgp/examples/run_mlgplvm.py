@@ -63,7 +63,8 @@ if __name__ == "__main__":
             if i % n_print == 0:
                 run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
                 run_metadata = tf.RunMetadata()
-                train_loss, summary = sess.run([loss, merged_summary], options=run_options, run_metadata=run_metadata)
+                train_loss, summary = sess.run([loss, merged_summary], options=run_options,
+                                               run_metadata=run_metadata)
                 summary_writer.add_run_metadata(run_metadata, f"step{i}")
                 summary_writer.add_summary(summary, i)
                 loss_print = f"Step {i} - Loss: {train_loss}"

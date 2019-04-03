@@ -19,7 +19,8 @@ class VAEMLGPLVM(BatchMLGPLVM):
                  num_hidden: int,
                  num_layers: int,
                  ) -> None:
-        super().__init__(y=y, x_dim=x_dim, x=x, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing,
+        super().__init__(y=y, x_dim=x_dim, x=x, kernel=kernel, likelihood=likelihood,
+                         num_inducing=num_inducing,
                          num_samples=num_samples)
         # qx is implicitly defined by neural network
         del self.qx_mean
@@ -43,10 +44,12 @@ class VAEMLGPLVM(BatchMLGPLVM):
     def _encoder(self) -> Tuple[tf.Tensor, tf.Tensor]:
         with tf.variable_scope("encoder"):
             nan_mask = tf.is_nan(self.y_batch, name="nan_mask")
-            y_batch_wo_nans = tf.where(nan_mask, tf.zeros_like(self.y_batch), self.y_batch, name="y_batch_wo_nans")
+            y_batch_wo_nans = tf.where(nan_mask, tf.zeros_like(self.y_batch), self.y_batch,
+                                       name="y_batch_wo_nans")
             hidden = y_batch_wo_nans
             for i in range(self.num_layers):
-                hidden = tf.layers.dense(hidden, units=self.num_hidden, activation=tf.tanh, name=f"hidden_{i}")
+                hidden = tf.layers.dense(hidden, units=self.num_hidden, activation=tf.tanh,
+                                         name=f"hidden_{i}")
             mean = tf.layers.dense(hidden, units=self.x_dim, activation=None, name="mean")
             log_var = tf.layers.dense(hidden, units=self.x_dim, activation=None, name="log_var")
             var = tf.exp(log_var, name="var")

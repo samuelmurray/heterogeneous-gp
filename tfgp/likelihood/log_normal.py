@@ -20,7 +20,8 @@ class LogNormal(Likelihood):
         return tfp.distributions.LogNormal(loc=f, scale=self._scale)
 
     def create_summaries(self) -> None:
-        tf.summary.scalar(f"normal_scale_{self._id}", tf.squeeze(self._scale), family=self._summary_family)
+        tf.summary.scalar(f"normal_scale_{self._id}", tf.squeeze(self._scale),
+                          family=self._summary_family)
 
     @staticmethod
     def __get_id() -> int:

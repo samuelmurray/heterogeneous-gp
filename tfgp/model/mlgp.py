@@ -17,7 +17,8 @@ class MLGP(InducingPointsModel):
                  num_samples: int = 10,
                  ) -> None:
         if x.shape[0] != y.shape[0]:
-            raise ValueError(f"First dimension of x and y must match, but x.shape={x.shape} and y.shape={y.shape}")
+            raise ValueError(f"First dimension of x and y must match, "
+                             f"but x.shape={x.shape} and y.shape={y.shape}")
         super().__init__(x.shape[1], y.shape[1], y.shape[0], num_inducing)
         if self.num_inducing > self.num_data:
             raise ValueError(f"Can't have more inducing points than data, "
@@ -33,17 +34,20 @@ class MLGP(InducingPointsModel):
                              f"but likelihood.num_dim={likelihood.num_dim} and y.shape={y.shape}")
         self.kernel = kernel
         self.likelihood = likelihood
-        self.z = tf.get_variable("z", shape=[self.num_inducing, self.x_dim], initializer=tf.constant_initializer(z))
+        self.z = tf.get_variable("z", shape=[self.num_inducing, self.x_dim],
+                                 initializer=tf.constant_initializer(z))
         with tf.variable_scope("qu"):
             self.qu_mean = tf.get_variable("mean", shape=[self.y_dim, self.num_inducing],
                                            initializer=tf.random_normal_initializer())
-            self.qu_log_scale_vec = tf.get_variable("log_scale_vec",
-                                                    shape=[self.y_dim, self.num_inducing * (self.num_inducing + 1) / 2],
+            qu_shape = [self.y_dim, self.num_inducing * (self.num_inducing + 1) / 2]
+            self.qu_log_scale_vec = tf.get_variable("log_scale_vec", shape=qu_shape,
                                                     initializer=tf.zeros_initializer())
-            self.qu_log_scale = tfp.distributions.fill_triangular(self.qu_log_scale_vec, name="log_scale")
+            self.qu_log_scale = tfp.distributions.fill_triangular(self.qu_log_scale_vec,
+                                                                  name="log_scale")
+            qu_log_scale_diag = tf.matrix_diag_part(self.qu_log_scale)
             self.qu_scale = tf.identity(self.qu_log_scale
                                         - tf.matrix_diag(tf.matrix_diag_part(self.qu_log_scale))
-                                        + tf.matrix_diag(tf.exp(tf.matrix_diag_part(self.qu_log_scale))), name="scale")
+                                        + tf.matrix_diag(tf.exp(qu_log_scale_diag)), name="scale")
 
     @property
     def num_samples(self) -> int:
@@ -65,7 +69,8 @@ class MLGP(InducingPointsModel):
             qu = tfp.distributions.MultivariateNormalTriL(self.qu_mean, self.qu_scale, name="qu")
             k_zz = self.kernel(self.z, name="k_zz")
             chol_zz = tf.cholesky(k_zz, name="chol_zz")
-            pu = tfp.distributions.MultivariateNormalTriL(tf.zeros(self.num_inducing), chol_zz, name="pu")
+            pu = tfp.distributions.MultivariateNormalTriL(tf.zeros(self.num_inducing), chol_zz,
+                                                          name="pu")
             kl = tfp.distributions.kl_divergence(qu, pu, allow_nan_stats=False, name="kl")
             kl_sum = tf.reduce_sum(kl, axis=0, name="kl_sum")
         return kl_sum
@@ -100,16 +105,19 @@ class MLGP(InducingPointsModel):
             a_tiled = tf.tile(tf.expand_dims(a, axis=0), multiples=[self.num_samples, 1, 1])
 
             # K~ = Kxx - Kxz * Kzz^(-1) * Kzx
-            k_tilde_full = tf.subtract(k_xx, tf.matmul(k_zx, a, transpose_a=True), name="k_tilde_full")
+            k_tilde_full = tf.subtract(k_xx, tf.matmul(k_zx, a, transpose_a=True),
+                                       name="k_tilde_full")
             k_tilde = tf.matrix_diag_part(k_tilde_full, name="diag_b")
             k_tilde_pos = tf.maximum(k_tilde, 1e-16, name="pos_b")  # k_tilde can't be negative
-            k_tilde_pos_tiled = tf.tile(tf.expand_dims(k_tilde_pos, axis=0), multiples=[self.num_samples, 1])
+            k_tilde_pos_tiled = tf.tile(tf.expand_dims(k_tilde_pos, axis=0),
+                                        multiples=[self.num_samples, 1])
 
             # f = a.T * u + sqrt(K~) * e_f, e_f ~ N(0,1)
             u_sample = self._sample_u()
             e_f = tf.random_normal(shape=[self.num_samples, self.y_dim, num_data], name="e_f")
             f_mean = tf.matmul(u_sample, a_tiled, name="f_mean")
-            f_noise = tf.multiply(tf.expand_dims(tf.sqrt(k_tilde_pos_tiled), axis=1), e_f, name="f_noise")
+            f_noise = tf.multiply(tf.expand_dims(tf.sqrt(k_tilde_pos_tiled), axis=1), e_f,
+                                  name="f_noise")
             f_samples = tf.add(f_mean, f_noise, name="f_samples")
         return f_samples
 
@@ -128,23 +136,29 @@ class MLGP(InducingPointsModel):
 
     def predict(self, xs: np.ndarray) -> Tuple[tf.Tensor, tf.Tensor]:
         # TODO: Not clear how to report the variances.
-        # Should we use qu_scale? Do we in the end want mean and std of f(x), h(f(x)) or p(y|x)=ExpFam(h(f(x)))?
+        # Should we use qu_scale?
+        # Do we in the end want mean and std of f(x), h(f(x)) or p(y|x)=ExpFam(h(f(x)))?
         # For now, we just report mean and std of ExpFam(h(f_mean(x)))
         with tf.name_scope("predict"):
             xs = tf.convert_to_tensor(xs, dtype=tf.float32, name="xs")
             k_zz = self.kernel(self.z, name="k_zz")
             k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
             k_xs_z = self.kernel(xs, self.z, name="k_xs_z")
-            f_mean = tf.matmul(tf.matmul(k_xs_z, k_zz_inv), self.qu_mean, transpose_b=True, name="f_mean")
+            f_mean = tf.matmul(tf.matmul(k_xs_z, k_zz_inv),
+                               self.qu_mean,
+                               transpose_b=True,
+                               name="f_mean")
 
             # TODO: Below is hack to work with new likelihood
             mean = tf.stack(
-                [likelihood(f_mean[:, i]).mean() for i, likelihood in enumerate(self.likelihood._likelihoods)],
+                [likelihood(f_mean[:, i]).mean() for i, likelihood in
+                 enumerate(self.likelihood._likelihoods)],
                 axis=1,
                 name="mean"
             )
             std = tf.stack(
-                [likelihood(f_mean[:, i]).stddev() for i, likelihood in enumerate(self.likelihood._likelihoods)],
+                [likelihood(f_mean[:, i]).stddev() for i, likelihood in
+                 enumerate(self.likelihood._likelihoods)],
                 axis=1,
                 name="std"
             )

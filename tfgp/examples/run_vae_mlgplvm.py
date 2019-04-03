@@ -30,7 +30,8 @@ if __name__ == "__main__":
     kernel = tfgp.kernel.ARDRBF(x_dim=latent_dim)
     num_hidden = 100
     num_layers = 1
-    m = VAEMLGPLVM(y, latent_dim, kernel=kernel, likelihood=likelihood, num_hidden=num_hidden, num_layers=num_layers)
+    m = VAEMLGPLVM(y, latent_dim, kernel=kernel, likelihood=likelihood, num_hidden=num_hidden,
+                   num_layers=num_layers)
     m.initialize()
 
     print("Building graph...")
@@ -68,7 +69,8 @@ if __name__ == "__main__":
             if i % n_print == 0:
                 run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
                 run_metadata = tf.RunMetadata()
-                train_loss, summary = sess.run([loss, merged_summary], options=run_options, run_metadata=run_metadata,
+                train_loss, summary = sess.run([loss, merged_summary], options=run_options,
+                                               run_metadata=run_metadata,
                                                feed_dict={m.batch_indices: all_indices})
                 summary_writer.add_run_metadata(run_metadata, f"step{i}")
                 summary_writer.add_summary(summary, i)

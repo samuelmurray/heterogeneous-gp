@@ -14,7 +14,8 @@ class ARDRBF(Kernel):
         with tf.variable_scope(name):
             self._x_dim = x_dim
             self._log_variance = tf.get_variable("log_variance", shape=[1],
-                                                 initializer=tf.constant_initializer(np.log(variance)))
+                                                 initializer=tf.constant_initializer(
+                                                     np.log(variance)))
             self._variance = tf.exp(self._log_variance, name="variance")
             self._log_gamma = tf.get_variable("log_gamma", shape=[x_dim],
                                               initializer=tf.constant_initializer(np.log(gamma)))
@@ -36,6 +37,8 @@ class ARDRBF(Kernel):
         return (rbf + self._eps * tf.eye(tf.shape(x1)[-2])) if x2 is None else rbf
 
     def create_summaries(self) -> None:
-        tf.summary.scalar(f"{self._name}_variance", tf.squeeze(self._variance), family=self._summary_family)
+        tf.summary.scalar(f"{self._name}_variance", tf.squeeze(self._variance),
+                          family=self._summary_family)
         for i in range(self._gamma.shape[0]):
-            tf.summary.scalar(f"{self._name}_gamma_{i}", tf.squeeze(self._gamma[i]), family=self._summary_family)
+            tf.summary.scalar(f"{self._name}_gamma_{i}", tf.squeeze(self._gamma[i]),
+                              family=self._summary_family)

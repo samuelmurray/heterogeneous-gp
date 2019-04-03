@@ -17,8 +17,8 @@ class BatchMLGPLVM(MLGPLVM):
                  num_inducing: int = 50,
                  num_samples: int = 10,
                  ) -> None:
-        super().__init__(y=y, x_dim=x_dim, x=x, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing,
-                         num_samples=num_samples)
+        super().__init__(y=y, x_dim=x_dim, x=x, kernel=kernel, likelihood=likelihood,
+                         num_inducing=num_inducing, num_samples=num_samples)
         self.batch_indices = tf.placeholder(shape=[None], dtype=tf.int32, name="batch_indices")
         self.qx_mean_batch = tf.gather(self.qx_mean, self.batch_indices, name="qx_mean_batch")
         self.qx_var_batch = tf.gather(self.qx_var, self.batch_indices, name="qx_var_batch")
@@ -29,7 +29,8 @@ class BatchMLGPLVM(MLGPLVM):
             batch_size = tf.shape(self.batch_indices, name="batch_size")
             fraction = tf.cast(tf.divide(batch_size, self.num_data), tf.float32, name="fraction")
             scaled_kl_qu_pu = tf.multiply(fraction, self._kl_qu_pu(), name="scaled_kl_qu_pu")
-            elbo = tf.identity(self._mc_expectation() - self._kl_qx_px() - scaled_kl_qu_pu, name="elbo")
+            elbo = tf.identity(self._mc_expectation() - self._kl_qx_px() - scaled_kl_qu_pu,
+                               name="elbo")
         return elbo
 
     def _get_or_subsample_qx(self) -> Tuple[tf.Tensor, tf.Tensor]:

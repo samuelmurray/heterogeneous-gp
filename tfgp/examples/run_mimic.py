@@ -31,6 +31,7 @@ def train_predict(model: BatchMLGPLVM):
     init = tf.global_variables_initializer()
 
     all_indices = np.arange(num_data)
+    test_indices = np.arange(train_split, num_data)
     with tf.Session() as sess:
         log_dir = os.path.join(LOG_DIR_PATH, "impute", f"{time.strftime('%Y%m%d%H%M%S')}")
         summary_writer = tf.summary.FileWriter(log_dir, sess.graph)
@@ -48,11 +49,13 @@ def train_predict(model: BatchMLGPLVM):
             if i % n_print == 0:
                 run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
                 run_metadata = tf.RunMetadata()
-                train_loss, summary = sess.run([loss, merged_summary], options=run_options, run_metadata=run_metadata,
+                train_loss, summary = sess.run([loss, merged_summary], options=run_options,
+                                               run_metadata=run_metadata,
                                                feed_dict={model.batch_indices: all_indices})
                 summary_writer.add_run_metadata(run_metadata, f"step{i}")
                 summary_writer.add_summary(summary, i)
-                imputation = sess.run(model.impute(), feed_dict={model.batch_indices: np.arange(train_split, num_data)})
+                imputation = sess.run(model.impute(),
+                                      feed_dict={model.batch_indices: test_indices})
                 prediction = imputation[:, -1]
                 print(f"Step {i} \tLoss: {train_loss}")
                 print(sklearn.metrics.confusion_matrix(labels, prediction))
@@ -80,6 +83,6 @@ if __name__ == "__main__":
         num_inducing = 100
         num_hidden = 100
         num_layers = 0
-        m = VAEMLGPLVM(y_noisy, latent_dim, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing,
-                       num_hidden=num_hidden, num_layers=num_layers)
+        m = VAEMLGPLVM(y_noisy, latent_dim, kernel=kernel, likelihood=likelihood,
+                       num_inducing=num_inducing, num_hidden=num_hidden, num_layers=num_layers)
         train_predict(m)

@@ -7,8 +7,8 @@ from sklearn.metrics.pairwise import rbf_kernel
 from sklearn.datasets import make_blobs
 
 import tfgp
-from tfgp.likelihood import Bernoulli, LogNormal, MixedLikelihoodWrapper, Normal, OneHotCategorical, Poisson, \
-    QuantizedNormal
+from tfgp.likelihood import (Bernoulli, LogNormal, MixedLikelihoodWrapper, Normal,
+                             OneHotCategorical, Poisson, QuantizedNormal)
 
 DataTuple = Tuple[np.ndarray, MixedLikelihoodWrapper, np.ndarray]
 ROOT_PATH = os.path.dirname(tfgp.__file__)
@@ -85,7 +85,8 @@ def make_circle(num_data: int, output_dim: int, *, gaussian: bool = True) -> Dat
         half_output = output_dim // 2
         y[:, :half_output] = np.random.normal(f[:, :half_output], var_y)
         y[:, half_output:] = np.random.binomial(1, 1 / (1 + np.exp(-f[:, half_output:])))
-        likelihoods = [Normal() for _ in range(half_output)] + [Bernoulli() for _ in range(output_dim - half_output)]
+        likelihoods = ([Normal() for _ in range(half_output)]
+                       + [Bernoulli() for _ in range(output_dim - half_output)])
     likelihood = MixedLikelihoodWrapper(likelihoods)
     labels = np.zeros(num_data)
     return y, likelihood, labels
@@ -198,7 +199,8 @@ def make_binaryalphadigits(num_data: int = None, num_classes: int = 36) -> DataT
     try:
         y = np.loadtxt(os.path.join(DATA_DIR_PATH, "binaryalphadigits_train.csv"), delimiter=",")
     except OSError as e:
-        print("You must run the Matlab script to download the Binary Alphadigits data set before calling this function")
+        print("You must run the Matlab script to download the Binary Alphadigits data set "
+              "before calling this function")
         raise e
     y = y[:data_per_class * num_classes]
     labels = np.array([[i] * data_per_class for i in range(num_classes)]).flatten()
@@ -214,7 +216,9 @@ def make_binaryalphadigits_test(num_data: int = None, num_classes: int = 36) -> 
     try:
         y = np.loadtxt(os.path.join(DATA_DIR_PATH, "binaryalphadigits_test.csv"), delimiter=",")
     except OSError as e:
-        print("You must run the Matlab script to download the Binary Alphadigits data set before calling this function")
+        print(
+            "You must run the Matlab script to download the Binary Alphadigits data set "
+            "before calling this function")
         raise e
     y = y[:data_per_class * num_classes]
     labels = np.array([[i] * data_per_class for i in range(num_classes)]).flatten()
@@ -326,7 +330,8 @@ def make_default_credit(num_data: int = None) -> DataTuple:
 
 def make_mimic(num_data: int = None) -> DataTuple:
     try:
-        data = np.genfromtxt(os.path.join(DATA_DIR_PATH, "mimic_onehot_train.csv"), delimiter=",", filling_values=None)
+        data = np.genfromtxt(os.path.join(DATA_DIR_PATH, "mimic_onehot_train.csv"), delimiter=",",
+                             filling_values=None)
     except OSError as e:
         print("You need to have the MIMIC 3 dataset")
         raise e
@@ -360,7 +365,8 @@ def make_mimic(num_data: int = None) -> DataTuple:
 
 def make_mimic_labeled(num_data: int = None) -> DataTuple:
     try:
-        data = np.genfromtxt(os.path.join(DATA_DIR_PATH, "mimic_onehot_train.csv"), delimiter=",", filling_values=None)
+        data = np.genfromtxt(os.path.join(DATA_DIR_PATH, "mimic_onehot_train.csv"), delimiter=",",
+                             filling_values=None)
     except OSError as e:
         print("You need to have the MIMIC 3 dataset")
         raise e
@@ -398,7 +404,8 @@ def make_mimic_labeled(num_data: int = None) -> DataTuple:
 
 def make_mimic_test(num_data: int = None) -> DataTuple:
     try:
-        data = np.genfromtxt(os.path.join(DATA_DIR_PATH, "mimic_onehot_test.csv"), delimiter=",", filling_values=None)
+        data = np.genfromtxt(os.path.join(DATA_DIR_PATH, "mimic_onehot_test.csv"), delimiter=",",
+                             filling_values=None)
     except OSError as e:
         print("You need to have the MIMIC 3 dataset")
         raise e
@@ -430,11 +437,13 @@ def make_mimic_test(num_data: int = None) -> DataTuple:
     return y, likelihood, labels
 
 
-def make_oilflow(num_data: int = None, output_dim: int = None, *, one_hot_labels: bool = False) -> DataTuple:
+def make_oilflow(num_data: int = None, output_dim: int = None, *,
+                 one_hot_labels: bool = False) -> DataTuple:
     try:
         import pods
     except ModuleNotFoundError as e:
-        print("You need to install the package 'pods' (pip install pods) to use the Oilflow dataset")
+        print("You need to install the package 'pods' (pip install pods) "
+              "to use the Oilflow dataset")
         raise e
     oil = pods.datasets.oil()
     data_size = oil['X'].shape[0]

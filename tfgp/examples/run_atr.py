@@ -22,8 +22,7 @@ def train_predict(model: BatchMLGPLVM):
     with tf.name_scope("train"):
         optimizer = tf.train.RMSPropOptimizer(learning_rate, name="RMSProp")
         train_all = optimizer.minimize(loss, var_list=tf.trainable_variables(),
-                                       global_step=tf.train.create_global_step(),
-                                       name="train")
+                                       global_step=tf.train.create_global_step(), name="train")
     with tf.name_scope("summary"):
         model.create_summaries()
         merged_summary = tf.summary.merge_all()
@@ -48,7 +47,8 @@ def train_predict(model: BatchMLGPLVM):
             if i % n_print == 0:
                 run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
                 run_metadata = tf.RunMetadata()
-                train_loss, summary = sess.run([loss, merged_summary], options=run_options, run_metadata=run_metadata,
+                train_loss, summary = sess.run([loss, merged_summary], options=run_options,
+                                               run_metadata=run_metadata,
                                                feed_dict={model.batch_indices: all_indices})
                 summary_writer.add_run_metadata(run_metadata, f"step{i}")
                 summary_writer.add_summary(summary, i)
@@ -72,6 +72,6 @@ if __name__ == "__main__":
         num_inducing = 100
         num_hidden = 100
         num_layers = 1
-        m = VAEMLGPLVM(y, latent_dim, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing,
-                       num_hidden=num_hidden, num_layers=num_layers)
+        m = VAEMLGPLVM(y, latent_dim, kernel=kernel, likelihood=likelihood,
+                       num_inducing=num_inducing, num_hidden=num_hidden, num_layers=num_layers)
         train_predict(m)

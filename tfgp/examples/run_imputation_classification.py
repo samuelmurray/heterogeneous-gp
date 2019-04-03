@@ -16,13 +16,15 @@ from tfgp.util import data
 ROOT_PATH = os.path.dirname(tfgp.__file__)
 
 
-def logistic_regression(data_train: np.ndarray, label_train: np.ndarray, data_test: np.ndarray) -> np.ndarray:
+def logistic_regression(data_train: np.ndarray, label_train: np.ndarray,
+                        data_test: np.ndarray) -> np.ndarray:
     m = LogisticRegression()
     m.fit(data_train, label_train)
     return m.predict(data_test)
 
 
-def random_forest(data_train: np.ndarray, label_train: np.ndarray, data_test: np.ndarray) -> np.ndarray:
+def random_forest(data_train: np.ndarray, label_train: np.ndarray,
+                  data_test: np.ndarray) -> np.ndarray:
     m = RandomForestClassifier()
     m.fit(data_train, label_train)
     return m.predict(data_test)
@@ -40,17 +42,24 @@ def zero_impute(data_train: np.ndarray, data_test: np.ndarray) -> Tuple[np.ndarr
     return zero_imputer.transform(data_train), zero_imputer.transform(data_test)
 
 
-def run_all(data_train: np.ndarray, label_train: np.ndarray, data_test: np.ndarray, label_test: np.ndarray) -> None:
+def run_all(data_train: np.ndarray, label_train: np.ndarray, data_test: np.ndarray,
+            label_test: np.ndarray) -> None:
     data_train_mean_imputed, data_test_mean_imputed = mean_impute(data_train, data_test)
     data_train_zero_imputed, data_test_zero_imputed = zero_impute(data_train, data_test)
     data_train_mlgplvm_imputed, data_test_mlgplvm_imputed = mlgplvm(data_train, data_test)
 
-    label_pred_lr_mean = logistic_regression(data_train_mean_imputed, label_train, data_test_mean_imputed)
-    label_pred_lr_zero = logistic_regression(data_train_zero_imputed, label_train, data_test_zero_imputed)
-    label_pred_lr_mlgplvm = logistic_regression(data_train_mlgplvm_imputed, label_train, data_test_mlgplvm_imputed)
-    label_pred_rf_mean = random_forest(data_train_mean_imputed, label_train, data_test_mean_imputed)
-    label_pred_rf_zero = random_forest(data_train_zero_imputed, label_train, data_test_zero_imputed)
-    label_pred_rf_mlgplvm = random_forest(data_train_mlgplvm_imputed, label_train, data_test_mlgplvm_imputed)
+    label_pred_lr_mean = logistic_regression(data_train_mean_imputed, label_train,
+                                             data_test_mean_imputed)
+    label_pred_lr_zero = logistic_regression(data_train_zero_imputed, label_train,
+                                             data_test_zero_imputed)
+    label_pred_lr_mlgplvm = logistic_regression(data_train_mlgplvm_imputed, label_train,
+                                                data_test_mlgplvm_imputed)
+    label_pred_rf_mean = random_forest(data_train_mean_imputed, label_train,
+                                       data_test_mean_imputed)
+    label_pred_rf_zero = random_forest(data_train_zero_imputed, label_train,
+                                       data_test_zero_imputed)
+    label_pred_rf_mlgplvm = random_forest(data_train_mlgplvm_imputed, label_train,
+                                          data_test_mlgplvm_imputed)
 
     print_score(label_test, label_pred_lr_mean, model="LR Mean impute")
     print_score(label_test, label_pred_lr_zero, model="LR Zero impute")
@@ -109,7 +118,8 @@ def mlgplvm(data_train: np.ndarray, data_test: np.ndarray) -> Tuple[np.ndarray, 
             if i % print_interval == 0:
                 run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
                 run_metadata = tf.RunMetadata()
-                train_loss, summary = sess.run([loss, merged_summary], options=run_options, run_metadata=run_metadata)
+                train_loss, summary = sess.run([loss, merged_summary], options=run_options,
+                                               run_metadata=run_metadata)
                 summary_writer.add_run_metadata(run_metadata, f"step_{i}", global_step=i)
                 summary_writer.add_summary(summary, i)
                 loss_print = f"Step {i} - Loss: {train_loss}"
@@ -121,8 +131,9 @@ def mlgplvm(data_train: np.ndarray, data_test: np.ndarray) -> Tuple[np.ndarray, 
 
 def print_score(label: np.ndarray, prediction: np.ndarray, *, model: str) -> None:
     class_names = ["Alive", "Deceased"]
-    print(f"---- {model} ----\n"
-          f"{sklearn.metrics.classification_report(label, prediction, target_names=class_names)}\n")
+    classification_report = sklearn.metrics.classification_report(label, prediction,
+                                                                  target_names=class_names)
+    print(f"---- {model} ----\n {classification_report}\n")
 
 
 if __name__ == "__main__":

@@ -19,10 +19,12 @@ class TruncatedNormal(Likelihood):
         self._scale = tf.exp(self._log_scale, name=f"likelihood/normal_scale_{self._id}")
 
     def __call__(self, f: tf.Tensor) -> tfp.distributions.TruncatedNormal:
-        return tfp.distributions.TruncatedNormal(loc=f, scale=self._scale, low=self._lower, high=self._upper)
+        return tfp.distributions.TruncatedNormal(loc=f, scale=self._scale, low=self._lower,
+                                                 high=self._upper)
 
     def create_summaries(self) -> None:
-        tf.summary.scalar(f"normal_scale_{self._id}", tf.squeeze(self._scale), family=self._summary_family)
+        tf.summary.scalar(f"normal_scale_{self._id}", tf.squeeze(self._scale),
+                          family=self._summary_family)
 
     @staticmethod
     def __get_id() -> int:
