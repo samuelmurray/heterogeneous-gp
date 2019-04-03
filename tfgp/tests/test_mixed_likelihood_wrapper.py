@@ -29,12 +29,16 @@ class TestMixedLikelihoodWrapper(tf.test.TestCase):
         log_prob = self.likelihood.log_prob(f, y)
         self.assertShapeEqual(np.empty((1, 1, 3)), log_prob)
 
-    def test_likelihoods(self)-> None:
+    def test_likelihoods(self) -> None:
         likelihoods = self.likelihood.likelihoods
         self.assertEqual(3, len(likelihoods))
         self.assertIsInstance(likelihoods[0], Bernoulli)
         self.assertIsInstance(likelihoods[1], OneHotCategorical)
         self.assertIsInstance(likelihoods[2], Normal)
+
+    def test_dims_per_likelihood(self) -> None:
+        dims_per_likelihood = self.likelihood.dims_per_likelihood
+        self.assertAllEqual([slice(0, 1), slice(1, 4), slice(4, 5)], dims_per_likelihood)
 
     def test_num_dim(self) -> None:
         self.assertEqual(self.likelihood.num_dim, 5)
