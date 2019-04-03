@@ -37,22 +37,25 @@ class MLGP(InducingPointsModel):
         self.z = tf.get_variable("z", shape=[self.num_inducing, self.x_dim],
                                  initializer=tf.constant_initializer(z))
         with tf.variable_scope("qu"):
-            self.qu_mean = tf.get_variable("mean", shape=[self.y_dim, self.num_inducing],
-                                           initializer=tf.random_normal_initializer())
-            qu_shape = [self.y_dim, self.num_inducing * (self.num_inducing + 1) / 2]
-            qu_log_scale_vec = tf.get_variable("log_scale_vec", shape=qu_shape,
-                                               initializer=tf.zeros_initializer())
-            qu_log_scale = tfp.distributions.fill_triangular(qu_log_scale_vec,
-                                                             name="log_scale")
-            qu_log_scale_diag = tf.matrix_diag_part(qu_log_scale)
-            self.qu_scale = tf.identity(qu_log_scale
-                                        - tf.matrix_diag(qu_log_scale_diag)
-                                        + tf.matrix_diag(tf.exp(qu_log_scale_diag)),
-                                        name="scale")
+            self.qu_mean, self.qu_scale = self._create_qu()
 
     @property
     def num_samples(self) -> int:
         return self._num_samples
+
+    def _create_qu(self) -> Tuple[tf.Tensor, tf.Tensor]:
+        qu_mean = tf.get_variable("mean", shape=[self.y_dim, self.num_inducing],
+                                  initializer=tf.random_normal_initializer())
+        qu_shape = [self.y_dim, self.num_inducing * (self.num_inducing + 1) / 2]
+        qu_log_scale_vec = tf.get_variable("log_scale_vec", shape=qu_shape,
+                                           initializer=tf.zeros_initializer())
+        qu_log_scale = tfp.distributions.fill_triangular(qu_log_scale_vec, name="log_scale")
+        qu_log_scale_diag = tf.matrix_diag_part(qu_log_scale)
+        qu_scale = tf.identity(qu_log_scale
+                               - tf.matrix_diag(qu_log_scale_diag)
+                               + tf.matrix_diag(tf.exp(qu_log_scale_diag)),
+                               name="scale")
+        return qu_mean, qu_scale
 
     def initialize(self) -> None:
         tf.losses.add_loss(self._loss())
