@@ -30,9 +30,9 @@ class MLGPLVM(MLGP):
         with tf.variable_scope("qx"):
             self.qx_mean = tf.get_variable("mean", shape=[self.num_data, self.x_dim],
                                            initializer=tf.constant_initializer(x.T))
-            self.qx_log_var = tf.get_variable("log_var", shape=[self.num_data, self.x_dim],
-                                              initializer=tf.constant_initializer(0.1))
-            self.qx_var = tf.exp(self.qx_log_var, name="var")
+            qx_log_var = tf.get_variable("log_var", shape=[self.num_data, self.x_dim],
+                                         initializer=tf.constant_initializer(0.1))
+            self.qx_var = tf.exp(qx_log_var, name="var")
 
     def _elbo(self) -> tf.Tensor:
         with tf.name_scope("elbo"):

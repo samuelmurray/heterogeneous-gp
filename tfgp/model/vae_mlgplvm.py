@@ -25,7 +25,6 @@ class VAEMLGPLVM(BatchMLGPLVM):
         # qx is implicitly defined by neural network
         del self.qx_mean
         del self.qx_var
-        del self.qx_log_var
         del self.qx_mean_batch
         del self.qx_var_batch
 
