@@ -61,11 +61,13 @@ class MLGP(InducingPointsModel):
         tf.losses.add_loss(self._loss())
 
     def _loss(self) -> tf.Tensor:
-        loss = tf.negative(self._elbo(), name="elbo_loss")
+        with tf.name_scope("loss"):
+            loss = tf.negative(self._elbo(), name="loss")
         return loss
 
     def _elbo(self) -> tf.Tensor:
-        elbo = tf.identity(self._mc_expectation() - self._kl_qu_pu(), name="elbo")
+        with tf.name_scope("elbo"):
+            elbo = tf.identity(self._mc_expectation() - self._kl_qu_pu(), name="elbo")
         return elbo
 
     def _kl_qu_pu(self) -> tf.Tensor:
