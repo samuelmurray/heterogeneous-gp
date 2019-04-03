@@ -101,9 +101,7 @@ class MLGP(InducingPointsModel):
             k_zx = self.kernel(self.z, x, name="k_zx")
             k_xx = self.kernel(x, name="k_xx")
 
-            # a = Kzz^(-1) * Kzx
-            a = tf.matmul(k_zz_inv, k_zx, name="a")
-            a_tiled = tf.tile(tf.expand_dims(a, axis=0), multiples=[self.num_samples, 1, 1])
+            a = self._compute_a(k_zz_inv, k_zx)
 
             # K~ = Kxx - Kxz * Kzz^(-1) * Kzx
             k_tilde_full = tf.subtract(k_xx, tf.matmul(k_zx, a, transpose_a=True),
@@ -127,6 +125,12 @@ class MLGP(InducingPointsModel):
 
     def _get_or_subsample_y(self) -> tf.Tensor:
         return self.y
+
+    def _compute_a(self, k_zz_inv, k_zx) -> tf.Tensor:
+        # a = Kzz^(-1) * Kzx
+        a = tf.matmul(k_zz_inv, k_zx, name="a")
+        a_tiled = tf.tile(tf.expand_dims(a, axis=0), multiples=[self.num_samples, 1, 1])
+        return a_tiled
 
     def _sample_u(self) -> tf.Tensor:
         # u = qu_mean + qu_scale * e_u, e_u ~ N(0,1)
