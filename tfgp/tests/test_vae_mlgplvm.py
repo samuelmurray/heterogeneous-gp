@@ -19,7 +19,7 @@ class TestVAEMLGPLVM(tf.test.TestCase):
             y, _ = make_blobs(self.num_data, self.output_dim, num_classes)
             kernel = RBF()
             likelihood = MixedLikelihoodWrapper([Normal() for _ in range(self.output_dim)])
-            self.batch_size = 5
+            self.batch_size = 20
             num_hidden = 10
             num_samples = 10
             num_layers = 1
@@ -80,7 +80,6 @@ class TestVAEMLGPLVM(tf.test.TestCase):
                 sess.run(init)
                 y_impute = self.m.impute()
                 y_impute_arr = sess.run(y_impute, feed_dict=feed_dict)
-            self.assertEqual([None, self.output_dim], y_impute.shape.as_list())
             self.assertEqual([self.batch_size, self.output_dim], list(y_impute_arr.shape))
 
     def test_create_summary(self) -> None:
