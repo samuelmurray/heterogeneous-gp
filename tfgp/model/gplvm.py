@@ -15,11 +15,14 @@ class GPLVM(Model):
         if x is None:
             x = np.random.normal(size=(self.num_data, self.x_dim))
         elif x.shape[0] != self.num_data:
-            raise ValueError(f"First dimension of x and y must match, but x.shape={x.shape} and y.shape={y.shape}")
+            raise ValueError(f"First dimension of x and y must match, "
+                             f"but x.shape={x.shape} and y.shape={y.shape}")
         elif x.shape[1] != self.x_dim:
-            raise ValueError(f"Second dimension of x must be x_dim, but x.shape={x.shape} and x_dim={self.x_dim}")
+            raise ValueError(f"Second dimension of x must be x_dim, "
+                             f"but x.shape={x.shape} and x_dim={self.x_dim}")
         self.y = tf.convert_to_tensor(y, dtype=tf.float32, name="y")
-        self.x = tf.get_variable("x", shape=[self.num_data, self.x_dim], initializer=tf.constant_initializer(x))
+        self.x = tf.get_variable("x", shape=[self.num_data, self.x_dim],
+                                 initializer=tf.constant_initializer(x))
         self.kernel = kernel
 
     def initialize(self) -> None:
@@ -40,7 +43,8 @@ class GPLVM(Model):
             k_xx = self.kernel(self.x, name="k_xx")
             chol_xx = tf.cholesky(k_xx, name="chol_xx")
             a = tf.matrix_solve(tf.transpose(chol_xx), tf.matrix_solve(chol_xx, self.y), name="a")
-            y_transp_a = tf.multiply(0.5, tf.trace(tf.matmul(self.y, a, transpose_a=True)), name="y_transp_a")
+            y_transp_a = tf.multiply(0.5, tf.trace(tf.matmul(self.y, a, transpose_a=True)),
+                                     name="y_transp_a")
             chol_trace = tf.multiply(tf.reduce_sum(tf.log(tf.diag_part(chol_xx)), axis=0),
                                      self.y_dim,
                                      name="chol_trace")

@@ -23,8 +23,9 @@ class TestVAEMLGPLVM(tf.test.TestCase):
             num_hidden = 10
             num_samples = 10
             num_layers = 1
-            self.m = VAEMLGPLVM(y, self.latent_dim, kernel=kernel, likelihood=likelihood, num_hidden=num_hidden,
-                                num_samples=num_samples, num_layers=num_layers)
+            self.m = VAEMLGPLVM(y, self.latent_dim, kernel=kernel, likelihood=likelihood,
+                                num_hidden=num_hidden, num_samples=num_samples,
+                                num_layers=num_layers)
             self.m.initialize()
 
     def tearDown(self) -> None:
@@ -57,7 +58,8 @@ class TestVAEMLGPLVM(tf.test.TestCase):
             init = tf.global_variables_initializer()
             indices = np.arange(self.batch_size)
             feed_dict = {self.m.batch_indices: indices}
-            encoder_variables = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="vae_mlgplvm/encoder")
+            encoder_variables = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES,
+                                                  scope="vae_mlgplvm/encoder")
             with tf.Session() as sess:
                 sess.run(init)
                 variables_before = sess.run(encoder_variables)

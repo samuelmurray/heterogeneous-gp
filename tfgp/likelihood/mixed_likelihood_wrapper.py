@@ -18,7 +18,8 @@ class MixedLikelihoodWrapper:
         self._slices += [slice(dims_cum_sum[i], dims_cum_sum[i + 1]) for i in range(len(dims) - 1)]
 
     def __call__(self, f: tf.Tensor) -> List[tfp.distributions.Distribution]:
-        return [likelihood(f[:, :, dims]) for likelihood, dims in zip(self._likelihoods, self._slices)]
+        return [likelihood(f[:, :, dims]) for likelihood, dims in
+                zip(self._likelihoods, self._slices)]
 
     @property
     def num_dim(self) -> int:

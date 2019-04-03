@@ -57,11 +57,15 @@ class TestBatchMLGPLVM(tf.test.TestCase):
             qx_log_var = tf.get_variable("qx/log_var")
             with tf.Session() as sess:
                 sess.run(init)
-                qx_in_batch_before = sess.run([qx_mean[:self.batch_size], qx_log_var[:self.batch_size]])
-                qx_out_of_batch_before = sess.run([qx_mean[self.batch_size:], qx_log_var[self.batch_size:]])
+                qx_in_batch_before = sess.run(
+                    [qx_mean[:self.batch_size], qx_log_var[:self.batch_size]])
+                qx_out_of_batch_before = sess.run(
+                    [qx_mean[self.batch_size:], qx_log_var[self.batch_size:]])
                 sess.run(train_all, feed_dict=feed_dict)
-                qx_in_batch_after = sess.run([qx_mean[:self.batch_size], qx_log_var[:self.batch_size]])
-                qx_out_of_batch_after = sess.run([qx_mean[self.batch_size:], qx_log_var[self.batch_size:]])
+                qx_in_batch_after = sess.run(
+                    [qx_mean[:self.batch_size], qx_log_var[:self.batch_size]])
+                qx_out_of_batch_after = sess.run(
+                    [qx_mean[self.batch_size:], qx_log_var[self.batch_size:]])
 
             # Variables in batch should change
             for i, (before, after) in enumerate(zip(qx_in_batch_before, qx_in_batch_after)):
@@ -69,7 +73,8 @@ class TestBatchMLGPLVM(tf.test.TestCase):
                     self.assertTrue((before != after).all())
 
             # Variables out of batch should not change
-            for i, (before, after) in enumerate(zip(qx_out_of_batch_before, qx_out_of_batch_after)):
+            for i, (before, after) in enumerate(
+                    zip(qx_out_of_batch_before, qx_out_of_batch_after)):
                 with self.subTest(status_code=["mean", "var"][i]):
                     self.assertAllEqual(before, after)
 

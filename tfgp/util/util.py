@@ -27,7 +27,8 @@ def knn_rmse(x: np.ndarray, labels: np.ndarray, k: int) -> float:
     return np.sqrt(np.mean(np.square(labels - guess)))
 
 
-def _nrmse(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray, *, use_mean: bool) -> np.ndarray:
+def _nrmse(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray, *,
+           use_mean: bool) -> np.ndarray:
     nan_mask = np.isnan(y_missing)
     y_filtered = y_true.copy()
     y_filtered[~nan_mask] = np.nan
@@ -50,7 +51,8 @@ def nrmse_range(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndar
     return _nrmse(y_imputation, y_missing, y_true, use_mean=False)
 
 
-def categorical_error(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray) -> float:
+def categorical_error(y_imputation: np.ndarray, y_missing: np.ndarray,
+                      y_true: np.ndarray) -> float:
     nan_mask = np.isnan(y_missing)
     y_filtered = y_true.copy()
     y_filtered[~nan_mask] = np.nan
@@ -77,7 +79,8 @@ def imputation_error(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np
     num_nominal = 0
     for sli, lik in zip(likelihood._slices, likelihood._likelihoods):
         if isinstance(lik, OneHotCategorical):
-            nominal_error += categorical_error(y_imputation[:, sli], y_missing[:, sli], y_true[:, sli])
+            nominal_error += categorical_error(y_imputation[:, sli], y_missing[:, sli],
+                                               y_true[:, sli])
             num_nominal += 1
         else:
             numerical_error += nrmse_range(y_imputation[:, sli], y_missing[:, sli], y_true[:, sli])
@@ -97,7 +100,8 @@ def pca_reduce(x: np.ndarray, latent_dim: int, *, whiten: bool = False) -> np.nd
     return x_reduced
 
 
-def remove_data(y: np.ndarray, indices: np.ndarray, likelihood: MixedLikelihoodWrapper) -> np.ndarray:
+def remove_data(y: np.ndarray, indices: np.ndarray,
+                likelihood: MixedLikelihoodWrapper) -> np.ndarray:
     y_noisy = y.copy()
     idx = np.zeros(y.shape, dtype=bool)
     indices = indices.astype(np.int)
@@ -107,7 +111,8 @@ def remove_data(y: np.ndarray, indices: np.ndarray, likelihood: MixedLikelihoodW
     return y_noisy
 
 
-def remove_data_randomly(y: np.ndarray, frac: float, likelihood: MixedLikelihoodWrapper) -> np.ndarray:
+def remove_data_randomly(y: np.ndarray, frac: float,
+                         likelihood: MixedLikelihoodWrapper) -> np.ndarray:
     y_noisy = y.copy()
     num_missing = int(frac * likelihood.num_likelihoods)
     dims_missing = np.repeat([np.arange(likelihood.num_likelihoods)], y.shape[0], axis=0)

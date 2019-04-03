@@ -41,7 +41,8 @@ class TestRBF(tf.test.TestCase):
         a = np.random.normal(size=(5, 5))
         b = np.random.normal(size=(6, 5))
         k_sklearn = rbf_kernel(a, b, gamma=0.5)
-        k_rbf = self.kernel(tf.convert_to_tensor(a, dtype=tf.float32), tf.convert_to_tensor(b, dtype=tf.float32))
+        k_rbf = self.kernel(tf.convert_to_tensor(a, dtype=tf.float32),
+                            tf.convert_to_tensor(b, dtype=tf.float32))
         init = tf.global_variables_initializer()
         with self.test_session() as sess:
             sess.run(init)

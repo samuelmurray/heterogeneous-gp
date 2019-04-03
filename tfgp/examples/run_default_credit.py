@@ -49,7 +49,8 @@ def train_predict(model: BatchMLGPLVM) -> Tuple[float, float]:
             if i % n_print == 0:
                 run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
                 run_metadata = tf.RunMetadata()
-                train_loss, summary = sess.run([loss, merged_summary], options=run_options, run_metadata=run_metadata,
+                train_loss, summary = sess.run([loss, merged_summary], options=run_options,
+                                               run_metadata=run_metadata,
                                                feed_dict={model.batch_indices: all_indices})
                 summary_writer.add_run_metadata(run_metadata, f"step{i}")
                 summary_writer.add_summary(summary, i)
@@ -79,8 +80,8 @@ if __name__ == "__main__":
         if num_data is None:
             num_data = y.shape[0]
 
-        idx_to_remove = np.loadtxt(os.path.join(ROOT_PATH, os.pardir, "util", NAME, f"Missing20_{i}.csv"),
-                                   delimiter=",")
+        idx_to_remove = np.loadtxt(
+            os.path.join(ROOT_PATH, os.pardir, "util", NAME, f"Missing20_{i}.csv"), delimiter=",")
         idx_to_remove -= 1  # The files are 1-index for some reason
         y_noisy = tfgp.util.remove_data(y, idx_to_remove, likelihood)
 
@@ -91,7 +92,8 @@ if __name__ == "__main__":
             num_inducing = 100
             num_hidden = 100
             num_layers = 1
-            m = VAEMLGPLVM(y_noisy, latent_dim, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing,
+            m = VAEMLGPLVM(y_noisy, latent_dim, kernel=kernel, likelihood=likelihood,
+                           num_inducing=num_inducing,
                            num_hidden=num_hidden, num_layers=num_layers)
             try:
                 numerical_error, nominal_error = train_predict(m)
@@ -100,5 +102,7 @@ if __name__ == "__main__":
             else:
                 numerical_errors.append(numerical_error)
                 nominal_errors.append(nominal_error)
-    print(f"Numerical error over all 10 runs: {np.mean(numerical_errors)} +- {np.std(numerical_errors)}")
-    print(f"Nominal error over all 10 runs: {np.mean(nominal_errors)} +- {np.std(nominal_errors)}")
+    print(f"Numerical error over all 10 runs: {np.mean(numerical_errors)}"
+          f" +- {np.std(numerical_errors)}")
+    print(f"Nominal error over all 10 runs: {np.mean(nominal_errors)}"
+          f" +- {np.std(nominal_errors)}")
