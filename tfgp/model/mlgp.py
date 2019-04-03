@@ -121,7 +121,8 @@ class MLGP(InducingPointsModel):
         k_tilde = self._compute_k_tilde(x, a)
         num_data = tf.shape(x)[0]
         e_f = tf.random_normal(shape=[self.num_samples, self.y_dim, num_data], name="e_f")
-        f_mean = tf.matmul(u, a, name="f_mean")
+        a_tiled = tf.tile(tf.expand_dims(a, axis=0), multiples=[self.num_samples, 1, 1])
+        f_mean = tf.matmul(u, a_tiled, name="f_mean")
         f_noise = tf.multiply(tf.expand_dims(tf.sqrt(k_tilde), axis=1), e_f,
                               name="f_noise")
         f_samples = tf.add(f_mean, f_noise, name="f_samples")
@@ -133,15 +134,14 @@ class MLGP(InducingPointsModel):
         k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
         k_zx = self.kernel(self.z, x, name="k_zx")
         a = tf.matmul(k_zz_inv, k_zx, name="a")
-        a_tiled = tf.tile(tf.expand_dims(a, axis=0), multiples=[self.num_samples, 1, 1])
-        return a_tiled
+        return a
 
     def _compute_k_tilde(self, x, a) -> tf.Tensor:
         # K~ = Kxx - Kxz * Kzz^(-1) * Kzx
         k_zx = self.kernel(self.z, x, name="k_zx")
         k_xx = self.kernel(x, name="k_xx")
-        k_tilde_full = tf.subtract(k_xx, tf.matmul(k_zx, a, transpose_a=True),
-                                   name="k_tilde_full")
+        k_zx_times_a = tf.matmul(k_zx, a, transpose_a=True)
+        k_tilde_full = tf.subtract(k_xx, k_zx_times_a, name="k_tilde_full")
         k_tilde = tf.matrix_diag_part(k_tilde_full, name="diag_b")
         k_tilde_pos = tf.maximum(k_tilde, 1e-16, name="pos_b")  # k_tilde can't be negative
         k_tilde_pos_tiled = tf.tile(tf.expand_dims(k_tilde_pos, axis=0),
