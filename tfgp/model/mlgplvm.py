@@ -54,9 +54,6 @@ class MLGPLVM(MLGP):
 
     def _sample_f(self) -> tf.Tensor:
         with tf.name_scope("sample_f"):
-            k_zz = self.kernel(self.z, name="k_zz")
-            k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
-
             qx_mean, qx_var = self._get_or_subsample_qx()
             num_data = tf.shape(qx_mean)[0]
 
@@ -64,10 +61,7 @@ class MLGPLVM(MLGP):
             e_x = tf.random_normal(shape=[self._num_samples, num_data, self.x_dim], name="e_x")
             x_noise = tf.multiply(tf.sqrt(qx_var), e_x, name="x_noise")
             x_samples = tf.add(qx_mean, x_noise, name="x_samples")
-
-            # a = Kzz^(-1) * Kzx
-            a = tf.transpose(tf.tensordot(k_zz_inv, k_zx, axes=[1, 1]), perm=[1, 0, 2], name="a")
-
+            a = self._compute_a(x_samples)
             k_tilde = self._compute_k_tilde(x_samples, a)
 
             # f = a.T * u + sqrt(k_tilde) * e_f, e_f ~ N(0,1)
@@ -78,17 +72,25 @@ class MLGPLVM(MLGP):
     def _get_or_subsample_qx(self) -> Tuple[tf.Tensor, tf.Tensor]:
         return self.qx_mean, self.qx_var
 
+    def _compute_a(self, x) -> tf.Tensor:
+        # a = Kzz^(-1) * Kzx
+        z_tiled = tf.tile(tf.expand_dims(self.z, axis=0), multiples=[self._num_samples, 1, 1],
+                          name="z_tiled")
+        k_zx = self.kernel(z_tiled, x, name="k_zx")
+        k_zz = self.kernel(self.z, name="k_zz")
+        k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
+        a = tf.transpose(tf.tensordot(k_zz_inv, k_zx, axes=[1, 1]), perm=[1, 0, 2], name="a")
+        return a
+
     def _compute_k_tilde(self, x, a) -> tf.Tensor:
         # K~ = Kxx - Kxz * Kzz^(-1) * Kzx
         z_tiled = tf.tile(tf.expand_dims(self.z, axis=0), multiples=[self._num_samples, 1, 1],
                           name="z_tiled")
         k_zx = self.kernel(z_tiled, x, name="k_zx")
         k_xx = self.kernel(x, name="k_xx")
-        k_tilde_full = tf.subtract(k_xx, tf.matmul(k_zx, a, transpose_a=True),
-                                   name="k_tilde_full")
+        k_tilde_full = tf.subtract(k_xx, tf.matmul(k_zx, a, transpose_a=True), name="k_tilde_full")
         k_tilde = tf.matrix_diag_part(k_tilde_full, name="k_tilde")
-        # k_tilde can't be negative
-        k_tilde_pos = tf.maximum(k_tilde, 1e-16, name="k_tilde_pos")
+        k_tilde_pos = tf.maximum(k_tilde, 1e-16, name="k_tilde_pos")  # k_tilde can't be negative
         return k_tilde_pos
 
     def _sample_f_from_x_and_u(self, x, u) -> tf.Tensor:
