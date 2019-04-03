@@ -40,9 +40,9 @@ class MLGP(InducingPointsModel):
             self.qu_mean = tf.get_variable("mean", shape=[self.y_dim, self.num_inducing],
                                            initializer=tf.random_normal_initializer())
             qu_shape = [self.y_dim, self.num_inducing * (self.num_inducing + 1) / 2]
-            self.qu_log_scale_vec = tf.get_variable("log_scale_vec", shape=qu_shape,
-                                                    initializer=tf.zeros_initializer())
-            self.qu_log_scale = tfp.distributions.fill_triangular(self.qu_log_scale_vec,
+            qu_log_scale_vec = tf.get_variable("log_scale_vec", shape=qu_shape,
+                                               initializer=tf.zeros_initializer())
+            self.qu_log_scale = tfp.distributions.fill_triangular(qu_log_scale_vec,
                                                                   name="log_scale")
             qu_log_scale_diag = tf.matrix_diag_part(self.qu_log_scale)
             self.qu_scale = tf.identity(self.qu_log_scale
