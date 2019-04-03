@@ -20,15 +20,24 @@ class TestGP(tf.test.TestCase):
     def tearDown(self) -> None:
         tf.reset_default_graph()
 
-    def test_predict(self) -> None:
+    def test_predict_mean_shape(self) -> None:
         with tf.variable_scope("gp", reuse=tf.AUTO_REUSE):
             num_test = 30
             init = tf.global_variables_initializer()
             with self.session() as sess:
                 sess.run(init)
                 x_test = np.linspace(0, 2 * np.pi, num_test)[:, None]
-                mean, cov = self.m.predict(x_test)
+                mean, _ = self.m.predict(x_test)
             self.assertShapeEqual(np.empty([num_test, self.output_dim]), mean)
+
+    def test_predict_cov_shape(self) -> None:
+        with tf.variable_scope("gp", reuse=tf.AUTO_REUSE):
+            num_test = 30
+            init = tf.global_variables_initializer()
+            with self.session() as sess:
+                sess.run(init)
+                x_test = np.linspace(0, 2 * np.pi, num_test)[:, None]
+                _, cov = self.m.predict(x_test)
             self.assertShapeEqual(np.empty([num_test, num_test]), cov)
 
     def test_shape_mismatch_exception(self) -> None:
