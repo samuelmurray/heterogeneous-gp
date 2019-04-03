@@ -23,11 +23,6 @@ class TestMixedLikelihoodWrapper(tf.test.TestCase):
                           tfp.distributions.Normal]
         self.assertAllEqual(ret_types, expected_types)
 
-    def test_call_return_shape(self) -> None:
-        f = tf.constant(np.array([[[0.7, 0.4, 0.4, 0.2, 2.]]]), dtype=tf.float32)
-        ret = self.likelihood(f)
-        self.assertEqual(3, len(ret))
-
     def test_log_prob(self) -> None:
         f = tf.constant(np.array([[[0.7, 0.4, 0.4, 0.2, 2.]]]), dtype=tf.float32)
         y = tf.constant(np.array([[1, 1, 0, 0, 2.3]]), dtype=tf.float32)
