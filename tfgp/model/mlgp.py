@@ -167,7 +167,7 @@ class MLGP(InducingPointsModel):
                            enumerate(self.likelihood.likelihoods)]
             means = [lik.mean() for lik in likelihoods]
             mean = tf.stack(means, axis=1, name="mean")
-            stds = [lik.std() for lik in likelihoods]
+            stds = [lik.stddev() for lik in likelihoods]
             std = tf.stack(stds, axis=1, name="std")
         return mean, std
 
