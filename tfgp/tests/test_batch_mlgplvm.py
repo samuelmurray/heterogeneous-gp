@@ -87,7 +87,6 @@ class TestBatchMLGPLVM(tf.test.TestCase):
                 sess.run(init)
                 y_impute = self.m.impute()
                 y_impute_arr = sess.run(y_impute, feed_dict=feed_dict)
-            self.assertEqual([None, self.output_dim], y_impute.shape.as_list())
             self.assertEqual([self.batch_size, self.output_dim], list(y_impute_arr.shape))
 
     def test_create_summary(self) -> None:
