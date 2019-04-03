@@ -44,18 +44,18 @@ class MLGP(InducingPointsModel):
         return self._num_samples
 
     def _create_qu(self) -> Tuple[tf.Tensor, tf.Tensor]:
-        qu_mean = tf.get_variable("mean", shape=[self.y_dim, self.num_inducing],
-                                  initializer=tf.random_normal_initializer())
-        qu_shape = [self.y_dim, self.num_inducing * (self.num_inducing + 1) / 2]
-        qu_log_scale_vec = tf.get_variable("log_scale_vec", shape=qu_shape,
-                                           initializer=tf.zeros_initializer())
-        qu_log_scale = tfp.distributions.fill_triangular(qu_log_scale_vec, name="log_scale")
-        qu_log_scale_diag = tf.matrix_diag_part(qu_log_scale)
-        qu_scale = tf.identity(qu_log_scale
-                               - tf.matrix_diag(qu_log_scale_diag)
-                               + tf.matrix_diag(tf.exp(qu_log_scale_diag)),
-                               name="scale")
-        return qu_mean, qu_scale
+        mean = tf.get_variable("mean", shape=[self.y_dim, self.num_inducing],
+                               initializer=tf.random_normal_initializer())
+        log_scale_shape = [self.y_dim, self.num_inducing * (self.num_inducing + 1) / 2]
+        log_scale_vec = tf.get_variable("log_scale_vec", shape=log_scale_shape,
+                                        initializer=tf.zeros_initializer())
+        log_scale = tfp.distributions.fill_triangular(log_scale_vec, name="log_scale")
+        log_scale_diag_part = tf.matrix_diag_part(log_scale)
+        scale = tf.identity(log_scale
+                            - tf.matrix_diag(log_scale_diag_part)
+                            + tf.matrix_diag(tf.exp(log_scale_diag_part)),
+                            name="scale")
+        return mean, scale
 
     def initialize(self) -> None:
         tf.losses.add_loss(self._loss())
