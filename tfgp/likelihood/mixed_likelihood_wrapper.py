@@ -32,16 +32,19 @@ class MixedLikelihoodWrapper:
         with tf.name_scope(name):
             nan_mask = tf.is_nan(y, name="nan_mask")
             y_wo_nans = tf.where(nan_mask, tf.zeros_like(y), y, name="y_wo_nans")
-            log_prob = tf.stack(
-                [
-                    tf.reshape(likelihood(f[:, :, dims]).log_prob(y_wo_nans[:, dims]), shape=[-1, tf.shape(y)[0]]) for
-                    likelihood, dims in zip(self._likelihoods, self._slices)
-                ],
-                axis=2
-            )
-            f_mask = tf.stack([nan_mask[:, sl.start] for sl in self._slices], axis=1, name="f_mask")
-            tiled_mask = tf.tile(tf.expand_dims(f_mask, axis=0), multiples=[tf.shape(f)[0], 1, 1], name="tiled_mask")
-            filtered_log_prob = tf.where(tiled_mask, tf.zeros_like(log_prob), log_prob, name="filtered_log_prob")
+
+            log_probs = [likelihood(f[:, :, dims]).log_prob(y_wo_nans[:, dims]) for
+                         likelihood, dims in zip(self._likelihoods, self._slices)]
+            log_probs_reshaped = [tf.reshape(log_prob, shape=[-1, tf.shape(y)[0]])
+                                  for log_prob in log_probs]
+            stacked_log_probs = tf.stack(log_probs_reshaped, axis=2)
+            f_mask = tf.stack([nan_mask[:, sl.start] for sl in self._slices], axis=1,
+                              name="f_mask")
+            tiled_mask = tf.tile(tf.expand_dims(f_mask, axis=0), multiples=[tf.shape(f)[0], 1, 1],
+                                 name="tiled_mask")
+            filtered_log_prob = tf.where(tiled_mask, tf.zeros_like(stacked_log_probs),
+                                         stacked_log_probs,
+                                         name="filtered_log_prob")
         return filtered_log_prob
 
     def create_summaries(self) -> None:
