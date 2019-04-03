@@ -24,7 +24,7 @@ class TestGP(tf.test.TestCase):
         with tf.variable_scope("gp", reuse=tf.AUTO_REUSE):
             num_test = 30
             init = tf.global_variables_initializer()
-            with tf.Session() as sess:
+            with self.session() as sess:
                 sess.run(init)
                 x_test = np.linspace(0, 2 * np.pi, num_test)[:, None]
                 mean, cov = self.m.predict(x_test)

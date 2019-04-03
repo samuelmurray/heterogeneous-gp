@@ -39,7 +39,7 @@ class TestMLGP(tf.test.TestCase):
 
             indices = np.arange(self.batch_size)
             feed_dict = {self.m.batch_indices: indices}
-            with tf.Session() as sess:
+            with self.session() as sess:
                 sess.run(init)
                 loss_before = sess.run(loss, feed_dict=feed_dict)
                 sess.run(train_all, feed_dict=feed_dict)
@@ -50,7 +50,7 @@ class TestMLGP(tf.test.TestCase):
         with tf.variable_scope("batch_mlgp", reuse=tf.AUTO_REUSE):
             num_test = 30
             init = tf.global_variables_initializer()
-            with tf.Session() as sess:
+            with self.session() as sess:
                 sess.run(init)
                 x_test = np.linspace(-2, 2 * np.pi + 2, num_test)[:, None]
                 mean, std = self.m.predict(x_test)

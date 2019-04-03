@@ -41,7 +41,7 @@ class TestVAEMLGPLVM(tf.test.TestCase):
             init = tf.global_variables_initializer()
             indices = np.arange(self.batch_size)
             feed_dict = {self.m.batch_indices: indices}
-            with tf.Session() as sess:
+            with self.session() as sess:
                 sess.run(init)
                 loss_before = sess.run(loss, feed_dict=feed_dict)
                 sess.run(train_all, feed_dict=feed_dict)
@@ -60,7 +60,7 @@ class TestVAEMLGPLVM(tf.test.TestCase):
             feed_dict = {self.m.batch_indices: indices}
             encoder_variables = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES,
                                                   scope="vae_mlgplvm/encoder")
-            with tf.Session() as sess:
+            with self.session() as sess:
                 sess.run(init)
                 variables_before = sess.run(encoder_variables)
                 sess.run(train_all, feed_dict=feed_dict)
@@ -76,7 +76,7 @@ class TestVAEMLGPLVM(tf.test.TestCase):
             init = tf.global_variables_initializer()
             indices = np.arange(self.batch_size)
             feed_dict = {self.m.batch_indices: indices}
-            with tf.Session() as sess:
+            with self.session() as sess:
                 sess.run(init)
                 y_impute = self.m.impute()
                 y_impute_arr = sess.run(y_impute, feed_dict=feed_dict)

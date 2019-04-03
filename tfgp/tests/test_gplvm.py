@@ -35,7 +35,7 @@ class TestGPLVM(tf.test.TestCase):
             train_all = optimizer.minimize(loss, var_list=tf.trainable_variables())
 
             init = tf.global_variables_initializer()
-            with tf.Session() as sess:
+            with self.session() as sess:
                 sess.run(init)
                 loss_before = sess.run(loss)
                 sess.run(train_all)

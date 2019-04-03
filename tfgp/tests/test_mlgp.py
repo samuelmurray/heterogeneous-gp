@@ -38,7 +38,7 @@ class TestMLGP(tf.test.TestCase):
             train_all = optimizer.minimize(loss, var_list=tf.trainable_variables())
 
             init = tf.global_variables_initializer()
-            with tf.Session() as sess:
+            with self.session() as sess:
                 sess.run(init)
                 loss_before = sess.run(loss)
                 sess.run(train_all)
@@ -49,7 +49,7 @@ class TestMLGP(tf.test.TestCase):
         with tf.variable_scope("mlgp", reuse=tf.AUTO_REUSE):
             num_test = 30
             init = tf.global_variables_initializer()
-            with tf.Session() as sess:
+            with self.session() as sess:
                 sess.run(init)
                 x_test = np.linspace(-2, 2 * np.pi + 2, num_test)[:, None]
                 mean, std = self.m.predict(x_test)

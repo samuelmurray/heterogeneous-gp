@@ -33,7 +33,7 @@ class TestMLGPLVM(tf.test.TestCase):
             train_all = optimizer.minimize(loss, var_list=tf.trainable_variables())
 
             init = tf.global_variables_initializer()
-            with tf.Session() as sess:
+            with self.session() as sess:
                 sess.run(init)
                 loss_before = sess.run(loss)
                 sess.run(train_all)
@@ -43,7 +43,7 @@ class TestMLGPLVM(tf.test.TestCase):
     def test_impute(self) -> None:
         with tf.variable_scope("mlgplvm", reuse=tf.AUTO_REUSE):
             init = tf.global_variables_initializer()
-            with tf.Session() as sess:
+            with self.session() as sess:
                 sess.run(init)
                 y_impute = self.m.impute()
             self.assertShapeEqual(np.empty((self.num_data, self.output_dim)), y_impute)
