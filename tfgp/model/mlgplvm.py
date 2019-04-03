@@ -83,22 +83,22 @@ class MLGPLVM(MLGP):
         f_samples = tf.add(f_mean, f_noise, name="f_samples")
         return f_samples
 
-    def _compute_a(self, x: tf.Tensor) -> tf.Tensor:
+    def _compute_a(self, x_samples: tf.Tensor) -> tf.Tensor:
         # a = Kzz^(-1) * Kzx
         z_tiled = tf.tile(tf.expand_dims(self.z, axis=0), multiples=[self._num_samples, 1, 1],
                           name="z_tiled")
-        k_zx = self.kernel(z_tiled, x, name="k_zx")
+        k_zx = self.kernel(z_tiled, x_samples, name="k_zx")
         k_zz = self.kernel(self.z, name="k_zz")
         k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
         a = tf.transpose(tf.tensordot(k_zz_inv, k_zx, axes=[1, 1]), perm=[1, 0, 2], name="a")
         return a
 
-    def _compute_k_tilde(self, x: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
+    def _compute_k_tilde(self, x_samples: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
         # K~ = Kxx - Kxz * Kzz^(-1) * Kzx
         z_tiled = tf.tile(tf.expand_dims(self.z, axis=0), multiples=[self._num_samples, 1, 1],
                           name="z_tiled")
-        k_zx = self.kernel(z_tiled, x, name="k_zx")
-        k_xx = self.kernel(x, name="k_xx")
+        k_zx = self.kernel(z_tiled, x_samples, name="k_zx")
+        k_xx = self.kernel(x_samples, name="k_xx")
         k_tilde_full = tf.subtract(k_xx, tf.matmul(k_zx, a, transpose_a=True), name="k_tilde_full")
         k_tilde = tf.matrix_diag_part(k_tilde_full, name="k_tilde")
         k_tilde_pos = tf.maximum(k_tilde, 1e-16, name="k_tilde_pos")  # k_tilde can't be negative
