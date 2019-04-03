@@ -48,7 +48,6 @@ class TestARDRBF(tf.test.TestCase):
         b = tf.convert_to_tensor(np.random.normal(size=(2, 12, 5)), dtype=tf.float32)
         k = self.kernel(a, b)
         self.assertShapeEqual(np.empty([2, 10, 12]), k)
-        self.kernel.create_summaries()
 
     def test_create_summary(self) -> None:
         self.kernel.create_summaries()
