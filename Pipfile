@@ -6,6 +6,9 @@ verify_ssl = true
 [requires]
 python_version = "3.7"
 
+[scripts]
+test = "pytest --pep8 --flakes"
+
 [packages]
 IPython = "*"
 jupyter = "*"
