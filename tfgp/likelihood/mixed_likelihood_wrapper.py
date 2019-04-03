@@ -51,9 +51,10 @@ class MixedLikelihoodWrapper:
             f_mask = tf.stack([nan_mask[:, dims.start] for dims in self.dims_per_likelihood],
                               axis=1,
                               name="f_mask")
-            tiled_mask = tf.tile(tf.expand_dims(f_mask, axis=0), multiples=[tf.shape(f)[0], 1, 1],
-                                 name="tiled_mask")
-            filtered_log_prob = tf.where(tiled_mask, tf.zeros_like(stacked_log_probs),
+            tiled_f_mask = tf.tile(tf.expand_dims(f_mask, axis=0),
+                                   multiples=[tf.shape(f)[0], 1, 1],
+                                   name="tiled_mask")
+            filtered_log_prob = tf.where(tiled_f_mask, tf.zeros_like(stacked_log_probs),
                                          stacked_log_probs,
                                          name="filtered_log_prob")
         return filtered_log_prob
