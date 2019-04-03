@@ -54,17 +54,19 @@ class MLGPLVM(MLGP):
 
     def _sample_f(self) -> tf.Tensor:
         with tf.name_scope("sample_f"):
-            qx_mean, qx_var = self._get_or_subsample_qx()
-            num_data = tf.shape(qx_mean)[0]
-
-            # x = qx_mean + qx_std * e_x, e_x ~ N(0,1)
-            e_x = tf.random_normal(shape=[self._num_samples, num_data, self.x_dim], name="e_x")
-            x_noise = tf.multiply(tf.sqrt(qx_var), e_x, name="x_noise")
-            x_samples = tf.add(qx_mean, x_noise, name="x_samples")
-
+            x_samples = self._sample_x()
             u_samples = self._sample_u()
             f_samples = self._sample_f_from_x_and_u(x_samples, u_samples)
         return f_samples
+
+    def _sample_x(self) -> tf.Tensor:
+        # x = qx_mean + qx_std * e_x, e_x ~ N(0,1)
+        qx_mean, qx_var = self._get_or_subsample_qx()
+        num_data = tf.shape(qx_mean)[0]
+        e_x = tf.random_normal(shape=[self._num_samples, num_data, self.x_dim], name="e_x")
+        x_noise = tf.multiply(tf.sqrt(qx_var), e_x, name="x_noise")
+        x_samples = tf.add(qx_mean, x_noise, name="x_samples")
+        return x_samples
 
     def _get_or_subsample_qx(self) -> Tuple[tf.Tensor, tf.Tensor]:
         return self.qx_mean, self.qx_var
