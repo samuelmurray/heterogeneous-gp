@@ -69,6 +69,18 @@ class MLGPLVM(MLGP):
     def _get_or_subsample_qx(self) -> Tuple[tf.Tensor, tf.Tensor]:
         return self.qx_mean, self.qx_var
 
+    def _sample_f_from_x_and_u(self, x, u) -> tf.Tensor:
+        # f = a.T * u + sqrt(k_tilde) * e_f, e_f ~ N(0,1)
+        a = self._compute_a(x)
+        k_tilde = self._compute_k_tilde(x, a)
+        num_data = tf.shape(x)[0]
+        e_f = tf.random_normal(shape=[self._num_samples, self.y_dim, num_data], name="e_f")
+        f_mean = tf.matmul(u, a, name="f_mean")
+        f_noise = tf.multiply(tf.expand_dims(tf.sqrt(k_tilde), axis=1), e_f,
+                              name="f_noise")
+        f_samples = tf.add(f_mean, f_noise, name="f_samples")
+        return f_samples
+
     def _compute_a(self, x) -> tf.Tensor:
         # a = Kzz^(-1) * Kzx
         z_tiled = tf.tile(tf.expand_dims(self.z, axis=0), multiples=[self._num_samples, 1, 1],
@@ -89,18 +101,6 @@ class MLGPLVM(MLGP):
         k_tilde = tf.matrix_diag_part(k_tilde_full, name="k_tilde")
         k_tilde_pos = tf.maximum(k_tilde, 1e-16, name="k_tilde_pos")  # k_tilde can't be negative
         return k_tilde_pos
-
-    def _sample_f_from_x_and_u(self, x, u) -> tf.Tensor:
-        # f = a.T * u + sqrt(k_tilde) * e_f, e_f ~ N(0,1)
-        a = self._compute_a(x)
-        k_tilde = self._compute_k_tilde(x, a)
-        num_data = tf.shape(x)[0]
-        e_f = tf.random_normal(shape=[self._num_samples, self.y_dim, num_data], name="e_f")
-        f_mean = tf.matmul(u, a, name="f_mean")
-        f_noise = tf.multiply(tf.expand_dims(tf.sqrt(k_tilde), axis=1), e_f,
-                              name="f_noise")
-        f_samples = tf.add(f_mean, f_noise, name="f_samples")
-        return f_samples
 
     def impute(self) -> tf.Tensor:
         with tf.name_scope("impute"):
