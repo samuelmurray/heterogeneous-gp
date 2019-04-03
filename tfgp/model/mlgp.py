@@ -155,13 +155,6 @@ class MLGP(InducingPointsModel):
             mean = tf.stack(means, axis=1, name="mean")
             stds = [lik.std() for lik in likelihoods]
             std = tf.stack(stds, axis=1, name="std")
-
-        """
-        k_xsxs = self.kernel(xs)
-        f_cov = k_xsxs - tf.matmul(tf.matmul(k_xs_z, k_zz_inv), k_xs_z, transpose_b=True)
-        f_cov_pos = tf.maximum(f_cov, 0.)
-        f_std = tf.expand_dims(tf.sqrt(tf.matrix_diag_part(f_cov_pos)), axis=-1)
-        """
         return mean, std
 
     def create_summaries(self) -> None:
