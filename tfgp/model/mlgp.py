@@ -127,10 +127,11 @@ class MLGP(InducingPointsModel):
         f_samples = tf.add(f_mean, f_noise, name="f_samples")
         return f_samples
 
-    def _compute_a(self, k_zx) -> tf.Tensor:
+    def _compute_a(self, x) -> tf.Tensor:
         # a = Kzz^(-1) * Kzx
         k_zz = self.kernel(self.z, name="k_zz")
         k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
+        k_zx = self.kernel(self.z, x, name="k_zx")
         a = tf.matmul(k_zz_inv, k_zx, name="a")
         a_tiled = tf.tile(tf.expand_dims(a, axis=0), multiples=[self.num_samples, 1, 1])
         return a_tiled
