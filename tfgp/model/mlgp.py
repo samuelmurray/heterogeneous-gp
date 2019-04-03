@@ -92,15 +92,9 @@ class MLGP(InducingPointsModel):
 
     def _sample_f(self) -> tf.Tensor:
         with tf.name_scope("sample_f"):
-            k_zz = self.kernel(self.z, name="k_zz")
-            k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
-
             x = self._get_or_subsample_x()
-            k_zx = self.kernel(self.z, x, name="k_zx")
-            k_xx = self.kernel(x, name="k_xx")
-
-            a = self._compute_a(k_zz_inv, k_zx)
-            k_tilde = self._compute_k_tilde(k_xx, k_zx, a)
+            a = self._compute_a(x)
+            k_tilde = self._compute_k_tilde(x, a)
             u_samples = self._sample_u()
             f_samples = self._sample_f_from_x_and_u(x, u_samples, a, k_tilde)
         return f_samples
@@ -111,14 +105,18 @@ class MLGP(InducingPointsModel):
     def _get_or_subsample_y(self) -> tf.Tensor:
         return self.y
 
-    def _compute_a(self, k_zz_inv, k_zx) -> tf.Tensor:
+    def _compute_a(self, k_zx) -> tf.Tensor:
         # a = Kzz^(-1) * Kzx
+        k_zz = self.kernel(self.z, name="k_zz")
+        k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
         a = tf.matmul(k_zz_inv, k_zx, name="a")
         a_tiled = tf.tile(tf.expand_dims(a, axis=0), multiples=[self.num_samples, 1, 1])
         return a_tiled
 
-    def _compute_k_tilde(self, k_xx, k_zx, a) -> tf.Tensor:
+    def _compute_k_tilde(self, x, a) -> tf.Tensor:
         # K~ = Kxx - Kxz * Kzz^(-1) * Kzx
+        k_zx = self.kernel(self.z, x, name="k_zx")
+        k_xx = self.kernel(x, name="k_xx")
         k_tilde_full = tf.subtract(k_xx, tf.matmul(k_zx, a, transpose_a=True),
                                    name="k_tilde_full")
         k_tilde = tf.matrix_diag_part(k_tilde_full, name="diag_b")
