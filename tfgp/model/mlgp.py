@@ -96,21 +96,13 @@ class MLGP(InducingPointsModel):
             k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
 
             x = self._get_or_subsample_x()
-            num_data = tf.shape(x)[0]
-
             k_zx = self.kernel(self.z, x, name="k_zx")
             k_xx = self.kernel(x, name="k_xx")
 
             a = self._compute_a(k_zz_inv, k_zx)
             k_tilde = self._compute_k_tilde(k_xx, k_zx, a)
-
-            # f = a.T * u + sqrt(K~) * e_f, e_f ~ N(0,1)
-            u_sample = self._sample_u()
-            e_f = tf.random_normal(shape=[self.num_samples, self.y_dim, num_data], name="e_f")
-            f_mean = tf.matmul(u_sample, a, name="f_mean")
-            f_noise = tf.multiply(tf.expand_dims(tf.sqrt(k_tilde), axis=1), e_f,
-                                  name="f_noise")
-            f_samples = tf.add(f_mean, f_noise, name="f_samples")
+            u_samples = self._sample_u()
+            f_samples = self._sample_f_from_x_and_u(x, u_samples, a, k_tilde)
         return f_samples
 
     def _get_or_subsample_x(self) -> tf.Tensor:
@@ -125,7 +117,7 @@ class MLGP(InducingPointsModel):
         a_tiled = tf.tile(tf.expand_dims(a, axis=0), multiples=[self.num_samples, 1, 1])
         return a_tiled
 
-    def _compute_k_tilde(self, k_xx, k_zx, a):
+    def _compute_k_tilde(self, k_xx, k_zx, a) -> tf.Tensor:
         # K~ = Kxx - Kxz * Kzz^(-1) * Kzx
         k_tilde_full = tf.subtract(k_xx, tf.matmul(k_zx, a, transpose_a=True),
                                    name="k_tilde_full")
@@ -141,6 +133,16 @@ class MLGP(InducingPointsModel):
         u_noise = tf.einsum("ijk,tik->tij", self.qu_scale, e_u, name="u_noise")
         u_samples = tf.add(self.qu_mean, u_noise, name="u_samples")
         return u_samples
+
+    def _sample_f_from_x_and_u(self, x, u_sample, a, k_tilde) -> tf.Tensor:
+        # f = a.T * u + sqrt(K~) * e_f, e_f ~ N(0,1)
+        num_data = tf.shape(x)[0]
+        e_f = tf.random_normal(shape=[self.num_samples, self.y_dim, num_data], name="e_f")
+        f_mean = tf.matmul(u_sample, a, name="f_mean")
+        f_noise = tf.multiply(tf.expand_dims(tf.sqrt(k_tilde), axis=1), e_f,
+                              name="f_noise")
+        f_samples = tf.add(f_mean, f_noise, name="f_samples")
+        return f_samples
 
     def predict(self, xs: np.ndarray) -> Tuple[tf.Tensor, tf.Tensor]:
         # TODO: Not clear how to report the variances.
