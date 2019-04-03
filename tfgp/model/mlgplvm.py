@@ -63,7 +63,7 @@ class MLGPLVM(MLGP):
         # x = qx_mean + qx_std * e_x, e_x ~ N(0,1)
         qx_mean, qx_var = self._get_or_subsample_qx()
         num_data = tf.shape(qx_mean)[0]
-        e_x = tf.random_normal(shape=[self._num_samples, num_data, self.x_dim], name="e_x")
+        e_x = tf.random_normal(shape=[self.num_samples, num_data, self.x_dim], name="e_x")
         x_noise = tf.multiply(tf.sqrt(qx_var), e_x, name="x_noise")
         x_samples = tf.add(qx_mean, x_noise, name="x_samples")
         return x_samples
@@ -76,7 +76,7 @@ class MLGPLVM(MLGP):
         a = self._compute_a(x_samples)
         k_tilde = self._compute_k_tilde(x_samples, a)
         num_data = tf.shape(x_samples)[1]
-        e_f = tf.random_normal(shape=[self._num_samples, self.y_dim, num_data], name="e_f")
+        e_f = tf.random_normal(shape=[self.num_samples, self.y_dim, num_data], name="e_f")
         f_mean = tf.matmul(u_samples, a, name="f_mean")
         f_noise = tf.multiply(tf.expand_dims(tf.sqrt(k_tilde), axis=1), e_f,
                               name="f_noise")
@@ -85,7 +85,7 @@ class MLGPLVM(MLGP):
 
     def _compute_a(self, x_samples: tf.Tensor) -> tf.Tensor:
         # a = Kzz^(-1) * Kzx
-        z_tiled = tf.tile(tf.expand_dims(self.z, axis=0), multiples=[self._num_samples, 1, 1],
+        z_tiled = tf.tile(tf.expand_dims(self.z, axis=0), multiples=[self.num_samples, 1, 1],
                           name="z_tiled")
         k_zx = self.kernel(z_tiled, x_samples, name="k_zx")
         k_zz = self.kernel(self.z, name="k_zz")
@@ -95,7 +95,7 @@ class MLGPLVM(MLGP):
 
     def _compute_k_tilde(self, x_samples: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
         # K~ = Kxx - Kxz * Kzz^(-1) * Kzx
-        z_tiled = tf.tile(tf.expand_dims(self.z, axis=0), multiples=[self._num_samples, 1, 1],
+        z_tiled = tf.tile(tf.expand_dims(self.z, axis=0), multiples=[self.num_samples, 1, 1],
                           name="z_tiled")
         k_zx = self.kernel(z_tiled, x_samples, name="k_zx")
         k_xx = self.kernel(x_samples, name="k_xx")
