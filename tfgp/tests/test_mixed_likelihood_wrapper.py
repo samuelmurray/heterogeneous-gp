@@ -15,19 +15,25 @@ class TestMixedLikelihoodWrapper(tf.test.TestCase):
     def tearDown(self) -> None:
         tf.reset_default_graph()
 
-    def test_call(self) -> None:
+    def test_call_return_type(self) -> None:
+        f = tf.constant(np.array([[[0.7, 0.4, 0.4, 0.2, 2.]]]), dtype=tf.float32)
+        ret = self.likelihood(f)
+        ret_types = [type(r) for r in ret]
+        expected_types = [tfp.distributions.Bernoulli, tfp.distributions.OneHotCategorical,
+                          tfp.distributions.Normal]
+        self.assertAllEqual(ret_types, expected_types)
+
+    def test_call_return_shape(self) -> None:
         f = tf.constant(np.array([[[0.7, 0.4, 0.4, 0.2, 2.]]]), dtype=tf.float32)
         ret = self.likelihood(f)
         self.assertEqual(3, len(ret))
-        self.assertIsInstance(ret[0], tfp.distributions.Bernoulli)
-        self.assertIsInstance(ret[1], tfp.distributions.OneHotCategorical)
-        self.assertIsInstance(ret[2], tfp.distributions.Normal)
 
     def test_log_prob(self) -> None:
         f = tf.constant(np.array([[[0.7, 0.4, 0.4, 0.2, 2.]]]), dtype=tf.float32)
         y = tf.constant(np.array([[1, 1, 0, 0, 2.3]]), dtype=tf.float32)
         log_prob = self.likelihood.log_prob(f, y)
         self.assertShapeEqual(np.empty((1, 1, 3)), log_prob)
+        self.assertNDArrayNear()
 
     def test_likelihoods(self) -> None:
         likelihoods = self.likelihood.likelihoods
