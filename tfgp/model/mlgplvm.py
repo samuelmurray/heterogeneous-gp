@@ -99,17 +99,11 @@ class MLGPLVM(MLGP):
                                self.qu_mean,
                                transpose_b=True, name="f_mean")
             posteriors = self.likelihood(tf.expand_dims(f_mean, 0))
-            modes = tf.concat(
-                [
-                    tf.to_float(tf.squeeze(p.mode(), axis=0))
-                    for p in posteriors
-                ],
-                axis=1,
-                name="modes"
-            )
+            modes = [tf.to_float(tf.squeeze(p.mode(), axis=0)) for p in posteriors]
+            mode = tf.concat(modes, axis=1, name="modes")
             y = self._get_or_subsample_y()
             nan_mask = tf.is_nan(y, name="nan_mask")
-            imputation = tf.where(nan_mask, modes, y, name="imputation")
+            imputation = tf.where(nan_mask, mode, y, name="imputation")
         return imputation
 
     def create_summaries(self) -> None:
