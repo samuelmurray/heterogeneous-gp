@@ -115,14 +115,14 @@ class MLGP(InducingPointsModel):
         u_samples = tf.add(self.qu_mean, u_noise, name="u_samples")
         return u_samples
 
-    def _sample_f_from_x_and_u(self, x, u) -> tf.Tensor:
+    def _sample_f_from_x_and_u(self, x, u_samples) -> tf.Tensor:
         # f = a.T * u + sqrt(K~) * e_f, e_f ~ N(0,1)
         a = self._compute_a(x)
         k_tilde = self._compute_k_tilde(x, a)
         num_data = tf.shape(x)[0]
         e_f = tf.random_normal(shape=[self.num_samples, self.y_dim, num_data], name="e_f")
         a_tiled = tf.tile(tf.expand_dims(a, axis=0), multiples=[self.num_samples, 1, 1])
-        f_mean = tf.matmul(u, a_tiled, name="f_mean")
+        f_mean = tf.matmul(u_samples, a_tiled, name="f_mean")
         f_noise = tf.multiply(tf.expand_dims(tf.sqrt(k_tilde), axis=1), e_f,
                               name="f_noise")
         f_samples = tf.add(f_mean, f_noise, name="f_samples")
