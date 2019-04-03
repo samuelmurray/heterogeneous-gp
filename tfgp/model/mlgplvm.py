@@ -26,7 +26,7 @@ class MLGPLVM(MLGP):
         super().__init__(x, y, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing,
                          num_samples=num_samples)
         del self.x  # x is a latent variable in this model
-        self.qx_mean = self._create_qx(x)
+        self.qx_mean, self.qx_var = self._create_qx(x)
 
     def _create_qx(self, x) -> Tuple[tf.Tensor, tf.Tensor]:
         with tf.variable_scope("qx"):
