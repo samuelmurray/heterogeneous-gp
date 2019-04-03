@@ -30,7 +30,7 @@ class VAEMLGPLVM(BatchMLGPLVM):
 
         self._num_hidden = num_hidden
         self._num_layers = num_layers
-        self.encoder = self._encoder()
+        self.encoder = self._create_encoder()
 
     @property
     def num_hidden(self) -> int:
@@ -40,7 +40,7 @@ class VAEMLGPLVM(BatchMLGPLVM):
     def num_layers(self) -> int:
         return self._num_layers
 
-    def _encoder(self) -> Tuple[tf.Tensor, tf.Tensor]:
+    def _create_encoder(self) -> Tuple[tf.Tensor, tf.Tensor]:
         with tf.variable_scope("encoder"):
             nan_mask = tf.is_nan(self.y_batch, name="nan_mask")
             y_batch_wo_nans = tf.where(nan_mask, tf.zeros_like(self.y_batch), self.y_batch,
