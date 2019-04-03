@@ -46,15 +46,24 @@ class TestMLGP(tf.test.TestCase):
                 loss_after = sess.run(loss, feed_dict=feed_dict)
             self.assertLess(loss_after, loss_before)
 
-    def test_predict(self) -> None:
+    def test_predict_mean_shape(self) -> None:
         with tf.variable_scope("batch_mlgp", reuse=tf.AUTO_REUSE):
             num_test = 30
             init = tf.global_variables_initializer()
             with self.session() as sess:
                 sess.run(init)
                 x_test = np.linspace(-2, 2 * np.pi + 2, num_test)[:, None]
-                mean, std = self.m.predict(x_test)
+                mean, _ = self.m.predict(x_test)
             self.assertShapeEqual(np.empty([num_test, self.output_dim]), mean)
+
+    def test_predict_std_shape(self) -> None:
+        with tf.variable_scope("batch_mlgp", reuse=tf.AUTO_REUSE):
+            num_test = 30
+            init = tf.global_variables_initializer()
+            with self.session() as sess:
+                sess.run(init)
+                x_test = np.linspace(-2, 2 * np.pi + 2, num_test)[:, None]
+                _, std = self.m.predict(x_test)
             self.assertShapeEqual(np.empty([num_test, self.output_dim]), std)
 
     def test_create_summary(self) -> None:
