@@ -114,7 +114,7 @@ class MLGPLVM(MLGP):
                                self.qu_mean,
                                transpose_b=True, name="f_mean")
             posteriors = self.likelihood(tf.expand_dims(f_mean, 0))
-            modes = [tf.to_float(tf.squeeze(p.mode(), axis=0)) for p in posteriors]
+            modes = [tf.cast(tf.squeeze(p.mode(), axis=0), tf.float32) for p in posteriors]
             mode = tf.concat(modes, axis=1, name="modes")
             y = self._get_or_subsample_y()
             nan_mask = tf.is_nan(y, name="nan_mask")
