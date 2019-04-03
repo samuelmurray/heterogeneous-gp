@@ -48,15 +48,20 @@ class MixedLikelihoodWrapper:
             log_probs_reshaped = [tf.reshape(log_prob, shape=[-1, tf.shape(y)[0]])
                                   for log_prob in log_probs]
             stacked_log_probs = tf.stack(log_probs_reshaped, axis=2)
-            f_masks = [nan_mask[:, dims.start] for dims in self.dims_per_likelihood]
-            f_mask = tf.stack(f_masks, axis=1, name="f_mask")
-            tiled_f_mask = tf.tile(tf.expand_dims(f_mask, axis=0),
-                                   multiples=[tf.shape(f)[0], 1, 1],
-                                   name="tiled_mask")
-            filtered_log_prob = tf.where(tiled_f_mask, tf.zeros_like(stacked_log_probs),
+            f_mask = self._create_f_mask(f, nan_mask)
+            filtered_log_prob = tf.where(f_mask, tf.zeros_like(stacked_log_probs),
                                          stacked_log_probs,
                                          name="filtered_log_prob")
+
         return filtered_log_prob
+
+    def _create_f_mask(self, f, nan_mask) -> tf.Tensor:
+        f_masks = [nan_mask[:, dims.start] for dims in self.dims_per_likelihood]
+        f_mask = tf.stack(f_masks, axis=1, name="f_mask")
+        tiled_f_mask = tf.tile(tf.expand_dims(f_mask, axis=0),
+                               multiples=[tf.shape(f)[0], 1, 1],
+                               name="tiled_mask")
+        return tiled_f_mask
 
     def create_summaries(self) -> None:
         for likelihood in self.likelihoods:
