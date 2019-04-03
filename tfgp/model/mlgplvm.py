@@ -28,7 +28,7 @@ class MLGPLVM(MLGP):
         del self.x  # x is a latent variable in this model
         self.qx_mean, self.qx_var = self._create_qx(x)
 
-    def _create_qx(self, x) -> Tuple[tf.Tensor, tf.Tensor]:
+    def _create_qx(self, x: np.ndarray) -> Tuple[tf.Tensor, tf.Tensor]:
         with tf.variable_scope("qx"):
             mean = tf.get_variable("mean", shape=[self.num_data, self.x_dim],
                                    initializer=tf.constant_initializer(x.T))
@@ -71,7 +71,7 @@ class MLGPLVM(MLGP):
     def _get_or_subsample_qx(self) -> Tuple[tf.Tensor, tf.Tensor]:
         return self.qx_mean, self.qx_var
 
-    def _sample_f_from_x_and_u(self, x_samples, u_samples) -> tf.Tensor:
+    def _sample_f_from_x_and_u(self, x_samples: tf.Tensor, u_samples: tf.Tensor) -> tf.Tensor:
         # f = a.T * u + sqrt(k_tilde) * e_f, e_f ~ N(0,1)
         a = self._compute_a(x_samples)
         k_tilde = self._compute_k_tilde(x_samples, a)
@@ -83,7 +83,7 @@ class MLGPLVM(MLGP):
         f_samples = tf.add(f_mean, f_noise, name="f_samples")
         return f_samples
 
-    def _compute_a(self, x) -> tf.Tensor:
+    def _compute_a(self, x: tf.Tensor) -> tf.Tensor:
         # a = Kzz^(-1) * Kzx
         z_tiled = tf.tile(tf.expand_dims(self.z, axis=0), multiples=[self._num_samples, 1, 1],
                           name="z_tiled")
@@ -93,7 +93,7 @@ class MLGPLVM(MLGP):
         a = tf.transpose(tf.tensordot(k_zz_inv, k_zx, axes=[1, 1]), perm=[1, 0, 2], name="a")
         return a
 
-    def _compute_k_tilde(self, x, a) -> tf.Tensor:
+    def _compute_k_tilde(self, x: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
         # K~ = Kxx - Kxz * Kzz^(-1) * Kzx
         z_tiled = tf.tile(tf.expand_dims(self.z, axis=0), multiples=[self._num_samples, 1, 1],
                           name="z_tiled")

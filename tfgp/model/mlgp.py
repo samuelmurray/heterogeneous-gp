@@ -115,7 +115,7 @@ class MLGP(InducingPointsModel):
         u_samples = tf.add(self.qu_mean, u_noise, name="u_samples")
         return u_samples
 
-    def _sample_f_from_x_and_u(self, x, u_samples) -> tf.Tensor:
+    def _sample_f_from_x_and_u(self, x: tf.Tensor, u_samples: tf.Tensor) -> tf.Tensor:
         # f = a.T * u + sqrt(K~) * e_f, e_f ~ N(0,1)
         a = self._compute_a(x)
         k_tilde = self._compute_k_tilde(x, a)
@@ -128,7 +128,7 @@ class MLGP(InducingPointsModel):
         f_samples = tf.add(f_mean, f_noise, name="f_samples")
         return f_samples
 
-    def _compute_a(self, x) -> tf.Tensor:
+    def _compute_a(self, x: tf.Tensor) -> tf.Tensor:
         # a = Kzz^(-1) * Kzx
         k_zz = self.kernel(self.z, name="k_zz")
         k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
@@ -136,7 +136,7 @@ class MLGP(InducingPointsModel):
         a = tf.matmul(k_zz_inv, k_zx, name="a")
         return a
 
-    def _compute_k_tilde(self, x, a) -> tf.Tensor:
+    def _compute_k_tilde(self, x: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
         # K~ = Kxx - Kxz * Kzz^(-1) * Kzx
         k_zx = self.kernel(self.z, x, name="k_zx")
         k_xx = self.kernel(x, name="k_xx")
