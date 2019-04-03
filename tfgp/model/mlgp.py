@@ -42,12 +42,13 @@ class MLGP(InducingPointsModel):
             qu_shape = [self.y_dim, self.num_inducing * (self.num_inducing + 1) / 2]
             qu_log_scale_vec = tf.get_variable("log_scale_vec", shape=qu_shape,
                                                initializer=tf.zeros_initializer())
-            self.qu_log_scale = tfp.distributions.fill_triangular(qu_log_scale_vec,
-                                                                  name="log_scale")
-            qu_log_scale_diag = tf.matrix_diag_part(self.qu_log_scale)
-            self.qu_scale = tf.identity(self.qu_log_scale
-                                        - tf.matrix_diag(tf.matrix_diag_part(self.qu_log_scale))
-                                        + tf.matrix_diag(tf.exp(qu_log_scale_diag)), name="scale")
+            qu_log_scale = tfp.distributions.fill_triangular(qu_log_scale_vec,
+                                                             name="log_scale")
+            qu_log_scale_diag = tf.matrix_diag_part(qu_log_scale)
+            self.qu_scale = tf.identity(qu_log_scale
+                                        - tf.matrix_diag(qu_log_scale_diag)
+                                        + tf.matrix_diag(tf.exp(qu_log_scale_diag)),
+                                        name="scale")
 
     @property
     def num_samples(self) -> int:
