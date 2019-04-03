@@ -28,7 +28,6 @@ class TestMixedLikelihoodWrapper(tf.test.TestCase):
         y = tf.constant(np.array([[1, 1, 0, 0, 2.3]]), dtype=tf.float32)
         log_prob = self.likelihood.log_prob(f, y)
         self.assertShapeEqual(np.empty((1, 1, 3)), log_prob)
-        self.assertNDArrayNear()
 
     def test_likelihoods(self) -> None:
         likelihoods = self.likelihood.likelihoods
