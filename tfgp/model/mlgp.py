@@ -152,13 +152,13 @@ class MLGP(InducingPointsModel):
             # TODO: Below is hack to work with new likelihood
             mean = tf.stack(
                 [likelihood(f_mean[:, i]).mean() for i, likelihood in
-                 enumerate(self.likelihood._likelihoods)],
+                 enumerate(self.likelihood.likelihoods)],
                 axis=1,
                 name="mean"
             )
             std = tf.stack(
                 [likelihood(f_mean[:, i]).stddev() for i, likelihood in
-                 enumerate(self.likelihood._likelihoods)],
+                 enumerate(self.likelihood.likelihoods)],
                 axis=1,
                 name="std"
             )
