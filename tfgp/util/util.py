@@ -104,6 +104,7 @@ def pca_reduce(x: np.ndarray, latent_dim: int, *, whiten: bool = False) -> np.nd
 def remove_data(y: np.ndarray, indices: np.ndarray,
                 likelihood: MixedLikelihoodWrapper) -> np.ndarray:
     y_noisy = y.copy()
+    num_data = y_noisy.shape[0]
     idx = np.zeros(y.shape, dtype=bool)
     indices = indices.astype(np.int)
     for data, dim in indices:
