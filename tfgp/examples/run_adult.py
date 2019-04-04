@@ -69,7 +69,7 @@ if __name__ == "__main__":
     np.random.seed(114123)
     tf.random.set_random_seed(135314)
     print("Generating data...")
-    num_data = None
+    num_data = 1000
     latent_dim = 10
 
     numerical_errors = []

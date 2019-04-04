@@ -6,7 +6,7 @@ import seaborn as sns
 import tensorflow as tf
 
 import tfgp
-from tfgp.model import BatchMLGPLVM, VAEMLGPLVM
+from tfgp.model import BatchMLGPLVM, VAEMLGPLVM, MLGPLVM
 from tfgp.util import data
 
 ROOT_PATH = os.path.dirname(tfgp.__file__)
@@ -35,7 +35,9 @@ def train_predict(model: BatchMLGPLVM):
         summary_writer = tf.summary.FileWriter(log_dir, sess.graph)
         print("Initializing variables...")
         sess.run(init)
-        print(f"Initial loss: {sess.run(loss, feed_dict={model.batch_indices: all_indices})}")
+        #initial_loss = sess.run(loss, feed_dict={model.batch_indices: all_indices})
+        initial_loss = sess.run(loss)
+        print(f"Initial loss: {initial_loss}")
         print("Starting training...")
         n_epoch = 10000
         batch_size = 100
@@ -43,7 +45,8 @@ def train_predict(model: BatchMLGPLVM):
         n_print = 1000
         for i in range(n_iter):
             batch_indices = np.random.choice(num_data, batch_size, replace=False)
-            sess.run(train_all, feed_dict={model.batch_indices: batch_indices})
+            #sess.run(train_all, feed_dict={model.batch_indices: batch_indices})
+            sess.run(train_all)
             if i % n_print == 0:
                 run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
                 run_metadata = tf.RunMetadata()

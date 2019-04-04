@@ -107,6 +107,8 @@ def remove_data(y: np.ndarray, indices: np.ndarray,
     idx = np.zeros(y.shape, dtype=bool)
     indices = indices.astype(np.int)
     for data, dim in indices:
+        if data >= num_data:
+            continue
         idx[data, likelihood.dims_per_likelihood[dim]] = True
     y_noisy[idx] = np.nan
     return y_noisy
