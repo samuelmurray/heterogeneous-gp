@@ -24,7 +24,7 @@ tensorflow-probability = ">=0.5.0"
 [dev-packages]
 codecov = "*"
 pytest = "*"
+pytest-codestyle = "*"
 pytest-cov = "*"
 pytest-flakes = "*"
 pytest-mypy = "*"
-pytest-codestyle = "*"
