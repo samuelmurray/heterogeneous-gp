@@ -38,7 +38,7 @@ class MixedLikelihoodWrapper:
     def num_likelihoods(self) -> int:
         return self._num_likelihoods
 
-    def log_prob(self, f: tf.Tensor, y: tf.Tensor, name="") -> tf.Tensor:
+    def log_prob(self, f: tf.Tensor, y: tf.Tensor, name: str = "") -> tf.Tensor:
         with tf.name_scope(name):
             nan_mask = tf.is_nan(y, name="nan_mask")
             log_prob = self._create_log_prob(f, y, nan_mask)
@@ -47,7 +47,7 @@ class MixedLikelihoodWrapper:
                                          name="filtered_log_prob")
         return filtered_log_prob
 
-    def _create_log_prob(self, f, y, nan_mask) -> tf.Tensor:
+    def _create_log_prob(self, f: tf.Tensor, y: tf.Tensor, nan_mask: tf.Tensor) -> tf.Tensor:
         y_wo_nans = tf.where(nan_mask, tf.zeros_like(y), y, name="y_wo_nans")
         log_probs = [likelihood(f[:, :, dims]).log_prob(y_wo_nans[:, dims]) for
                      likelihood, dims in zip(self.likelihoods, self.dims_per_likelihood)]
@@ -56,7 +56,7 @@ class MixedLikelihoodWrapper:
         log_prob = tf.stack(log_probs_reshaped, axis=2)
         return log_prob
 
-    def _create_f_mask(self, f, nan_mask) -> tf.Tensor:
+    def _create_f_mask(self, f: tf.Tensor, nan_mask: tf.Tensor) -> tf.Tensor:
         f_masks = [nan_mask[:, dims.start] for dims in self.dims_per_likelihood]
         f_mask = tf.stack(f_masks, axis=1, name="f_mask")
         tiled_f_mask = tf.tile(tf.expand_dims(f_mask, axis=0),
