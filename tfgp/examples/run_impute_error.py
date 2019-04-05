@@ -13,7 +13,7 @@ ROOT_PATH = os.path.dirname(tfgp.__file__)
 LOG_DIR_PATH = os.path.join(ROOT_PATH, os.pardir, "log")
 
 
-def train_impute(model: BatchMLGPLVM):
+def train_impute(model: BatchMLGPLVM) -> None:
     model.initialize()
     print("Building graph...")
     loss = tf.losses.get_total_loss()

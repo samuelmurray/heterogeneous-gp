@@ -14,7 +14,7 @@ LOG_DIR_PATH = os.path.join(ROOT_PATH, os.pardir, "log")
 NAME = "atr"
 
 
-def train_predict(model: BatchMLGPLVM):
+def train_predict(model: BatchMLGPLVM) -> None:
     model.initialize()
     print("Building graph...")
     loss = tf.losses.get_total_loss()
