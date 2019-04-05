@@ -9,6 +9,6 @@ install:
   - pip install pipenv
   - pipenv sync --dev
 script:
-  - pipenv run pytest --pep8 --flakes --cov=./
+  - pipenv run pytest --pep8 --flakes --mypy --cov=./
 after_success:
   - pipenv run codecov
