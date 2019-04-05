@@ -1,5 +1,5 @@
 import os
-from typing import Tuple
+from typing import List, Tuple
 
 import numpy as np
 from scipy.special import expit
@@ -7,7 +7,7 @@ from sklearn.metrics.pairwise import rbf_kernel
 from sklearn.datasets import make_blobs
 
 import tfgp
-from tfgp.likelihood import (Bernoulli, LogNormal, MixedLikelihoodWrapper, Normal,
+from tfgp.likelihood import (Bernoulli, Likelihood, LogNormal, MixedLikelihoodWrapper, Normal,
                              OneHotCategorical, Poisson, QuantizedNormal)
 
 DataTuple = Tuple[np.ndarray, MixedLikelihoodWrapper, np.ndarray]
@@ -78,15 +78,16 @@ def make_circle(num_data: int, output_dim: int, *, gaussian: bool = True) -> Dat
 
     var_y = 0.01
     y = np.empty((num_data, output_dim))
+    likelihoods: List[Likelihood] = []
     if gaussian:
         y = np.random.normal(f, var_y)
-        likelihoods = [Normal() for _ in range(output_dim)]
+        likelihoods += [Normal() for _ in range(output_dim)]
     else:
         half_output = output_dim // 2
         y[:, :half_output] = np.random.normal(f[:, :half_output], var_y)
         y[:, half_output:] = np.random.binomial(1, 1 / (1 + np.exp(-f[:, half_output:])))
-        likelihoods = ([Normal() for _ in range(half_output)]
-                       + [Bernoulli() for _ in range(output_dim - half_output)])
+        likelihoods += [Normal() for _ in range(half_output)]
+        likelihoods += [Bernoulli() for _ in range(output_dim - half_output)]
     likelihood = MixedLikelihoodWrapper(likelihoods)
     labels = np.zeros(num_data)
     return y, likelihood, labels
@@ -126,7 +127,9 @@ def make_abalone(num_data: int = None) -> DataTuple:
     data_indices = np.random.permutation(data_size)[:num_data]
     y = data[data_indices, :-1]
     labels = data[data_indices, -1]
-    likelihood = MixedLikelihoodWrapper([OneHotCategorical(3)] + [Normal() for _ in range(7)])
+    likelihoods: List[Likelihood] = [OneHotCategorical(3)]
+    likelihoods += [Normal() for _ in range(7)]
+    likelihood = MixedLikelihoodWrapper(likelihoods)
     return y, likelihood, labels
 
 
@@ -167,7 +170,8 @@ def make_atr(num_data: int = None) -> DataTuple:
     data_indices = np.random.permutation(data_size)[:num_data]
     y = data[data_indices]
     labels = np.zeros(y.shape[0])
-    likelihoods = [Normal() for _ in range(86)] + [
+    likelihoods: List[Likelihood] = [Normal() for _ in range(86)]
+    likelihoods += [
         OneHotCategorical(6),
         OneHotCategorical(2),
         OneHotCategorical(2),
@@ -465,7 +469,9 @@ def make_wine(num_data: int = None) -> DataTuple:
         raise e
     y = data[:num_data]
     labels = np.zeros(y.shape[0])
-    likelihood = MixedLikelihoodWrapper([Normal() for _ in range(12)] + [OneHotCategorical(2)])
+    likelihoods: List[Likelihood] = [Normal() for _ in range(12)]
+    likelihoods += [OneHotCategorical(2)]
+    likelihood = MixedLikelihoodWrapper(likelihoods)
     return y, likelihood, labels
 
 
@@ -477,5 +483,7 @@ def make_wine_pos(num_data: int = None) -> DataTuple:
         raise e
     y = data[:num_data]
     labels = np.zeros(y.shape[0])
-    likelihood = MixedLikelihoodWrapper([LogNormal() for _ in range(12)] + [OneHotCategorical(2)])
+    likelihoods: List[Likelihood] = [LogNormal() for _ in range(12)]
+    likelihoods += [OneHotCategorical(2)]
+    likelihood = MixedLikelihoodWrapper(likelihoods)
     return y, likelihood, labels
