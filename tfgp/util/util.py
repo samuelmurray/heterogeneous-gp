@@ -73,9 +73,9 @@ def ordinal_error(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.nd
 
 def imputation_error(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray,
                      likelihood: MixedLikelihoodWrapper) -> Tuple[float, float]:
-    numerical_error = 0
+    numerical_error: float = 0
     num_numerical = 0
-    nominal_error = 0
+    nominal_error: float = 0
     num_nominal = 0
     for lik, dims in zip(likelihood.likelihoods, likelihood.dims_per_likelihood):
         if isinstance(lik, OneHotCategorical):
