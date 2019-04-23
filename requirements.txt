@@ -8,10 +8,10 @@ backcall==0.1.0
 bleach==3.1.0
 cycler==0.10.0
 decorator==4.4.0
-defusedxml==0.5.0
+defusedxml==0.6.0
 entrypoints==0.3
 gast==0.2.2
-grpcio==1.19.0
+grpcio==1.20.0
 h5py==2.9.0
 ipykernel==5.1.0
 ipython-genutils==0.2.0
@@ -35,7 +35,7 @@ mock==2.0.0
 nbconvert==5.4.1
 nbformat==4.4.0
 notebook==5.7.8
-numpy==1.16.2
+numpy==1.16.3
 pandas==0.24.2
 pandocfilters==1.4.2
 parso==0.4.0
