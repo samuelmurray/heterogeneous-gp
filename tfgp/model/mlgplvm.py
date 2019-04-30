@@ -99,7 +99,8 @@ class MLGPLVM(MLGP):
                           name="z_tiled")
         k_zx = self.kernel(z_tiled, x_samples, name="k_zx")
         k_xx = self.kernel(x_samples, name="k_xx")
-        k_tilde_full = tf.subtract(k_xx, tf.matmul(k_zx, a, transpose_a=True), name="k_tilde_full")
+        k_xz_mul_a = tf.matmul(k_zx, a, transpose_a=True)
+        k_tilde_full = tf.subtract(k_xx, k_xz_mul_a, name="k_tilde_full")
         k_tilde = tf.matrix_diag_part(k_tilde_full, name="k_tilde")
         k_tilde_pos = tf.maximum(k_tilde, 1e-16, name="k_tilde_pos")  # k_tilde can't be negative
         return k_tilde_pos
