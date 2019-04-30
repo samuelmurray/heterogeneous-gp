@@ -158,11 +158,8 @@ class MLGP(InducingPointsModel):
             k_zz = self.kernel(self.z, name="k_zz")
             k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
             k_xs_z = self.kernel(xs, self.z, name="k_xs_z")
-            f_mean = tf.matmul(tf.matmul(k_xs_z, k_zz_inv),
-                               self.qu_mean,
-                               transpose_b=True,
-                               name="f_mean")
-
+            k_xs_z_mul_kzz_inv = tf.matmul(k_xs_z, k_zz_inv, name="k_xs_z_mul_kzz_inv")
+            f_mean = tf.matmul(k_xs_z_mul_kzz_inv, self.qu_mean, transpose_b=True, name="f_mean")
             likelihoods = [likelihood(f_mean[:, i]) for i, likelihood in
                            enumerate(self.likelihood.likelihoods)]
             means = [lik.mean() for lik in likelihoods]
