@@ -77,7 +77,7 @@ def imputation_error(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np
     num_numerical = 0
     nominal_error: float = 0
     num_nominal = 0
-    for lik, dims in zip(likelihood.likelihoods, likelihood.dims_per_likelihood):
+    for lik, dims in zip(likelihood.likelihoods, likelihood.y_dims_per_likelihood):
         if isinstance(lik, OneHotCategorical):
             nominal_error += categorical_error(y_imputation[:, dims], y_missing[:, dims],
                                                y_true[:, dims])
@@ -110,7 +110,7 @@ def remove_data(y: np.ndarray, indices: np.ndarray,
     for data, dim in indices:
         if data >= num_data:
             continue
-        idx[data, likelihood.dims_per_likelihood[dim]] = True
+        idx[data, likelihood.f_dims_per_likelihood[dim]] = True
     y_noisy[idx] = np.nan
     return y_noisy
 
@@ -125,6 +125,6 @@ def remove_data_randomly(y: np.ndarray, frac: float,
     idx = np.zeros(y.shape, dtype=bool)
     for i in range(dims_missing.shape[0]):
         for j in range(dims_missing.shape[1]):
-            idx[i, likelihood.dims_per_likelihood[dims_missing[i, j]]] = True
+            idx[i, likelihood.f_dims_per_likelihood[dims_missing[i, j]]] = True
     y_noisy[idx] = np.nan
     return y_noisy
