@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Sequence
 
 import numpy as np
 import tensorflow as tf
@@ -8,8 +8,8 @@ from .likelihood import Likelihood
 
 
 class MixedLikelihoodWrapper:
-    def __init__(self, likelihoods: List[Likelihood]) -> None:
-        self._likelihoods = likelihoods
+    def __init__(self, likelihoods: Sequence[Likelihood]) -> None:
+        self._likelihoods = list(likelihoods)
         dims = [l.num_dimensions for l in self.likelihoods]
         dims_cum_sum = np.cumsum(dims)
         self._num_dim = dims_cum_sum[-1]
