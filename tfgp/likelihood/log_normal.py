@@ -9,7 +9,8 @@ class LogNormal(Likelihood):
     __count = 0
 
     def __init__(self) -> None:
-        super().__init__(num_dimensions=1)
+        input_dim = output_dim = 1
+        super().__init__(input_dim, output_dim)
         self._id = self.__get_id()
         with tf.variable_scope("likelihood"):
             self._log_scale = tf.get_variable(f"normal_log_scale_{self._id}", shape=[1],

@@ -29,9 +29,9 @@ class MLGP(InducingPointsModel):
         # TODO: Try changing to float64 and see if it solves Cholesky inversion problems!
         self.x = tf.convert_to_tensor(x, dtype=tf.float32, name="x")
         self.y = tf.convert_to_tensor(y, dtype=tf.float32, name="y")
-        if likelihood.num_dim != self.y_dim:
+        if likelihood.y_dim != self.y_dim:
             raise ValueError(f"The likelihood must have as many dimensions as y, "
-                             f"but likelihood.num_dim={likelihood.num_dim} and y.shape={y.shape}")
+                             f"but likelihood.num_dim={likelihood.y_dim} and y.shape={y.shape}")
         self.kernel = kernel
         self.likelihood = likelihood
         self.z = tf.get_variable("z", shape=[self.num_inducing, self.x_dim],

@@ -6,7 +6,7 @@ from .likelihood import Likelihood
 
 class OneHotCategorical(Likelihood):
     def __init__(self, num_classes: int) -> None:
-        super().__init__(num_classes)
+        super().__init__(num_classes - 1, num_classes)
 
     def __call__(self, f: tf.Tensor) -> tfp.distributions.OneHotCategorical:
         return tfp.distributions.OneHotCategorical(logits=f)

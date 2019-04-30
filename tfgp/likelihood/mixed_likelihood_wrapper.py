@@ -10,13 +10,15 @@ from .likelihood import Likelihood
 class MixedLikelihoodWrapper:
     def __init__(self, likelihoods: Sequence[Likelihood]) -> None:
         self._likelihoods = list(likelihoods)
-        dims = [l.num_dimensions for l in self.likelihoods]
-        dims_cum_sum = np.cumsum(dims)
-        self._num_dim = dims_cum_sum[-1]
+        input_dims = [l.input_dim for l in self.likelihoods]
+        self._f_dim = sum(input_dims)
+        output_dims = [l.output_dim for l in self.likelihoods]
+        output_dims_cum_sum = np.cumsum(output_dims)
+        self._y_dim = output_dims_cum_sum[-1]
         self._num_likelihoods = len(self.likelihoods)
-        self._dims_per_likelihood = [slice(0, dims[0])]
-        self._dims_per_likelihood += [slice(dims_cum_sum[i], dims_cum_sum[i + 1]) for i in
-                                      range(len(dims) - 1)]
+        self._dims_per_likelihood = [slice(0, output_dims[0])]
+        self._dims_per_likelihood += [slice(output_dims_cum_sum[i], output_dims_cum_sum[i + 1])
+                                      for i in range(len(output_dims) - 1)]
 
     def __call__(self, f: tf.Tensor) -> List[tfp.distributions.Distribution]:
         return [likelihood(f[:, :, dims]) for likelihood, dims in
@@ -31,8 +33,12 @@ class MixedLikelihoodWrapper:
         return self._dims_per_likelihood
 
     @property
-    def num_dim(self) -> int:
-        return self._num_dim
+    def f_dim(self) -> int:
+        return self._f_dim
+
+    @property
+    def y_dim(self) -> int:
+        return self._y_dim
 
     @property
     def num_likelihoods(self) -> int:

@@ -40,8 +40,11 @@ class TestMixedLikelihoodWrapper(tf.test.TestCase):
         dims_per_likelihood = self.likelihood.dims_per_likelihood
         self.assertAllEqual([slice(0, 1), slice(1, 4), slice(4, 5)], dims_per_likelihood)
 
-    def test_num_dim(self) -> None:
-        self.assertEqual(self.likelihood.num_dim, 5)
+    def test_f_dim(self) -> None:
+        self.assertEqual(self.likelihood.f_dim, 4)
+
+    def test_y_dim(self) -> None:
+        self.assertEqual(self.likelihood.y_dim, 5)
 
     def test_num_likelihoods(self) -> None:
         self.assertEqual(self.likelihood.num_likelihoods, 3)
