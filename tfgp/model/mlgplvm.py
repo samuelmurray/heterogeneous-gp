@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Optional, Tuple
 
 import numpy as np
 import tensorflow as tf
@@ -11,7 +11,7 @@ from tfgp.likelihood import MixedLikelihoodWrapper
 
 class MLGPLVM(MLGP):
     def __init__(self, y: np.ndarray, x_dim: int, *,
-                 x: np.ndarray = None,
+                 x: Optional[np.ndarray] = None,
                  kernel: Kernel,
                  likelihood: MixedLikelihoodWrapper,
                  num_inducing: int = 50,

@@ -1,3 +1,5 @@
+from typing import Optional
+
 import numpy as np
 import tensorflow as tf
 
@@ -7,7 +9,7 @@ from tfgp.kernel import Kernel
 
 class GPLVM(Model):
     def __init__(self, y: np.ndarray, x_dim: int, *,
-                 x: np.ndarray = None,
+                 x: Optional[np.ndarray] = None,
                  kernel: Kernel,
                  ) -> None:
         super().__init__(x_dim, y.shape[1], y.shape[0])

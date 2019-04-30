@@ -1,3 +1,5 @@
+from typing import Optional
+
 import numpy as np
 import tensorflow as tf
 
@@ -20,7 +22,8 @@ class RBF(Kernel):
             self._gamma = tf.exp(self._log_gamma, name="gamma")
             self._eps = eps
 
-    def __call__(self, x1: tf.Tensor, x2: tf.Tensor = None, *, name: str = "") -> tf.Tensor:
+    def __call__(self, x1: tf.Tensor, x2: Optional[tf.Tensor] = None, *,
+                 name: str = "") -> tf.Tensor:
         with tf.name_scope(name):
             _x2 = x1 if x2 is None else x2
             x1_squared = tf.reduce_sum(tf.square(x1), axis=-1, name="x1_squared")

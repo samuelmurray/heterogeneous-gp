@@ -1,5 +1,5 @@
 import os
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import numpy as np
 from scipy.special import expit
@@ -117,7 +117,7 @@ def make_normal_binary(num_data: int) -> DataTuple:
     return y, likelihood, labels
 
 
-def make_abalone(num_data: int = None) -> DataTuple:
+def make_abalone(num_data: Optional[int] = None) -> DataTuple:
     try:
         data = np.loadtxt(os.path.join(DATA_DIR_PATH, "abalone.csv"), delimiter=",")
     except OSError as e:
@@ -133,7 +133,7 @@ def make_abalone(num_data: int = None) -> DataTuple:
     return y, likelihood, labels
 
 
-def make_adult(num_data: int = None) -> DataTuple:
+def make_adult(num_data: Optional[int] = None) -> DataTuple:
     try:
         data = np.loadtxt(os.path.join(DATA_DIR_PATH, "adult_onehot.csv"), delimiter=",")
     except OSError as e:
@@ -160,7 +160,7 @@ def make_adult(num_data: int = None) -> DataTuple:
     return y, likelihood, labels
 
 
-def make_atr(num_data: int = None) -> DataTuple:
+def make_atr(num_data: Optional[int] = None) -> DataTuple:
     try:
         data = np.loadtxt(os.path.join(DATA_DIR_PATH, "atr_onehot.csv"), delimiter=",")
     except OSError as e:
@@ -198,7 +198,7 @@ def make_atr(num_data: int = None) -> DataTuple:
     return y, likelihood, labels
 
 
-def make_binaryalphadigits(num_data: int = None, num_classes: int = 36) -> DataTuple:
+def make_binaryalphadigits(num_data: Optional[int] = None, num_classes: int = 36) -> DataTuple:
     data_per_class = 30
     try:
         y = np.loadtxt(os.path.join(DATA_DIR_PATH, "binaryalphadigits_train.csv"), delimiter=",")
@@ -215,7 +215,8 @@ def make_binaryalphadigits(num_data: int = None, num_classes: int = 36) -> DataT
     return y, likelihood, labels
 
 
-def make_binaryalphadigits_test(num_data: int = None, num_classes: int = 36) -> DataTuple:
+def make_binaryalphadigits_test(num_data: Optional[int] = None,
+                                num_classes: int = 36) -> DataTuple:
     data_per_class = 9
     try:
         y = np.loadtxt(os.path.join(DATA_DIR_PATH, "binaryalphadigits_test.csv"), delimiter=",")
@@ -233,7 +234,7 @@ def make_binaryalphadigits_test(num_data: int = None, num_classes: int = 36) -> 
     return y, likelihood, labels
 
 
-def make_cleveland(num_data: int = None) -> DataTuple:
+def make_cleveland(num_data: Optional[int] = None) -> DataTuple:
     try:
         data = np.loadtxt(os.path.join(DATA_DIR_PATH, "cleveland_onehot.csv"), delimiter=",")
     except OSError as e:
@@ -263,7 +264,7 @@ def make_cleveland(num_data: int = None) -> DataTuple:
     return y, likelihood, labels
 
 
-def make_cleveland_quantized(num_data: int = None) -> DataTuple:
+def make_cleveland_quantized(num_data: Optional[int] = None) -> DataTuple:
     try:
         data = np.loadtxt(os.path.join(DATA_DIR_PATH, "cleveland_onehot.csv"), delimiter=",")
     except OSError as e:
@@ -293,7 +294,7 @@ def make_cleveland_quantized(num_data: int = None) -> DataTuple:
     return y, likelihood, labels
 
 
-def make_default_credit(num_data: int = None) -> DataTuple:
+def make_default_credit(num_data: Optional[int] = None) -> DataTuple:
     try:
         data = np.loadtxt(os.path.join(DATA_DIR_PATH, "default_credit_onehot.csv"), delimiter=",")
     except OSError as e:
@@ -332,7 +333,7 @@ def make_default_credit(num_data: int = None) -> DataTuple:
     return y, likelihood, labels
 
 
-def make_mimic(num_data: int = None) -> DataTuple:
+def make_mimic(num_data: Optional[int] = None) -> DataTuple:
     try:
         data = np.genfromtxt(os.path.join(DATA_DIR_PATH, "mimic_onehot_train.csv"), delimiter=",",
                              filling_values=None)
@@ -367,7 +368,7 @@ def make_mimic(num_data: int = None) -> DataTuple:
     return y, likelihood, labels
 
 
-def make_mimic_labeled(num_data: int = None) -> DataTuple:
+def make_mimic_labeled(num_data: Optional[int] = None) -> DataTuple:
     try:
         data = np.genfromtxt(os.path.join(DATA_DIR_PATH, "mimic_onehot_train.csv"), delimiter=",",
                              filling_values=None)
@@ -406,7 +407,7 @@ def make_mimic_labeled(num_data: int = None) -> DataTuple:
     return y, likelihood, labels
 
 
-def make_mimic_test(num_data: int = None) -> DataTuple:
+def make_mimic_test(num_data: Optional[int] = None) -> DataTuple:
     try:
         data = np.genfromtxt(os.path.join(DATA_DIR_PATH, "mimic_onehot_test.csv"), delimiter=",",
                              filling_values=None)
@@ -441,7 +442,7 @@ def make_mimic_test(num_data: int = None) -> DataTuple:
     return y, likelihood, labels
 
 
-def make_oilflow(num_data: int = None, output_dim: int = None, *,
+def make_oilflow(num_data: Optional[int] = None, output_dim: Optional[int] = None, *,
                  one_hot_labels: bool = False) -> DataTuple:
     try:
         import pods
@@ -461,7 +462,7 @@ def make_oilflow(num_data: int = None, output_dim: int = None, *,
     return y, likelihood, labels
 
 
-def make_wine(num_data: int = None) -> DataTuple:
+def make_wine(num_data: Optional[int] = None) -> DataTuple:
     try:
         data = np.loadtxt(os.path.join(DATA_DIR_PATH, "wine.csv"), delimiter=",")
     except OSError as e:
@@ -475,7 +476,7 @@ def make_wine(num_data: int = None) -> DataTuple:
     return y, likelihood, labels
 
 
-def make_wine_pos(num_data: int = None) -> DataTuple:
+def make_wine_pos(num_data: Optional[int] = None) -> DataTuple:
     try:
         data = np.loadtxt(os.path.join(DATA_DIR_PATH, "wine.csv"), delimiter=",")
     except OSError as e:

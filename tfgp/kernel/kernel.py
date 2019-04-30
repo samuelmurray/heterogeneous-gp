@@ -1,4 +1,5 @@
 import abc
+from typing import Optional
 
 import tensorflow as tf
 
@@ -9,7 +10,8 @@ class Kernel(abc.ABC):
         self._name = name
 
     @abc.abstractmethod
-    def __call__(self, x1: tf.Tensor, x2: tf.Tensor = None, *, name: str = "") -> tf.Tensor:
+    def __call__(self, x1: tf.Tensor, x2: Optional[tf.Tensor] = None, *,
+                 name: str = "") -> tf.Tensor:
         raise NotImplementedError
 
     @abc.abstractmethod
