@@ -78,8 +78,8 @@ class MLGPLVM(MLGP):
         num_data = tf.shape(x_samples)[1]
         e_f = tf.random_normal(shape=[self.num_samples, self.y_dim, num_data], name="e_f")
         f_mean = tf.matmul(u_samples, a, name="f_mean")
-        f_noise = tf.multiply(tf.expand_dims(tf.sqrt(k_tilde), axis=1), e_f,
-                              name="f_noise")
+        k_tilde_sqrt = tf.sqrt(k_tilde, name="k_tilde_sqrt")
+        f_noise = tf.multiply(tf.expand_dims(k_tilde_sqrt, axis=1), e_f, name="f_noise")
         f_samples = tf.add(f_mean, f_noise, name="f_samples")
         return f_samples
 
