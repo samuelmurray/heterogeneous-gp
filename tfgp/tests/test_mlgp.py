@@ -92,6 +92,9 @@ class TestMLGP(tf.test.TestCase):
         with self.assertRaises(ValueError):
             _ = MLGP(x, y, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing)
 
+    def test_f_dim(self) -> None:
+        self.assertEqual(self.output_dim, self.m.f_dim)
+
     def test_num_samples(self) -> None:
         self.assertEqual(10, self.m.num_samples)
 

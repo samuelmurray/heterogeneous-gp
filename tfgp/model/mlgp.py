@@ -31,12 +31,16 @@ class MLGP(InducingPointsModel):
         self.y = tf.convert_to_tensor(y, dtype=tf.float32, name="y")
         if likelihood.y_dim != self.y_dim:
             raise ValueError(f"The likelihood must have as many dimensions as y, "
-                             f"but likelihood.num_dim={likelihood.y_dim} and y.shape={y.shape}")
+                             f"but likelihood.y_dim={likelihood.y_dim} and y.shape={y.shape}")
         self.kernel = kernel
         self.likelihood = likelihood
         self.z = tf.get_variable("z", shape=[self.num_inducing, self.x_dim],
                                  initializer=tf.constant_initializer(z))
         self.qu_mean, self.qu_scale = self._create_qu()
+
+    @property
+    def f_dim(self) -> int:
+        return self.likelihood.f_dim
 
     @property
     def num_samples(self) -> int:
