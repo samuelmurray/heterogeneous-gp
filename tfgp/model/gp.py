@@ -20,8 +20,8 @@ class GP(Model):
         self.kernel = kernel
         self.k_xx = self.kernel(self.x, name="k_xx")
         self.chol_xx = tf.cholesky(self.k_xx, name="chol_xx")
-        self.a = tf.matrix_solve(tf.transpose(self.chol_xx), tf.matrix_solve(self.chol_xx, self.y),
-                                 name="a")
+        rhs = tf.matrix_solve(self.chol_xx, self.y)
+        self.a = tf.matrix_solve(tf.transpose(self.chol_xx), rhs, name="a")
 
     def initialize(self) -> None:
         pass
