@@ -1,4 +1,4 @@
-from typing import List, Sequence
+from typing import List, Sequence, Tuple
 
 import numpy as np
 import tensorflow as tf
@@ -13,18 +13,19 @@ class MixedLikelihoodWrapper:
         self._num_likelihoods = len(self.likelihoods)
 
         input_dims = [l.input_dim for l in self.likelihoods]
-        input_dims_cum_sum = np.cumsum(input_dims)
-        self._f_dim = input_dims_cum_sum[-1]
-        self._f_dims_per_likelihood = [slice(0, input_dims[0])]
-        self._f_dims_per_likelihood += [slice(input_dims_cum_sum[i], input_dims_cum_sum[i + 1])
-                                        for i in range(len(input_dims) - 1)]
+        self._f_dim, self._f_dims_per_likelihood = self._dim_and_dims_per_likelihood(input_dims)
 
         output_dims = [l.output_dim for l in self.likelihoods]
-        output_dims_cum_sum = np.cumsum(output_dims)
-        self._y_dim = output_dims_cum_sum[-1]
-        self._y_dims_per_likelihood = [slice(0, output_dims[0])]
-        self._y_dims_per_likelihood += [slice(output_dims_cum_sum[i], output_dims_cum_sum[i + 1])
-                                        for i in range(len(output_dims) - 1)]
+        self._y_dim, self._y_dims_per_likelihood = self._dim_and_dims_per_likelihood(output_dims)
+
+    @staticmethod
+    def _dim_and_dims_per_likelihood(dims: Sequence[int]) -> Tuple[int, List[slice]]:
+        dims_cum_sum = np.cumsum(dims)
+        dim = dims_cum_sum[-1]
+        dims_per_likelihood = [slice(0, dims[0])]
+        dims_per_likelihood += [slice(dims_cum_sum[i], dims_cum_sum[i + 1])
+                                for i in range(len(dims) - 1)]
+        return dim, dims_per_likelihood
 
     def __call__(self, f: tf.Tensor) -> List[tfp.distributions.Distribution]:
         return [likelihood(f[:, :, dims]) for likelihood, dims in
