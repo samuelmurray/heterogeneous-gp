@@ -9,7 +9,8 @@ class TruncatedNormal(Likelihood):
     __count = 0
 
     def __init__(self, lower: float, upper: float) -> None:
-        super().__init__(num_dimensions=1)
+        input_dim = output_dim = 1
+        super().__init__(input_dim, output_dim)
         self._id = self.__get_id()
         self._lower = lower
         self._upper = upper
