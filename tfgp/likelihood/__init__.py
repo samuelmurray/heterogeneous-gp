@@ -9,6 +9,8 @@ __all__ = [
     "MixedLikelihoodWrapper",
     "Normal",
     "OneHotCategorical",
+    "Ordinal",
+    "OrdinalDistribution",
     "Poisson",
     "QuantizedNormal",
     "TruncatedNormal",
@@ -20,6 +22,8 @@ from .log_normal import LogNormal
 from .mixed_likelihood_wrapper import MixedLikelihoodWrapper
 from .normal import Normal
 from .one_hot_categorical import OneHotCategorical
+from .ordinal import Ordinal
+from .ordinal_distribution import OrdinalDistribution
 from .poisson import Poisson
 from .quantized_normal import QuantizedNormal
 from .truncated_normal import TruncatedNormal
