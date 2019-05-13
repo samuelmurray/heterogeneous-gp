@@ -15,7 +15,17 @@ class OrdinalDistribution(tfp.distributions.Distribution):
         self.mean, self.theta = tf.split(params, num_or_size_splits=[1, -1], axis=-1)
 
     def _prob(self, y: tf.Tensor) -> tf.Tensor:
-        pass
+        theta_softplus = tf.nn.softplus(self.theta)
+        theta_cum_sum = tf.cumsum(theta_softplus)
+        sigmoid_est_mean = tf.nn.sigmoid(theta_cum_sum - self.mean)
+        batch_size = tf.shape(y)[0]
+        num_classes = tf.shape(self.theta)[-1] + 1
+        prob1 = tf.concat([sigmoid_est_mean, tf.ones([batch_size, 1], tf.float32)], 1)
+        prob2 = tf.concat([tf.zeros([batch_size, 1], tf.float32), sigmoid_est_mean], 1)
+        mean_probs = tf.subtract(prob1, prob2)
+        true_values = tf.one_hot(tf.reduce_sum(tf.cast(y, tf.int32), 1) - 1, num_classes)
+        prob = tf.reduce_sum(mean_probs * true_values, 1)
+        return prob
 
     @staticmethod
     def _param_shapes(sample_shape):
