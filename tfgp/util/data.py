@@ -431,9 +431,6 @@ def make_mimic_test(num_data: Optional[int] = None) -> DataTuple:
 
 def make_oilflow(num_data: Optional[int] = None, output_dim: Optional[int] = None, *,
                  one_hot_labels: bool = False) -> DataTuple:
-    if not importlib.util.find_spec("pods"):
-        raise ModuleNotFoundError("You need to install the package 'pods' (pip install pods) "
-                                  "to use the Oilflow dataset")
     oil = pods.datasets.oil()
     data_size = oil['X'].shape[0]
     data_indices = np.random.permutation(data_size)[:num_data]
