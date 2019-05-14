@@ -15,9 +15,8 @@ class OrdinalDistribution(tfp.distributions.Distribution):
 
     def _prob(self, y: tf.Tensor) -> tf.Tensor:
         prob_of_category = self._prob_of_category()
-        prob_of_observation = tf.multiply(y, prob_of_category)
-        prob_summed = tf.reduce_sum(prob_of_observation, axis=-1, keepdims=True)
-        return prob_summed
+        prob_of_observation = self._prob_of_observation(y, prob_of_category)
+        return prob_of_observation
 
     def _prob_of_category(self) -> tf.Tensor:
         sigmoid_est_mean = self._sigmoid_est_mean()
@@ -44,3 +43,8 @@ class OrdinalDistribution(tfp.distributions.Distribution):
         zeros = tf.zeros(size)
         zeros_expanded = tf.expand_dims(zeros, axis=-1)
         return tf.concat([zeros_expanded, sigmoid_est_mean], axis=-1)
+
+    @staticmethod
+    def _prob_of_observation(y, prob_of_category):
+        prob_of_observation = tf.multiply(y, prob_of_category)
+        return tf.reduce_sum(prob_of_observation, axis=-1, keepdims=True)
