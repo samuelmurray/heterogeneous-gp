@@ -33,12 +33,12 @@ class OrdinalDistribution(tfp.distributions.Distribution):
 
     def _upper_prob(self, sigmoid_est_mean: tf.Tensor) -> tf.Tensor:
         size = tf.shape(sigmoid_est_mean)[:-1]
-        ones = tf.ones(size, tf.float32)
+        ones = tf.ones(size)
         ones_expanded = tf.expand_dims(ones, axis=-1)
         return tf.concat([sigmoid_est_mean, ones_expanded], axis=-1)
 
     def _lower_prob(self, sigmoid_est_mean: tf.Tensor) -> tf.Tensor:
         size = tf.shape(sigmoid_est_mean)[:-1]
-        zeros = tf.zeros(size, tf.float32)
+        zeros = tf.zeros(size)
         zeros_expanded = tf.expand_dims(zeros, axis=-1)
         return tf.concat([zeros_expanded, sigmoid_est_mean], axis=-1)
