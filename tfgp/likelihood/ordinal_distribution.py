@@ -34,10 +34,8 @@ class OrdinalDistribution(tfp.distributions.Distribution):
 
     def _upper_prob(self, batch_size: int, sigmoid_est_mean: tf.Tensor) -> tf.Tensor:
         ones = tf.ones([batch_size, 1], tf.float32)
-        prob1 = tf.concat([sigmoid_est_mean, ones], axis=1)
-        return prob1
+        return tf.concat([sigmoid_est_mean, ones], axis=1)
 
     def _lower_prob(self, batch_size: int, sigmoid_est_mean: tf.Tensor) -> tf.Tensor:
         zeros = tf.zeros([batch_size, 1], tf.float32)
-        prob2 = tf.concat([zeros, sigmoid_est_mean], axis=1)
-        return prob2
+        return tf.concat([zeros, sigmoid_est_mean], axis=1)
