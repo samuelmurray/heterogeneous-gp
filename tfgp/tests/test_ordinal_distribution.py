@@ -1,3 +1,4 @@
+import numpy as np
 import tensorflow as tf
 
 from tfgp.likelihood import OrdinalDistribution
@@ -17,6 +18,13 @@ class TestOrdinalDistribution(tf.test.TestCase):
         prob = self.distribution._prob(y)
         log_prob = self.distribution.log_prob(y)
         self.assertAllEqual(log_prob, tf.log(prob))
+
+    def test_prob_handles_2D_parameters(self) -> None:
+        params = tf.convert_to_tensor([[4., 2., 1.], [2., 5., -1.]])
+        distribution = OrdinalDistribution(params)
+        y = tf.convert_to_tensor([[0., 0., 1.], [0., 1., 0.]])
+        prob = distribution._prob(y)
+        self.assertShapeEqual(np.empty([2, 1]), prob)
 
     def test_param_shapes_not_implemented(self) -> None:
         self.assertRaises(NotImplementedError, self.distribution._param_shapes, None)
