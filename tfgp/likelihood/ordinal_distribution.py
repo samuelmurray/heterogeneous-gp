@@ -15,54 +15,29 @@ class OrdinalDistribution(tfp.distributions.Distribution):
         self.mean, self.theta = tf.split(params, num_or_size_splits=[1, -1], axis=-1)
 
     def _prob(self, y: tf.Tensor) -> tf.Tensor:
+        sigmoid_est_mean = self._sigmoid_est_mean()
+        batch_size = tf.shape(y)[0]
+        mean_probs = self._mean_probs(batch_size, sigmoid_est_mean)
+        prob = tf.reduce_sum(mean_probs * y, 1)
+        return prob
+
+    def _sigmoid_est_mean(self):
         theta_softplus = tf.nn.softplus(self.theta)
         theta_cum_sum = tf.cumsum(theta_softplus)
         sigmoid_est_mean = tf.nn.sigmoid(theta_cum_sum - self.mean)
-        batch_size = tf.shape(y)[0]
-        num_classes = tf.shape(self.theta)[-1] + 1
-        prob1 = tf.concat([sigmoid_est_mean, tf.ones([batch_size, 1], tf.float32)], 1)
-        prob2 = tf.concat([tf.zeros([batch_size, 1], tf.float32), sigmoid_est_mean], 1)
-        mean_probs = tf.subtract(prob1, prob2)
-        true_values = tf.one_hot(tf.reduce_sum(tf.cast(y, tf.int32), 1) - 1, num_classes)
-        prob = tf.reduce_sum(mean_probs * true_values, 1)
-        return prob
+        return sigmoid_est_mean
 
-    @staticmethod
-    def _param_shapes(sample_shape):
-        pass
+    def _mean_probs(self, batch_size, sigmoid_est_mean):
+        upper_prob = self._upper_prob(batch_size, sigmoid_est_mean)
+        lower_prob = self._lower_prob(batch_size, sigmoid_est_mean)
+        return tf.subtract(upper_prob, lower_prob)
 
-    def _batch_shape_tensor(self):
-        pass
+    def _upper_prob(self, batch_size, sigmoid_est_mean):
+        ones = tf.ones([batch_size, 1], tf.float32)
+        prob1 = tf.concat([sigmoid_est_mean, ones], axis=1)
+        return prob1
 
-    def _event_shape_tensor(self):
-        pass
-
-    def _sample_n(self, n, seed=None):
-        pass
-
-    def _log_survival_function(self, value):
-        pass
-
-    def _survival_function(self, value):
-        pass
-
-    def _entropy(self):
-        pass
-
-    def _mean(self):
-        pass
-
-    def _quantile(self, value):
-        pass
-
-    def _variance(self):
-        pass
-
-    def _stddev(self):
-        pass
-
-    def _covariance(self):
-        pass
-
-    def _mode(self):
-        pass
+    def _lower_prob(self, batch_size, sigmoid_est_mean):
+        zeros = tf.zeros([batch_size, 1], tf.float32)
+        prob2 = tf.concat([zeros, sigmoid_est_mean], axis=1)
+        return prob2
