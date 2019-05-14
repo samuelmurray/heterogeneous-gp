@@ -19,17 +19,17 @@ class OrdinalDistribution(tfp.distributions.Distribution):
         prob_summed = tf.reduce_sum(prob_of_observation, axis=-1, keepdims=True)
         return prob_summed
 
-    def _sigmoid_est_mean(self) -> tf.Tensor:
-        theta_softplus = tf.nn.softplus(self.theta)
-        theta_cumsum = tf.cumsum(theta_softplus, axis=-1)
-        sigmoid_est_mean = tf.nn.sigmoid(theta_cumsum - self.mean)
-        return sigmoid_est_mean
-
     def _prob_of_category(self) -> tf.Tensor:
         sigmoid_est_mean = self._sigmoid_est_mean()
         upper_cdf = self._cdf_of_category(sigmoid_est_mean)
         lower_cdf = self._cdf_of_below_category(sigmoid_est_mean)
         return tf.subtract(upper_cdf, lower_cdf)
+
+    def _sigmoid_est_mean(self) -> tf.Tensor:
+        theta_softplus = tf.nn.softplus(self.theta)
+        theta_cumsum = tf.cumsum(theta_softplus, axis=-1)
+        sigmoid_est_mean = tf.nn.sigmoid(theta_cumsum - self.mean)
+        return sigmoid_est_mean
 
     @staticmethod
     def _cdf_of_category(sigmoid_est_mean: tf.Tensor) -> tf.Tensor:
