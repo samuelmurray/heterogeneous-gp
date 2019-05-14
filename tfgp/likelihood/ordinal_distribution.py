@@ -17,7 +17,8 @@ class OrdinalDistribution(tfp.distributions.Distribution):
     def _prob(self, y: tf.Tensor) -> tf.Tensor:
         sigmoid_est_mean = self._sigmoid_est_mean()
         mean_probs = self._mean_probs(sigmoid_est_mean)
-        prob = tf.reduce_sum(mean_probs * y, axis=-1, keepdims=True)
+        y_times_mean_probs = tf.multiply(y, mean_probs)
+        prob = tf.reduce_sum(y_times_mean_probs, axis=-1, keepdims=True)
         return prob
 
     def _sigmoid_est_mean(self) -> tf.Tensor:
