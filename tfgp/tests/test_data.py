@@ -244,16 +244,16 @@ class TestMockPodsPackage(tf.test.TestCase):
     def tearDown(self) -> None:
         tf.reset_default_graph()
 
-    def test_oilflow(self) -> None:
-        with tf.test.mock.patch("tfgp.util.data.pods") as mocked_pods:
-            X = np.empty([10, 12])
-            Y = np.empty([10, 3])
-            mocked_data = {"X": X, "Y": Y}
-            mocked_pods.datasets.oil = lambda: mocked_data
-            y, likelihood, labels = data.make_oilflow(self.num_data)
-            self.assertIsInstance(y, np.ndarray)
-            self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
-            self.assertIsInstance(labels, np.ndarray)
+    @tf.test.mock.patch("tfgp.util.data.pods")
+    def test_oilflow(self, mocked_pods: tf.test.mock.MagicMock) -> None:
+        X = np.empty([10, 12])
+        Y = np.empty([10, 3])
+        mocked_data = {"X": X, "Y": Y}
+        mocked_pods.datasets.oil = lambda: mocked_data
+        y, likelihood, labels = data.make_oilflow(self.num_data)
+        self.assertIsInstance(y, np.ndarray)
+        self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
+        self.assertIsInstance(labels, np.ndarray)
 
 
 if __name__ == "__main__":
