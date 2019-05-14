@@ -24,12 +24,20 @@ class TestOrdinalDistribution(tf.test.TestCase):
         prob = self.distribution._prob(y)
         self.assertShapeEqual(np.empty([2, 1]), prob)
 
-    def test_prob_handles_3D_parameters(self) -> None:
+    def test_prob_handles_single_3D_parameters(self) -> None:
         params = tf.convert_to_tensor([[[4., 2., 1.], [2., 5., -1.]]])
         distribution = OrdinalDistribution(params)
         y = tf.convert_to_tensor([[0., 0., 1.], [0., 1., 0.]])
         prob = distribution._prob(y)
         self.assertShapeEqual(np.empty([1, 2, 1]), prob)
+
+    def test_prob_handles_multiple_3D_parameters(self) -> None:
+        params = tf.convert_to_tensor([[[4., 2., 1.], [2., 5., -1.]],
+                                       [[4., 2., 1.], [2., 5., -1.]]])
+        distribution = OrdinalDistribution(params)
+        y = tf.convert_to_tensor([[0., 0., 1.], [0., 1., 0.]])
+        prob = distribution._prob(y)
+        self.assertShapeEqual(np.empty([2, 2, 1]), prob)
 
     def test_param_shapes_not_implemented(self) -> None:
         self.assertRaises(NotImplementedError, self.distribution._param_shapes, None)
