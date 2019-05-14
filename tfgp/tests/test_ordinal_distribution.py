@@ -19,6 +19,16 @@ class TestOrdinalDistribution(tf.test.TestCase):
         log_prob = self.distribution.log_prob(y)
         self.assertAllEqual(log_prob, tf.log(prob))
 
+    def test_most_likely_category(self) -> None:
+        params = tf.convert_to_tensor([[5., 0.]])
+        distribution = OrdinalDistribution(params)
+        category_1 = tf.convert_to_tensor([[1., 0]])
+        category_2 = tf.convert_to_tensor([[0, 1.]])
+        with self.session() as sess:
+            prob_of_category_1 = sess.run(distribution.prob(category_1))
+            prob_of_category_2 = sess.run(distribution.prob(category_2))
+        self.assertAllGreater(prob_of_category_2, prob_of_category_1)
+
     def test_prob_handles_2D_parameters(self) -> None:
         y = tf.convert_to_tensor([[0., 0., 1.], [0., 1., 0.]])
         prob = self.distribution._prob(y)
