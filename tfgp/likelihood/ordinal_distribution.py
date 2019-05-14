@@ -1,6 +1,5 @@
 import tensorflow as tf
 import tensorflow_probability as tfp
-from tensorflow_probability.python.internal import reparameterization
 
 
 class OrdinalDistribution(tfp.distributions.Distribution):
@@ -8,7 +7,7 @@ class OrdinalDistribution(tfp.distributions.Distribution):
                  params: tf.Tensor,
                  name: str = "Ordinal") -> None:
         super().__init__(dtype=tf.int32,
-                         reparameterization_type=reparameterization.NOT_REPARAMETERIZED,
+                         reparameterization_type=tfp.distributions.NOT_REPARAMETERIZED,
                          validate_args=False,
                          allow_nan_stats=True,
                          name=name)
