@@ -88,6 +88,7 @@ class TestStubOutDataFilesExist(tf.test.TestCase):
         self.num_data = 10
         self.stubs = tf.test.StubOutForTesting()
         stubbed_data = np.empty([1100, 10])
+        self.stubs.Set(os.path, "isfile", lambda x: True)
         self.stubs.Set(np, "loadtxt", lambda x, delimiter=None: stubbed_data)
         self.stubs.Set(np, "genfromtxt",
                        lambda x, delimiter=None, filling_values=None: stubbed_data)
