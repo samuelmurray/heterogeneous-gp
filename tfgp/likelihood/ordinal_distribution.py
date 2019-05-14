@@ -43,6 +43,6 @@ class OrdinalDistribution(tfp.distributions.Distribution):
         return tf.concat([zeros_expanded, sigmoid_est_mean], axis=-1)
 
     @staticmethod
-    def _prob_of_observation(y, prob_of_category):
+    def _prob_of_observation(y: tf.Tensor, prob_of_category: tf.Tensor) -> tf.Tensor:
         prob_of_observation = tf.multiply(y, prob_of_category)
         return tf.reduce_sum(prob_of_observation, axis=-1, keepdims=True)
