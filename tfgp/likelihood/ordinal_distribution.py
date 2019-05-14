@@ -15,10 +15,10 @@ class OrdinalDistribution(tfp.distributions.Distribution):
 
     def _prob(self, y: tf.Tensor) -> tf.Tensor:
         sigmoid_est_mean = self._sigmoid_est_mean()
-        mean_probs = self._prob_of_y_in_category(sigmoid_est_mean)
-        y_times_mean_probs = tf.multiply(y, mean_probs)
-        prob = tf.reduce_sum(y_times_mean_probs, axis=-1, keepdims=True)
-        return prob
+        prob_of_category = self._prob_of_category(sigmoid_est_mean)
+        prob_of_observation = tf.multiply(y, prob_of_category)
+        prob_summed = tf.reduce_sum(prob_of_observation, axis=-1, keepdims=True)
+        return prob_summed
 
     def _sigmoid_est_mean(self) -> tf.Tensor:
         theta_softplus = tf.nn.softplus(self.theta)
@@ -26,18 +26,18 @@ class OrdinalDistribution(tfp.distributions.Distribution):
         sigmoid_est_mean = tf.nn.sigmoid(theta_cumsum - self.mean)
         return sigmoid_est_mean
 
-    def _prob_of_y_in_category(self, sigmoid_est_mean: tf.Tensor) -> tf.Tensor:
-        upper_cdf = self._cdf_of_y_in_category(sigmoid_est_mean)
-        lower_cdf = self._cdf_of_y_below_category(sigmoid_est_mean)
+    def _prob_of_category(self, sigmoid_est_mean: tf.Tensor) -> tf.Tensor:
+        upper_cdf = self._cdf_of_category(sigmoid_est_mean)
+        lower_cdf = self._cdf_of_below_category(sigmoid_est_mean)
         return tf.subtract(upper_cdf, lower_cdf)
 
-    def _cdf_of_y_in_category(self, sigmoid_est_mean: tf.Tensor) -> tf.Tensor:
+    def _cdf_of_category(self, sigmoid_est_mean: tf.Tensor) -> tf.Tensor:
         size = tf.shape(sigmoid_est_mean)[:-1]
         ones = tf.ones(size)
         ones_expanded = tf.expand_dims(ones, axis=-1)
         return tf.concat([sigmoid_est_mean, ones_expanded], axis=-1)
 
-    def _cdf_of_y_below_category(self, sigmoid_est_mean: tf.Tensor) -> tf.Tensor:
+    def _cdf_of_below_category(self, sigmoid_est_mean: tf.Tensor) -> tf.Tensor:
         size = tf.shape(sigmoid_est_mean)[:-1]
         zeros = tf.zeros(size)
         zeros_expanded = tf.expand_dims(zeros, axis=-1)
