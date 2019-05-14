@@ -88,9 +88,10 @@ class TestStubOutDataFilesExist(tf.test.TestCase):
     def setUp(self) -> None:
         self.num_data = 10
         self.stubs = tf.test.StubOutForTesting()
-        data = np.empty([1100, 10])
-        self.stubs.Set(np, "loadtxt", lambda x, delimiter=None: data)
-        self.stubs.Set(np, "genfromtxt", lambda x, delimiter=None, filling_values=None: data)
+        stubbed_data = np.empty([1100, 10])
+        self.stubs.Set(np, "loadtxt", lambda x, delimiter=None: stubbed_data)
+        self.stubs.Set(np, "genfromtxt",
+                       lambda x, delimiter=None, filling_values=None: stubbed_data)
 
     def tearDown(self) -> None:
         tf.reset_default_graph()
