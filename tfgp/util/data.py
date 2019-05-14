@@ -3,6 +3,7 @@ import os
 from typing import List, Optional, Tuple
 
 import numpy as np
+import pods
 from scipy.special import expit
 from sklearn.metrics.pairwise import rbf_kernel
 from sklearn.datasets import make_blobs
@@ -433,7 +434,6 @@ def make_oilflow(num_data: Optional[int] = None, output_dim: Optional[int] = Non
     if not importlib.util.find_spec("pods"):
         raise ModuleNotFoundError("You need to install the package 'pods' (pip install pods) "
                                   "to use the Oilflow dataset")
-    import pods
     oil = pods.datasets.oil()
     data_size = oil['X'].shape[0]
     data_indices = np.random.permutation(data_size)[:num_data]

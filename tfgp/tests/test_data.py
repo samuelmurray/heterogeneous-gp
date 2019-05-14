@@ -237,6 +237,25 @@ class TestStubOutFileNotFound(tf.test.TestCase):
             data.make_wine_pos(self.num_data)
 
 
+class TestMockPodsPackage(tf.test.TestCase):
+    def setUp(self) -> None:
+        self.num_data = 10
+
+    def tearDown(self) -> None:
+        tf.reset_default_graph()
+
+    def test_oilflow(self) -> None:
+        with tf.test.mock.patch("tfgp.util.data.pods") as mocked_pods:
+            X = np.empty([10, 12])
+            Y = np.empty([10, 3])
+            mocked_data = {"X": X, "Y": Y}
+            mocked_pods.datasets.oil = lambda: mocked_data
+            y, likelihood, labels = data.make_oilflow(self.num_data)
+            self.assertIsInstance(y, np.ndarray)
+            self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
+            self.assertIsInstance(labels, np.ndarray)
+
+
 class TestUnsupervisedDataModuleNotFound(tf.test.TestCase):
     def setUp(self) -> None:
         self.num_data = 10
