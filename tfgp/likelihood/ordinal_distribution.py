@@ -23,7 +23,7 @@ class OrdinalDistribution(tfp.distributions.Distribution):
 
     def _sigmoid_est_mean(self):
         theta_softplus = tf.nn.softplus(self.theta)
-        theta_cum_sum = tf.cumsum(theta_softplus)
+        theta_cum_sum = tf.cumsum(theta_softplus, axis=1)
         sigmoid_est_mean = tf.nn.sigmoid(theta_cum_sum - self.mean)
         return sigmoid_est_mean
 
