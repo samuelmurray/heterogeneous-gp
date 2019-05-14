@@ -21,23 +21,23 @@ class OrdinalDistribution(tfp.distributions.Distribution):
         prob = tf.reduce_sum(mean_probs * y, axis=1, keepdims=True)
         return prob
 
-    def _sigmoid_est_mean(self):
+    def _sigmoid_est_mean(self) -> tf.Tensor:
         theta_softplus = tf.nn.softplus(self.theta)
         theta_cumsum = tf.cumsum(theta_softplus, axis=1)
         sigmoid_est_mean = tf.nn.sigmoid(theta_cumsum - self.mean)
         return sigmoid_est_mean
 
-    def _mean_probs(self, batch_size, sigmoid_est_mean):
+    def _mean_probs(self, batch_size: int, sigmoid_est_mean: tf.Tensor) -> tf.Tensor:
         upper_prob = self._upper_prob(batch_size, sigmoid_est_mean)
         lower_prob = self._lower_prob(batch_size, sigmoid_est_mean)
         return tf.subtract(upper_prob, lower_prob)
 
-    def _upper_prob(self, batch_size, sigmoid_est_mean):
+    def _upper_prob(self, batch_size: int, sigmoid_est_mean: tf.Tensor) -> tf.Tensor:
         ones = tf.ones([batch_size, 1], tf.float32)
         prob1 = tf.concat([sigmoid_est_mean, ones], axis=1)
         return prob1
 
-    def _lower_prob(self, batch_size, sigmoid_est_mean):
+    def _lower_prob(self, batch_size: int, sigmoid_est_mean: tf.Tensor) -> tf.Tensor:
         zeros = tf.zeros([batch_size, 1], tf.float32)
         prob2 = tf.concat([zeros, sigmoid_est_mean], axis=1)
         return prob2
