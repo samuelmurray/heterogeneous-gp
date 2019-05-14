@@ -90,6 +90,7 @@ class TestUnsupervisedDataFilesExist(tf.test.TestCase):
         self.stubs = tf.test.StubOutForTesting()
         data = np.empty([1100, 10])
         self.stubs.Set(np, "loadtxt", lambda x, delimiter=None: data)
+        self.stubs.Set(np, "genfromtxt", lambda x, delimiter=None, filling_values=None: data)
 
     def tearDown(self) -> None:
         tf.reset_default_graph()
