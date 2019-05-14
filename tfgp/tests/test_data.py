@@ -83,145 +83,94 @@ class TestUnsupervisedData(tf.test.TestCase):
         self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
         self.assertIsInstance(labels, np.ndarray)
 
+
+class TestUnsupervisedDataFilesExist(tf.test.TestCase):
+    def setUp(self) -> None:
+        self.num_data = 10
+        self.stubs = tf.test.StubOutForTesting()
+        data = np.empty([1100, 10])
+        self.stubs.Set(np, "loadtxt", lambda x, delimiter=None: data)
+
+    def tearDown(self) -> None:
+        tf.reset_default_graph()
+
     def test_abalone(self) -> None:
-        if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "abalone.csv")):
-            with self.assertRaises(OSError):
-                data.make_abalone(self.num_data)
-        else:
-            y, likelihood, labels = data.make_abalone(self.num_data)
-            self.assertIsInstance(y, np.ndarray)
-            self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
-            self.assertIsInstance(labels, np.ndarray)
+        y, likelihood, labels = data.make_abalone(self.num_data)
+        self.assertIsInstance(y, np.ndarray)
+        self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
+        self.assertIsInstance(labels, np.ndarray)
 
     def test_adult(self) -> None:
-        if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "adult_onehot.csv")):
-            with self.assertRaises(OSError):
-                data.make_adult(self.num_data)
-        else:
-            y, likelihood, labels = data.make_adult(self.num_data)
-            self.assertIsInstance(y, np.ndarray)
-            self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
-            self.assertIsInstance(labels, np.ndarray)
+        y, likelihood, labels = data.make_adult(self.num_data)
+        self.assertIsInstance(y, np.ndarray)
+        self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
+        self.assertIsInstance(labels, np.ndarray)
 
     def test_atr(self) -> None:
-        if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "atr_onehot.csv")):
-            with self.assertRaises(OSError):
-                data.make_atr(self.num_data)
-        else:
-            y, likelihood, labels = data.make_atr(self.num_data)
-            self.assertIsInstance(y, np.ndarray)
-            self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
-            self.assertIsInstance(labels, np.ndarray)
+        y, likelihood, labels = data.make_atr(self.num_data)
+        self.assertIsInstance(y, np.ndarray)
+        self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
+        self.assertIsInstance(labels, np.ndarray)
 
     def test_binaryalphadigits(self) -> None:
-        if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "binaryalphadigits_train.csv")):
-            with self.assertRaises(OSError):
-                data.make_binaryalphadigits(self.num_data)
-        else:
-            y, likelihood, labels = data.make_binaryalphadigits(self.num_data)
-            self.assertIsInstance(y, np.ndarray)
-            self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
-            self.assertIsInstance(labels, np.ndarray)
+        y, likelihood, labels = data.make_binaryalphadigits(self.num_data)
+        self.assertIsInstance(y, np.ndarray)
+        self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
+        self.assertIsInstance(labels, np.ndarray)
 
     def test_binaryalphadigits_test(self) -> None:
-        if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "binaryalphadigits_test.csv")):
-            with self.assertRaises(OSError):
-                data.make_binaryalphadigits_test(self.num_data)
-        else:
-            y, likelihood, labels = data.make_binaryalphadigits_test(self.num_data)
-            self.assertIsInstance(y, np.ndarray)
-            self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
-            self.assertIsInstance(labels, np.ndarray)
+        y, likelihood, labels = data.make_binaryalphadigits_test(self.num_data)
+        self.assertIsInstance(y, np.ndarray)
+        self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
+        self.assertIsInstance(labels, np.ndarray)
 
     def test_cleveland(self) -> None:
-        if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "cleveland_onehot.csv")):
-            with self.assertRaises(OSError):
-                data.make_cleveland(self.num_data)
-        else:
-            y, likelihood, labels = data.make_cleveland(self.num_data)
-            self.assertIsInstance(y, np.ndarray)
-            self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
-            self.assertIsInstance(labels, np.ndarray)
+        y, likelihood, labels = data.make_cleveland(self.num_data)
+        self.assertIsInstance(y, np.ndarray)
+        self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
+        self.assertIsInstance(labels, np.ndarray)
 
     def test_cleveland_quantized(self) -> None:
-        if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "cleveland_onehot.csv")):
-            with self.assertRaises(OSError):
-                data.make_cleveland_quantized(self.num_data)
-        else:
-            y, likelihood, labels = data.make_cleveland_quantized(self.num_data)
-            self.assertIsInstance(y, np.ndarray)
-            self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
-            self.assertIsInstance(labels, np.ndarray)
+        y, likelihood, labels = data.make_cleveland_quantized(self.num_data)
+        self.assertIsInstance(y, np.ndarray)
+        self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
+        self.assertIsInstance(labels, np.ndarray)
 
     def test_default_credit(self) -> None:
-        if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "default_credit_onehot.csv")):
-            with self.assertRaises(OSError):
-                data.make_default_credit(self.num_data)
-        else:
-            y, likelihood, labels = data.make_default_credit(self.num_data)
-            self.assertIsInstance(y, np.ndarray)
-            self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
-            self.assertIsInstance(labels, np.ndarray)
+        y, likelihood, labels = data.make_default_credit(self.num_data)
+        self.assertIsInstance(y, np.ndarray)
+        self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
+        self.assertIsInstance(labels, np.ndarray)
 
     def test_mimic(self) -> None:
-        if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "mimic_onehot_train.csv")):
-            with self.assertRaises(OSError):
-                data.make_mimic(self.num_data)
-        else:
-            y, likelihood, labels = data.make_mimic(self.num_data)
-            self.assertIsInstance(y, np.ndarray)
-            self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
-            self.assertIsInstance(labels, np.ndarray)
+        y, likelihood, labels = data.make_mimic(self.num_data)
+        self.assertIsInstance(y, np.ndarray)
+        self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
+        self.assertIsInstance(labels, np.ndarray)
 
     def test_mimic_labeled(self) -> None:
-        if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "mimic_onehot_train.csv")):
-            with self.assertRaises(OSError):
-                data.make_mimic_labeled(self.num_data)
-        else:
-            y, likelihood, labels = data.make_mimic_labeled(self.num_data)
-            self.assertIsInstance(y, np.ndarray)
-            self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
-            self.assertIsInstance(labels, np.ndarray)
+        y, likelihood, labels = data.make_mimic_labeled(self.num_data)
+        self.assertIsInstance(y, np.ndarray)
+        self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
+        self.assertIsInstance(labels, np.ndarray)
 
     def test_mimic_test(self) -> None:
-        if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "mimic_onehot_test.csv")):
-            with self.assertRaises(OSError):
-                data.make_mimic_test(self.num_data)
-        else:
-            y, likelihood, labels = data.make_mimic_test(self.num_data)
-            self.assertIsInstance(y, np.ndarray)
-            self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
-            self.assertIsInstance(labels, np.ndarray)
-
-    def test_oilflow(self) -> None:
-        if not importlib.util.find_spec("pods"):
-            with self.assertRaises(ModuleNotFoundError):
-                data.make_oilflow(self.num_data)
-        else:
-            y, likelihood, labels = data.make_oilflow(self.num_data)
-            self.assertIsInstance(y, np.ndarray)
-            self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
-            self.assertIsInstance(labels, np.ndarray)
+        y, likelihood, labels = data.make_mimic_test(self.num_data)
+        self.assertIsInstance(y, np.ndarray)
+        self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
+        self.assertIsInstance(labels, np.ndarray)
 
     def test_wine(self) -> None:
-        if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "wine.csv")):
-            with self.assertRaises(OSError):
-                data.make_wine(self.num_data)
-        else:
-            y, likelihood, labels = data.make_wine(self.num_data)
-            self.assertIsInstance(y, np.ndarray)
-            self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
-            self.assertIsInstance(labels, np.ndarray)
+        y, likelihood, labels = data.make_wine(self.num_data)
+        self.assertIsInstance(y, np.ndarray)
+        self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
+        self.assertIsInstance(labels, np.ndarray)
 
     def test_wine_pos(self) -> None:
-        if not os.path.isfile(os.path.join(data.DATA_DIR_PATH, "wine.csv")):
-            with self.assertRaises(OSError):
-                data.make_wine_pos(self.num_data)
-        else:
-            y, likelihood, labels = data.make_wine_pos(self.num_data)
-            self.assertIsInstance(y, np.ndarray)
-            self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
-            self.assertIsInstance(labels, np.ndarray)
+        y, likelihood, labels = data.make_wine_pos(self.num_data)
+        self.assertIsInstance(y, np.ndarray)
+        self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
+        self.assertIsInstance(labels, np.ndarray)
 
 
 class TestUnsupervisedDataFileNotFound(tf.test.TestCase):
