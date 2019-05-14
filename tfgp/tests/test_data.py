@@ -84,7 +84,7 @@ class TestUnsupervisedData(tf.test.TestCase):
         self.assertIsInstance(labels, np.ndarray)
 
 
-class TestUnsupervisedDataFilesExist(tf.test.TestCase):
+class TestStubOutDataFilesExist(tf.test.TestCase):
     def setUp(self) -> None:
         self.num_data = 10
         self.stubs = tf.test.StubOutForTesting()
@@ -174,7 +174,7 @@ class TestUnsupervisedDataFilesExist(tf.test.TestCase):
         self.assertIsInstance(labels, np.ndarray)
 
 
-class TestUnsupervisedDataFileNotFound(tf.test.TestCase):
+class TestStubOutFileNotFound(tf.test.TestCase):
     def setUp(self) -> None:
         self.num_data = 10
         self.stubs = tf.test.StubOutForTesting()
