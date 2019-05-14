@@ -15,7 +15,7 @@ class OrdinalDistribution(tfp.distributions.Distribution):
 
     def _prob(self, y: tf.Tensor) -> tf.Tensor:
         sigmoid_est_mean = self._sigmoid_est_mean()
-        mean_probs = self._mean_probs(sigmoid_est_mean)
+        mean_probs = self._prob_of_y_in_category(sigmoid_est_mean)
         y_times_mean_probs = tf.multiply(y, mean_probs)
         prob = tf.reduce_sum(y_times_mean_probs, axis=-1, keepdims=True)
         return prob
@@ -26,18 +26,18 @@ class OrdinalDistribution(tfp.distributions.Distribution):
         sigmoid_est_mean = tf.nn.sigmoid(theta_cumsum - self.mean)
         return sigmoid_est_mean
 
-    def _mean_probs(self, sigmoid_est_mean: tf.Tensor) -> tf.Tensor:
-        upper_prob = self._upper_prob(sigmoid_est_mean)
-        lower_prob = self._lower_prob(sigmoid_est_mean)
-        return tf.subtract(upper_prob, lower_prob)
+    def _prob_of_y_in_category(self, sigmoid_est_mean: tf.Tensor) -> tf.Tensor:
+        upper_cdf = self._cdf_of_y_in_category(sigmoid_est_mean)
+        lower_cdf = self._cdf_of_y_below_category(sigmoid_est_mean)
+        return tf.subtract(upper_cdf, lower_cdf)
 
-    def _upper_prob(self, sigmoid_est_mean: tf.Tensor) -> tf.Tensor:
+    def _cdf_of_y_in_category(self, sigmoid_est_mean: tf.Tensor) -> tf.Tensor:
         size = tf.shape(sigmoid_est_mean)[:-1]
         ones = tf.ones(size)
         ones_expanded = tf.expand_dims(ones, axis=-1)
         return tf.concat([sigmoid_est_mean, ones_expanded], axis=-1)
 
-    def _lower_prob(self, sigmoid_est_mean: tf.Tensor) -> tf.Tensor:
+    def _cdf_of_y_below_category(self, sigmoid_est_mean: tf.Tensor) -> tf.Tensor:
         size = tf.shape(sigmoid_est_mean)[:-1]
         zeros = tf.zeros(size)
         zeros_expanded = tf.expand_dims(zeros, axis=-1)
