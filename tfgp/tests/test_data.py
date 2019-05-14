@@ -256,20 +256,5 @@ class TestMockPodsPackage(tf.test.TestCase):
             self.assertIsInstance(labels, np.ndarray)
 
 
-class TestUnsupervisedDataModuleNotFound(tf.test.TestCase):
-    def setUp(self) -> None:
-        self.num_data = 10
-        self.stubs = tf.test.StubOutForTesting()
-        self.stubs.Set(importlib.util, "find_spec", lambda x: False)
-
-    def tearDown(self) -> None:
-        self.stubs.CleanUp()
-        tf.reset_default_graph()
-
-    def test_oilflow(self) -> None:
-        with self.assertRaises(ModuleNotFoundError):
-            data.make_oilflow(self.num_data)
-
-
 if __name__ == "__main__":
     tf.test.main()
