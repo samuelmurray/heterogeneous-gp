@@ -60,8 +60,16 @@ class TestOrdinalDistribution(tf.test.TestCase):
     def test_batch_shape_is_TensorShape(self) -> None:
         self.assertIsInstance(self.distribution.batch_shape, tf.TensorShape)
 
+    def test_batch_shape(self) -> None:
+        batch_shape = self.params.shape[:-1]
+        self.assertEqual(batch_shape, self.distribution.batch_shape)
+
     def test_event_shape_is_TensorShape(self) -> None:
         self.assertIsInstance(self.distribution.event_shape, tf.TensorShape)
+
+    def test_event_shape(self) -> None:
+        event_shape = self.params.shape[-1]
+        self.assertEqual(event_shape, self.distribution.event_shape)
 
     def test_param_shapes_not_implemented(self) -> None:
         self.assertRaises(NotImplementedError, self.distribution._param_shapes, None)
