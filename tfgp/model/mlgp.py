@@ -1,5 +1,6 @@
 from typing import Tuple
 
+from IPython import embed
 import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
@@ -164,12 +165,16 @@ class MLGP(InducingPointsModel):
             k_xs_z = self.kernel(xs, self.z, name="k_xs_z")
             k_xs_z_mul_kzz_inv = tf.matmul(k_xs_z, k_zz_inv, name="k_xs_z_mul_kzz_inv")
             f_mean = tf.matmul(k_xs_z_mul_kzz_inv, self.qu_mean, transpose_b=True, name="f_mean")
-            likelihoods = [likelihood(f_mean[:, i]) for i, likelihood in
-                           enumerate(self.likelihood.likelihoods)]
-            means = [lik.mean() for lik in likelihoods]
-            mean = tf.stack(means, axis=1, name="mean")
-            stds = [lik.stddev() for lik in likelihoods]
-            std = tf.stack(stds, axis=1, name="std")
+            f_mean_expanded = tf.expand_dims(f_mean, axis=0, name="f_mean_expanded")
+            likelihood_distributions = self.likelihood(f_mean_expanded)
+
+            means = [distribution.mean() for distribution in likelihood_distributions]
+            means_squeezed = [mean[0] for mean in means]
+            mean = tf.concat(means_squeezed, axis=-1, name="mean")
+
+            stds = [distribution.stddev() for distribution in likelihood_distributions]
+            stds_squeezed = [std[0] for std in stds]
+            std = tf.concat(stds_squeezed, axis=-1, name="std")
         return mean, std
 
     def create_summaries(self) -> None:
