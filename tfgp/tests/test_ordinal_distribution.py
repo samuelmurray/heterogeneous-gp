@@ -78,17 +78,11 @@ class TestOrdinalDistribution(tf.test.TestCase):
     def test_entropy_not_implemented(self) -> None:
         self.assertRaises(NotImplementedError, self.distribution._entropy)
 
-    def test_mean_not_implemented(self) -> None:
-        self.assertRaises(NotImplementedError, self.distribution._mean)
-
     def test_quantile_not_implemented(self) -> None:
         self.assertRaises(NotImplementedError, self.distribution._quantile, None)
 
     def test_variance_not_implemented(self) -> None:
         self.assertRaises(NotImplementedError, self.distribution._variance)
-
-    def test_stddev_not_implemented(self) -> None:
-        self.assertRaises(NotImplementedError, self.distribution._stddev)
 
     def test_covariance_not_implemented(self) -> None:
         self.assertRaises(NotImplementedError, self.distribution._covariance)
