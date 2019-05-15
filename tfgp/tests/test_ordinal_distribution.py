@@ -57,6 +57,12 @@ class TestOrdinalDistribution(tf.test.TestCase):
         prob_3D = distribution_3D.prob(y)
         self.assertAllEqual(prob_2D, prob_3D[0])
 
+    def test_batch_shape_is_TensorShape(self) -> None:
+        self.assertIsInstance(self.distribution.batch_shape, tf.TensorShape)
+
+    def test_event_shape_is_TensorShape(self) -> None:
+        self.assertIsInstance(self.distribution.event_shape, tf.TensorShape)
+
     def test_param_shapes_not_implemented(self) -> None:
         self.assertRaises(NotImplementedError, self.distribution._param_shapes, None)
 
