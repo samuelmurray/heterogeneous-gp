@@ -49,3 +49,6 @@ class OrdinalDistribution(tfp.distributions.Distribution):
 
     def _batch_shape(self):
         return self.theta.shape[:-1]
+
+    def _event_shape(self):
+        return self.theta.shape[-1] + 1
