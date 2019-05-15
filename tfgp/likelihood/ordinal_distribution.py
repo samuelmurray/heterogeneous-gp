@@ -47,15 +47,15 @@ class OrdinalDistribution(tfp.distributions.Distribution):
         prob_of_observation = tf.multiply(y, prob_of_category)
         return tf.reduce_sum(prob_of_observation, axis=-1, keepdims=True)
 
-    def _batch_shape(self):
+    def _batch_shape(self) -> tf.TensorShape:
         return self.theta.shape[:-1]
 
-    def _event_shape(self):
+    def _event_shape(self) -> tf.TensorShape:
         return self.theta.shape[-1] + 1
 
-    def _mean(self):
+    def _mean(self) -> tf.Tensor:
         return tf.squeeze(self.mean_param, axis=-1)
 
-    def _stddev(self):
+    def _stddev(self) -> tf.Tensor:
         # Not clear how to report std for this distribution - return zeros with correct shape
         return tf.zeros_like(self.mean())
