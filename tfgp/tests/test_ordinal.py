@@ -26,6 +26,15 @@ class TestOrdinal(tf.test.TestCase):
         self.assertEqual(shape[:-1], ret.batch_shape)
         self.assertEqual(shape[-1:], ret.event_shape)
 
+    def test_call_3D_return_shape(self) -> None:
+        batch_size = 2
+        num_data = 10
+        shape = (batch_size, num_data, self.num_classes)
+        f = tf.ones(shape)
+        ret = self.likelihood(f)
+        self.assertEqual(shape[:-1], ret.batch_shape)
+        self.assertEqual(shape[-1:], ret.event_shape)
+
     def test_create_summary(self) -> None:
         self.likelihood.create_summaries()
         merged_summary = tf.summary.merge_all()
