@@ -64,7 +64,8 @@ class MLGPLVM(MLGP):
         qx_mean, qx_var = self._get_or_subsample_qx()
         num_data = tf.shape(qx_mean)[0]
         e_x = tf.random_normal(shape=[self.num_samples, num_data, self.x_dim], name="e_x")
-        x_noise = tf.multiply(tf.sqrt(qx_var), e_x, name="x_noise")
+        qx_var_sqrt = tf.sqrt(qx_var, name="qx_var_sqrt")
+        x_noise = tf.multiply(qx_var_sqrt, e_x, name="x_noise")
         x_samples = tf.add(qx_mean, x_noise, name="x_samples")
         return x_samples
 
@@ -79,24 +80,24 @@ class MLGPLVM(MLGP):
         e_f = tf.random_normal(shape=[self.num_samples, self.f_dim, num_data], name="e_f")
         f_mean = tf.matmul(u_samples, a, name="f_mean")
         k_tilde_sqrt = tf.sqrt(k_tilde, name="k_tilde_sqrt")
-        f_noise = tf.multiply(tf.expand_dims(k_tilde_sqrt, axis=1), e_f, name="f_noise")
+        k_tilde_sqrt_expanded = tf.expand_dims(k_tilde_sqrt, axis=1, name="k_tilde_sqrt_expanded")
+        f_noise = tf.multiply(k_tilde_sqrt_expanded, e_f, name="f_noise")
         f_samples = tf.add(f_mean, f_noise, name="f_samples")
         return f_samples
 
     def _compute_a(self, x_samples: tf.Tensor) -> tf.Tensor:
         # a = Kzz^(-1) * Kzx
-        z_tiled = tf.tile(tf.expand_dims(self.z, axis=0), multiples=[self.num_samples, 1, 1],
-                          name="z_tiled")
+        z_tiled = self._expand_and_tile(self.z, [self.num_samples, 1, 1], name="z_tiled")
         k_zx = self.kernel(z_tiled, x_samples, name="k_zx")
         k_zz = self.kernel(self.z, name="k_zz")
         k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
-        a = tf.transpose(tf.tensordot(k_zz_inv, k_zx, axes=[1, 1]), perm=[1, 0, 2], name="a")
+        a_transposed = tf.tensordot(k_zz_inv, k_zx, axes=[1, 1], name="a_transposed")
+        a = tf.transpose(a_transposed, perm=[1, 0, 2], name="a")
         return a
 
     def _compute_k_tilde(self, x_samples: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
         # K~ = Kxx - Kxz * Kzz^(-1) * Kzx
-        z_tiled = tf.tile(tf.expand_dims(self.z, axis=0), multiples=[self.num_samples, 1, 1],
-                          name="z_tiled")
+        z_tiled = self._expand_and_tile(self.z, [self.num_samples, 1, 1], name="z_tiled")
         k_zx = self.kernel(z_tiled, x_samples, name="k_zx")
         k_xx = self.kernel(x_samples, name="k_xx")
         k_xz_mul_a = tf.matmul(k_zx, a, transpose_a=True)

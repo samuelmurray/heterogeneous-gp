@@ -11,7 +11,7 @@ class Kernel(abc.ABC):
 
     @abc.abstractmethod
     def __call__(self, x1: tf.Tensor, x2: Optional[tf.Tensor] = None, *,
-                 name: str = "") -> tf.Tensor:
+                 name: Optional[str] = None) -> tf.Tensor:
         raise NotImplementedError
 
     @abc.abstractmethod

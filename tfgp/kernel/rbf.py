@@ -23,7 +23,7 @@ class RBF(Kernel):
             self._eps = eps
 
     def __call__(self, x1: tf.Tensor, x2: Optional[tf.Tensor] = None, *,
-                 name: str = "") -> tf.Tensor:
+                 name: Optional[str] = None) -> tf.Tensor:
         with tf.name_scope(name):
             _x2 = x1 if x2 is None else x2
             x1_squared = tf.reduce_sum(tf.square(x1), axis=-1, name="x1_squared")

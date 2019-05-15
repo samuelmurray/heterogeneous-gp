@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Optional, Sequence, Tuple
 
 import numpy as np
 import tensorflow as tf
@@ -79,8 +79,8 @@ class MLGP(InducingPointsModel):
             qu = tfp.distributions.MultivariateNormalTriL(self.qu_mean, self.qu_scale, name="qu")
             k_zz = self.kernel(self.z, name="k_zz")
             chol_zz = tf.cholesky(k_zz, name="chol_zz")
-            pu = tfp.distributions.MultivariateNormalTriL(tf.zeros(self.num_inducing), chol_zz,
-                                                          name="pu")
+            zeros = tf.zeros(self.num_inducing)
+            pu = tfp.distributions.MultivariateNormalTriL(zeros, chol_zz, name="pu")
             kl = tfp.distributions.kl_divergence(qu, pu, allow_nan_stats=False, name="kl")
             kl_sum = tf.reduce_sum(kl, axis=0, name="kl_sum")
         return kl_sum
@@ -125,10 +125,11 @@ class MLGP(InducingPointsModel):
         k_tilde = self._compute_k_tilde(x, a)
         num_data = tf.shape(x)[0]
         e_f = tf.random_normal(shape=[self.num_samples, self.f_dim, num_data], name="e_f")
-        a_tiled = tf.tile(tf.expand_dims(a, axis=0), multiples=[self.num_samples, 1, 1])
+        a_tiled = self._expand_and_tile(a, [self.num_samples, 1, 1], name="a_tiled")
         f_mean = tf.matmul(u_samples, a_tiled, name="f_mean")
         k_tilde_sqrt = tf.sqrt(k_tilde, name="k_tilde_sqrt")
-        f_noise = tf.multiply(tf.expand_dims(k_tilde_sqrt, axis=1), e_f, name="f_noise")
+        k_tilde_sqrt_expanded = tf.expand_dims(k_tilde_sqrt, axis=1, name="k_tilde_sqrt_expanded")
+        f_noise = tf.multiply(k_tilde_sqrt_expanded, e_f, name="f_noise")
         f_samples = tf.add(f_mean, f_noise, name="f_samples")
         return f_samples
 
@@ -144,13 +145,19 @@ class MLGP(InducingPointsModel):
         # K~ = Kxx - Kxz * Kzz^(-1) * Kzx
         k_zx = self.kernel(self.z, x, name="k_zx")
         k_xx = self.kernel(x, name="k_xx")
-        k_zx_times_a = tf.matmul(k_zx, a, transpose_a=True)
+        k_zx_times_a = tf.matmul(k_zx, a, transpose_a=True, name="k_zx_times_a")
         k_tilde_full = tf.subtract(k_xx, k_zx_times_a, name="k_tilde_full")
-        k_tilde = tf.matrix_diag_part(k_tilde_full, name="diag_b")
-        k_tilde_pos = tf.maximum(k_tilde, 1e-16, name="pos_b")  # k_tilde can't be negative
-        k_tilde_pos_tiled = tf.tile(tf.expand_dims(k_tilde_pos, axis=0),
-                                    multiples=[self.num_samples, 1])
+        k_tilde = tf.matrix_diag_part(k_tilde_full, name="k_tilde")
+        k_tilde_pos = tf.maximum(k_tilde, 1e-16, name="k_tilde_pos")  # k_tilde can't be negative
+        k_tilde_pos_tiled = self._expand_and_tile(k_tilde_pos, [self.num_samples, 1],
+                                                  name="k_tilde_pos_tiled")
         return k_tilde_pos_tiled
+
+    @staticmethod
+    def _expand_and_tile(tensor: tf.Tensor, shape: Sequence[int],
+                         name: Optional[str] = None) -> tf.Tensor:
+        expanded_tensor = tf.expand_dims(tensor, axis=0)
+        return tf.tile(expanded_tensor, multiples=shape, name=name)
 
     def predict(self, xs: np.ndarray) -> Tuple[tf.Tensor, tf.Tensor]:
         # TODO: Not clear how to report the variances.
