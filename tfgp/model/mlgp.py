@@ -145,10 +145,10 @@ class MLGP(InducingPointsModel):
         # K~ = Kxx - Kxz * Kzz^(-1) * Kzx
         k_zx = self.kernel(self.z, x, name="k_zx")
         k_xx = self.kernel(x, name="k_xx")
-        k_zx_times_a = tf.matmul(k_zx, a, transpose_a=True)
+        k_zx_times_a = tf.matmul(k_zx, a, transpose_a=True, name="k_zx_times_a")
         k_tilde_full = tf.subtract(k_xx, k_zx_times_a, name="k_tilde_full")
-        k_tilde = tf.matrix_diag_part(k_tilde_full, name="diag_b")
-        k_tilde_pos = tf.maximum(k_tilde, 1e-16, name="pos_b")  # k_tilde can't be negative
+        k_tilde = tf.matrix_diag_part(k_tilde_full, name="k_tilde")
+        k_tilde_pos = tf.maximum(k_tilde, 1e-16, name="k_tilde_pos")  # k_tilde can't be negative
         k_tilde_pos_tiled = self._expand_and_tile(k_tilde_pos, [self.num_samples, 1],
                                                   name="k_tilde_pos_tiled")
         return k_tilde_pos_tiled
