@@ -10,8 +10,8 @@ import sklearn.metrics
 import tensorflow as tf
 
 import tfgp
+from tfgp.data import Unsupervised
 from tfgp.model import MLGPLVM
-from tfgp.util import data
 
 ROOT_PATH = os.path.dirname(tfgp.__file__)
 
@@ -140,7 +140,7 @@ if __name__ == "__main__":
     print("Generating data...")
     num_data = 200
     split = 100
-    data, likelihood, label = data.make_mimic(num_data)
+    data, likelihood, label = Unsupervised.make_mimic(num_data)
     data_train, data_test = np.split(data, [split])
     label_train, label_test = np.split(label, [split])
 

@@ -8,9 +8,9 @@ import seaborn as sns
 import tensorflow as tf
 
 import tfgp
+from tfgp.data import Supervised
 from tfgp.kernel import RBF
 from tfgp.model import MLGP
-from tfgp.util import data
 
 ROOT_PATH = os.path.dirname(tfgp.__file__)
 LOG_DIR_PATH = os.path.join(ROOT_PATH, os.pardir, "log")
@@ -19,7 +19,7 @@ if __name__ == "__main__":
     sns.set()
     print("Generating data...")
     num_data = 40
-    x, likelihood, y = data.make_sin(num_data)
+    x, likelihood, y = Supervised.make_sin(num_data)
     num_inducing = 20
 
     print("Creating model...")

@@ -6,8 +6,8 @@ import seaborn as sns
 import tensorflow as tf
 
 import tfgp
+from tfgp.data import Unsupervised
 from tfgp.model import BatchMLGPLVM, VAEMLGPLVM
-from tfgp.util import data
 
 ROOT_PATH = os.path.dirname(tfgp.__file__)
 LOG_DIR_PATH = os.path.join(ROOT_PATH, os.pardir, "log")
@@ -63,7 +63,7 @@ if __name__ == "__main__":
     print("Generating data...")
     num_data = None
     latent_dim = 10
-    y, likelihood, _ = data.make_atr(num_data)
+    y, likelihood, _ = Unsupervised.make_atr(num_data)
     if num_data is None:
         num_data = y.shape[0]
 
