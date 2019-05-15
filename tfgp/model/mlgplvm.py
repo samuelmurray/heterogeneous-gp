@@ -91,7 +91,8 @@ class MLGPLVM(MLGP):
         k_zx = self.kernel(z_tiled, x_samples, name="k_zx")
         k_zz = self.kernel(self.z, name="k_zz")
         k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
-        a = tf.transpose(tf.tensordot(k_zz_inv, k_zx, axes=[1, 1]), perm=[1, 0, 2], name="a")
+        a_transposed = tf.tensordot(k_zz_inv, k_zx, axes=[1, 1], name="a_transposed")
+        a = tf.transpose(a_transposed, perm=[1, 0, 2], name="a")
         return a
 
     def _compute_k_tilde(self, x_samples: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
