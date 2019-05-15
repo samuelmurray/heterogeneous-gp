@@ -54,7 +54,7 @@ class MixedLikelihoodWrapper:
     def y_dim(self) -> int:
         return self._y_dim
 
-    def log_prob(self, f: tf.Tensor, y: tf.Tensor, name: str = "") -> tf.Tensor:
+    def log_prob(self, f: tf.Tensor, y: tf.Tensor, name: Optional[str] = None) -> tf.Tensor:
         with tf.name_scope(name):
             nan_mask = tf.is_nan(y, name="nan_mask")
             log_prob = self._create_log_prob(f, y, nan_mask)
