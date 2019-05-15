@@ -79,8 +79,8 @@ class MLGP(InducingPointsModel):
             qu = tfp.distributions.MultivariateNormalTriL(self.qu_mean, self.qu_scale, name="qu")
             k_zz = self.kernel(self.z, name="k_zz")
             chol_zz = tf.cholesky(k_zz, name="chol_zz")
-            pu = tfp.distributions.MultivariateNormalTriL(tf.zeros(self.num_inducing), chol_zz,
-                                                          name="pu")
+            zeros = tf.zeros(self.num_inducing)
+            pu = tfp.distributions.MultivariateNormalTriL(zeros, chol_zz, name="pu")
             kl = tfp.distributions.kl_divergence(qu, pu, allow_nan_stats=False, name="kl")
             kl_sum = tf.reduce_sum(kl, axis=0, name="kl_sum")
         return kl_sum
