@@ -9,7 +9,7 @@ class OrdinalDistribution(tfp.distributions.Distribution):
                          validate_args=False,
                          allow_nan_stats=True,
                          name=name)
-        self.mean, self.theta = tf.split(params, num_or_size_splits=[1, -1], axis=-1)
+        self.mean_param, self.theta = tf.split(params, num_or_size_splits=[1, -1], axis=-1)
 
     def _prob(self, y: tf.Tensor) -> tf.Tensor:
         prob_of_category = self._prob_of_category()
@@ -25,7 +25,7 @@ class OrdinalDistribution(tfp.distributions.Distribution):
     def _sigmoid_est_mean(self) -> tf.Tensor:
         theta_softplus = tf.nn.softplus(self.theta)
         theta_cumsum = tf.cumsum(theta_softplus, axis=-1)
-        sigmoid_est_mean = tf.nn.sigmoid(theta_cumsum - self.mean)
+        sigmoid_est_mean = tf.nn.sigmoid(theta_cumsum - self.mean_param)
         return sigmoid_est_mean
 
     @staticmethod
@@ -52,3 +52,6 @@ class OrdinalDistribution(tfp.distributions.Distribution):
 
     def _event_shape(self):
         return self.theta.shape[-1] + 1
+
+    def _mean(self):
+        return tf.squeeze(self.mean_param, axis=-1)
