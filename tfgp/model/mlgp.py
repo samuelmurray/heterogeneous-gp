@@ -1,6 +1,5 @@
 from typing import Tuple
 
-from IPython import embed
 import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
