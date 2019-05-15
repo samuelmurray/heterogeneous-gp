@@ -115,7 +115,7 @@ class MLGPLVM(MLGP):
             f_mean = tf.matmul(k_xz_mul_k_zz_inv, self.qu_mean, transpose_b=True, name="f_mean")
             f_mean_expanded = tf.expand_dims(f_mean, axis=0, name="f_mean_expanded")
             posteriors = self.likelihood(f_mean_expanded)
-            
+
             modes = [posterior.mode() for posterior in posteriors]
             modes_squeezed = [tf.squeeze(mode, axis=0) for mode in modes]
             modes_as_float = [tf.cast(mode, tf.float32) for mode in modes_squeezed]
