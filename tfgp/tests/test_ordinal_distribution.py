@@ -71,6 +71,16 @@ class TestOrdinalDistribution(tf.test.TestCase):
         event_shape = self.params.shape[-1]
         self.assertEqual(event_shape, self.distribution.event_shape)
 
+    def test_mean_shape(self) -> None:
+        expected_shape = self.distribution.batch_shape
+        mean = self.distribution.mean()
+        self.assertAllEqual(expected_shape, mean.shape)
+
+    def test_stddev_shape(self) -> None:
+        expected_shape = self.distribution.batch_shape
+        stddev = self.distribution.stddev()
+        self.assertAllEqual(expected_shape, stddev.shape)
+
     def test_param_shapes_not_implemented(self) -> None:
         self.assertRaises(NotImplementedError, self.distribution._param_shapes, None)
 
