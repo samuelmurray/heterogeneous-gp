@@ -168,11 +168,11 @@ class MLGP(InducingPointsModel):
             posteriors = self.likelihood(f_mean_expanded)
 
             means = [distribution.mean() for distribution in posteriors]
-            means_squeezed = [mean[0] for mean in means]
+            means_squeezed = [tf.squeeze(mean, axis=0) for mean in means]
             mean = tf.concat(means_squeezed, axis=-1, name="mean")
 
             stds = [distribution.stddev() for distribution in posteriors]
-            stds_squeezed = [std[0] for std in stds]
+            stds_squeezed = [tf.squeeze(std, axis=0) for std in stds]
             std = tf.concat(stds_squeezed, axis=-1, name="std")
         return mean, std
 
