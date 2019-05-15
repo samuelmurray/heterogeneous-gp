@@ -55,3 +55,7 @@ class OrdinalDistribution(tfp.distributions.Distribution):
 
     def _mean(self):
         return tf.squeeze(self.mean_param, axis=-1)
+
+    def _stddev(self):
+        # Not clear how to report std for this distribution - return zeros with correct shape
+        return tf.zeros_like(self.mean())
