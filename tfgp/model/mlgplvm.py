@@ -85,8 +85,7 @@ class MLGPLVM(MLGP):
 
     def _compute_a(self, x_samples: tf.Tensor) -> tf.Tensor:
         # a = Kzz^(-1) * Kzx
-        z_tiled = tf.tile(tf.expand_dims(self.z, axis=0), multiples=[self.num_samples, 1, 1],
-                          name="z_tiled")
+        z_tiled = self._expand_and_tile(self.z, [self.num_samples, 1, 1], name="z_tiled")
         k_zx = self.kernel(z_tiled, x_samples, name="k_zx")
         k_zz = self.kernel(self.z, name="k_zz")
         k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
@@ -95,8 +94,7 @@ class MLGPLVM(MLGP):
 
     def _compute_k_tilde(self, x_samples: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
         # K~ = Kxx - Kxz * Kzz^(-1) * Kzx
-        z_tiled = tf.tile(tf.expand_dims(self.z, axis=0), multiples=[self.num_samples, 1, 1],
-                          name="z_tiled")
+        z_tiled = self._expand_and_tile(self.z, [self.num_samples, 1, 1], name="z_tiled")
         k_zx = self.kernel(z_tiled, x_samples, name="k_zx")
         k_xx = self.kernel(x_samples, name="k_xx")
         k_xz_mul_a = tf.matmul(k_zx, a, transpose_a=True)

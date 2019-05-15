@@ -1,4 +1,4 @@
-from typing import List, Sequence
+from typing import List, Optional, Sequence
 
 import numpy as np
 import tensorflow as tf
@@ -76,10 +76,14 @@ class MixedLikelihoodWrapper:
     def _create_f_mask(self, f: tf.Tensor, nan_mask: tf.Tensor) -> tf.Tensor:
         f_masks = [nan_mask[:, dims.start] for dims in self.f_dims_per_likelihood]
         f_mask = tf.stack(f_masks, axis=1, name="f_mask")
-        tiled_f_mask = tf.tile(tf.expand_dims(f_mask, axis=0),
-                               multiples=[tf.shape(f)[0], 1, 1],
-                               name="tiled_mask")
-        return tiled_f_mask
+        f_mask_tiled = self._expand_and_tile(f_mask, [tf.shape(f)[0], 1, 1], name="f_mask_tiled")
+        return f_mask_tiled
+
+    @staticmethod
+    def _expand_and_tile(tensor: tf.Tensor, shape: Sequence[int],
+                         name: Optional[str] = None) -> tf.Tensor:
+        expanded_tensor = tf.expand_dims(tensor, axis=0)
+        return tf.tile(expanded_tensor, multiples=shape, name=name)
 
     def create_summaries(self) -> None:
         for likelihood in self.likelihoods:

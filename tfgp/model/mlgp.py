@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Optional, Sequence, Tuple
 
 import numpy as np
 import tensorflow as tf
@@ -125,7 +125,7 @@ class MLGP(InducingPointsModel):
         k_tilde = self._compute_k_tilde(x, a)
         num_data = tf.shape(x)[0]
         e_f = tf.random_normal(shape=[self.num_samples, self.f_dim, num_data], name="e_f")
-        a_tiled = tf.tile(tf.expand_dims(a, axis=0), multiples=[self.num_samples, 1, 1])
+        a_tiled = self._expand_and_tile(a, [self.num_samples, 1, 1], name="a_tiled")
         f_mean = tf.matmul(u_samples, a_tiled, name="f_mean")
         k_tilde_sqrt = tf.sqrt(k_tilde, name="k_tilde_sqrt")
         k_tilde_sqrt_expanded = tf.expand_dims(k_tilde_sqrt, axis=1, name="k_tilde_sqrt_expanded")
@@ -149,9 +149,15 @@ class MLGP(InducingPointsModel):
         k_tilde_full = tf.subtract(k_xx, k_zx_times_a, name="k_tilde_full")
         k_tilde = tf.matrix_diag_part(k_tilde_full, name="diag_b")
         k_tilde_pos = tf.maximum(k_tilde, 1e-16, name="pos_b")  # k_tilde can't be negative
-        k_tilde_pos_tiled = tf.tile(tf.expand_dims(k_tilde_pos, axis=0),
-                                    multiples=[self.num_samples, 1])
+        k_tilde_pos_tiled = self._expand_and_tile(k_tilde_pos, [self.num_samples, 1],
+                                                  name="k_tilde_pos_tiled")
         return k_tilde_pos_tiled
+
+    @staticmethod
+    def _expand_and_tile(tensor: tf.Tensor, shape: Sequence[int],
+                         name: Optional[str] = None) -> tf.Tensor:
+        expanded_tensor = tf.expand_dims(tensor, axis=0)
+        return tf.tile(expanded_tensor, multiples=shape, name=name)
 
     def predict(self, xs: np.ndarray) -> Tuple[tf.Tensor, tf.Tensor]:
         # TODO: Not clear how to report the variances.
