@@ -165,13 +165,13 @@ class MLGP(InducingPointsModel):
             k_xs_z_mul_kzz_inv = tf.matmul(k_xs_z, k_zz_inv, name="k_xs_z_mul_kzz_inv")
             f_mean = tf.matmul(k_xs_z_mul_kzz_inv, self.qu_mean, transpose_b=True, name="f_mean")
             f_mean_expanded = tf.expand_dims(f_mean, axis=0, name="f_mean_expanded")
-            likelihood_distributions = self.likelihood(f_mean_expanded)
+            posteriors = self.likelihood(f_mean_expanded)
 
-            means = [distribution.mean() for distribution in likelihood_distributions]
+            means = [distribution.mean() for distribution in posteriors]
             means_squeezed = [mean[0] for mean in means]
             mean = tf.concat(means_squeezed, axis=-1, name="mean")
 
-            stds = [distribution.stddev() for distribution in likelihood_distributions]
+            stds = [distribution.stddev() for distribution in posteriors]
             stds_squeezed = [std[0] for std in stds]
             std = tf.concat(stds_squeezed, axis=-1, name="std")
         return mean, std
