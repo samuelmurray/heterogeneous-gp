@@ -64,7 +64,8 @@ class MLGPLVM(MLGP):
         qx_mean, qx_var = self._get_or_subsample_qx()
         num_data = tf.shape(qx_mean)[0]
         e_x = tf.random_normal(shape=[self.num_samples, num_data, self.x_dim], name="e_x")
-        x_noise = tf.multiply(tf.sqrt(qx_var), e_x, name="x_noise")
+        qx_var_sqrt = tf.sqrt(qx_var, name="qx_var_sqrt")
+        x_noise = tf.multiply(qx_var_sqrt, e_x, name="x_noise")
         x_samples = tf.add(qx_mean, x_noise, name="x_samples")
         return x_samples
 
