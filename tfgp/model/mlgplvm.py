@@ -113,7 +113,7 @@ class MLGPLVM(MLGP):
             k_zx = self.kernel(self.z, qx_mean, name="k_zx")
             k_xz_mul_k_zz_inv = tf.matmul(k_zx, k_zz_inv, transpose_a=True)
             f_mean = tf.matmul(k_xz_mul_k_zz_inv, self.qu_mean, transpose_b=True, name="f_mean")
-            f_mean_expanded = tf.expand_dims(f_mean, 0)
+            f_mean_expanded = tf.expand_dims(f_mean, axis=0, name="f_mean_expanded")
             posteriors = self.likelihood(f_mean_expanded)
             
             modes = [posterior.mode() for posterior in posteriors]
