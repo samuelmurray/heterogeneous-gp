@@ -115,8 +115,12 @@ class MLGPLVM(MLGP):
             f_mean = tf.matmul(k_xz_mul_k_zz_inv, self.qu_mean, transpose_b=True, name="f_mean")
             f_mean_expanded = tf.expand_dims(f_mean, 0)
             posteriors = self.likelihood(f_mean_expanded)
-            modes = [tf.cast(tf.squeeze(p.mode(), axis=0), tf.float32) for p in posteriors]
-            mode = tf.concat(modes, axis=1, name="modes")
+            
+            modes = [posterior.mode() for posterior in posteriors]
+            modes_squeezed = [tf.squeeze(mode, axis=0) for mode in modes]
+            modes_as_float = [tf.cast(mode, tf.float32) for mode in modes_squeezed]
+            mode = tf.concat(modes_as_float, axis=1, name="modes")
+
             y = self._get_or_subsample_y()
             nan_mask = tf.is_nan(y, name="nan_mask")
             imputation = tf.where(nan_mask, mode, y, name="imputation")
