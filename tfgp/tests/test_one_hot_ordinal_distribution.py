@@ -1,14 +1,14 @@
 import numpy as np
 import tensorflow as tf
 
-from tfgp.likelihood import OrdinalDistribution
+from tfgp.likelihood import OneHotOrdinalDistribution
 
 
-class TestOrdinalDistribution(tf.test.TestCase):
+class TestOneHotOrdinalDistribution(tf.test.TestCase):
 
     def setUp(self) -> None:
         self.params = tf.convert_to_tensor([[4., 2., 1.], [2., 5., -1.]])
-        self.distribution = OrdinalDistribution(self.params)
+        self.distribution = OneHotOrdinalDistribution(self.params)
 
     def tearDown(self) -> None:
         tf.reset_default_graph()
@@ -21,7 +21,7 @@ class TestOrdinalDistribution(tf.test.TestCase):
 
     def test_most_likely_category(self) -> None:
         params = tf.convert_to_tensor([[5., 0.]])
-        distribution = OrdinalDistribution(params)
+        distribution = OneHotOrdinalDistribution(params)
         category_1 = tf.convert_to_tensor([[1., 0]])
         category_2 = tf.convert_to_tensor([[0, 1.]])
         with self.session() as sess:
@@ -36,7 +36,7 @@ class TestOrdinalDistribution(tf.test.TestCase):
 
     def test_prob_handles_single_3D_parameters(self) -> None:
         params = tf.convert_to_tensor([[[4., 2., 1.], [2., 5., -1.]]])
-        distribution = OrdinalDistribution(params)
+        distribution = OneHotOrdinalDistribution(params)
         y = tf.convert_to_tensor([[0., 0., 1.], [0., 1., 0.]])
         prob = distribution._prob(y)
         self.assertShapeEqual(np.empty([1, 2, 1]), prob)
@@ -44,14 +44,14 @@ class TestOrdinalDistribution(tf.test.TestCase):
     def test_prob_handles_multiple_3D_parameters(self) -> None:
         params = tf.convert_to_tensor([[[4., 2., 1.], [2., 5., -1.]],
                                        [[4., 2., 1.], [2., 5., -1.]]])
-        distribution = OrdinalDistribution(params)
+        distribution = OneHotOrdinalDistribution(params)
         y = tf.convert_to_tensor([[0., 0., 1.], [0., 1., 0.]])
         prob = distribution._prob(y)
         self.assertShapeEqual(np.empty([2, 2, 1]), prob)
 
     def test_prob_gives_same_result_for_2D_and_3D_parameters(self) -> None:
         params_3D = tf.convert_to_tensor([[[4., 2., 1.], [2., 5., -1.]]])
-        distribution_3D = OrdinalDistribution(params_3D)
+        distribution_3D = OneHotOrdinalDistribution(params_3D)
         y = tf.convert_to_tensor([[0., 0., 1.], [0., 1., 0.]])
         prob_2D = self.distribution.prob(y)
         prob_3D = distribution_3D.prob(y)

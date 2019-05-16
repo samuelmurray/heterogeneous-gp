@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-from tfgp.likelihood import OneHotOrdinal, OrdinalDistribution
+from tfgp.likelihood import OneHotOrdinal, OneHotOrdinalDistribution
 
 
 class TestOneHotOrdinal(tf.test.TestCase):
@@ -16,7 +16,7 @@ class TestOneHotOrdinal(tf.test.TestCase):
         shape = (num_data, self.num_classes)
         f = tf.ones(shape)
         ret = self.likelihood(f)
-        self.assertIsInstance(ret, OrdinalDistribution)
+        self.assertIsInstance(ret, OneHotOrdinalDistribution)
 
     def test_call_2D_return_shape(self) -> None:
         num_data = 10
