@@ -52,6 +52,7 @@ class TestSupervisedData(tf.test.TestCase):
         x, likelihood, y = Supervised.make_sin_ordinal_one_hot(self.num_data)
         self.assertEqual(self.num_data, x.shape[0])
         self.assertEqual(self.num_data, y.shape[0])
+        self.assertEqual(y.shape[1], likelihood.y_dim)
 
 
 if __name__ == "__main__":
