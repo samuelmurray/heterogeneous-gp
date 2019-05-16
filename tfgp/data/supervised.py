@@ -4,7 +4,7 @@ from typing import Tuple
 import numpy as np
 from scipy.special import expit
 
-from tfgp.likelihood import Bernoulli, MixedLikelihoodWrapper, Normal, Ordinal, Poisson
+from tfgp.likelihood import Bernoulli, MixedLikelihoodWrapper, Normal, OneHotOrdinal, Poisson
 
 DataTuple = Tuple[np.ndarray, MixedLikelihoodWrapper, np.ndarray]
 
@@ -63,7 +63,7 @@ class Supervised(abc.ABC):
         latent = 1.9 * (1 + np.sin(x).flatten())
         y = np.floor(latent).astype(np.int)
         num_categories = 4
-        likelihood = MixedLikelihoodWrapper([Ordinal(num_categories)])
+        likelihood = MixedLikelihoodWrapper([OneHotOrdinal(num_categories)])
         y_one_hot = np.zeros((num_data, num_categories))
         y_one_hot[np.arange(num_data), y] = 1
         return x, likelihood, y_one_hot

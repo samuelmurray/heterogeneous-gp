@@ -1,12 +1,12 @@
 import tensorflow as tf
 
-from tfgp.likelihood import Ordinal, OrdinalDistribution
+from tfgp.likelihood import OneHotOrdinal, OrdinalDistribution
 
 
-class TestOrdinal(tf.test.TestCase):
+class TestOneHotOrdinal(tf.test.TestCase):
     def setUp(self) -> None:
         self.num_classes = 5
-        self.likelihood = Ordinal(self.num_classes)
+        self.likelihood = OneHotOrdinal(self.num_classes)
 
     def tearDown(self) -> None:
         tf.reset_default_graph()

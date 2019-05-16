@@ -4,7 +4,7 @@ from .likelihood import Likelihood
 from .ordinal_distribution import OrdinalDistribution
 
 
-class Ordinal(Likelihood):
+class OneHotOrdinal(Likelihood):
     def __init__(self, num_classes: int) -> None:
         super().__init__(num_classes, num_classes)
 
