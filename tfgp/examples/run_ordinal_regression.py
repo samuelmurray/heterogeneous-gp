@@ -19,7 +19,7 @@ if __name__ == "__main__":
     sns.set()
     print("Generating data...")
     num_data = 40
-    x, likelihood, y = Supervised.make_sin_ordinal(num_data)
+    x, likelihood, y = Supervised.make_sin_ordinal_one_hot(num_data)
     num_inducing = 20
 
     print("Creating model...")

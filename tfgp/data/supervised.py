@@ -58,12 +58,12 @@ class Supervised(abc.ABC):
         return x, likelihood, y
 
     @staticmethod
-    def make_sin_ordinal(num_data: int) -> DataTuple:
+    def make_sin_ordinal_one_hot(num_data: int) -> DataTuple:
         x = np.linspace(0, 2 * np.pi, num_data)[:, None]
-        latent = 2 * (1 + np.sin(x).flatten())
+        latent = 1.9 * (1 + np.sin(x).flatten())
         y = np.floor(latent).astype(np.int)
-        num_categories = np.unique(y).size
+        num_categories = 4
+        likelihood = MixedLikelihoodWrapper([Ordinal(num_categories)])
         y_one_hot = np.zeros((num_data, num_categories))
         y_one_hot[np.arange(num_data), y] = 1
-        likelihood = MixedLikelihoodWrapper([Ordinal(4)])
         return x, likelihood, y_one_hot
