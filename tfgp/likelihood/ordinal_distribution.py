@@ -59,10 +59,10 @@ class OrdinalDistribution(tfp.distributions.Distribution):
         return tf.clip_by_value(probability, min_value, max_value, name="prob_clipped")
 
     def _batch_shape(self) -> tf.TensorShape:
-        return tf.identity(self.theta.shape[:-1], name="batch_shape")
+        return self.theta.shape[:-1]
 
     def _event_shape(self) -> tf.TensorShape:
-        return tf.identity(self.theta.shape[-1] + 1, name="event_shape")
+        return self.theta.shape[-1] + 1
 
     def _mean(self) -> tf.Tensor:
         # Not clear how to report mean - the mean param gives reasonable values but is not correct
