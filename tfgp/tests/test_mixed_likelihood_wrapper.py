@@ -19,7 +19,8 @@ class TestMixedLikelihoodWrapper(tf.test.TestCase):
         f = tf.constant(np.array([[[0.7, 0.4, 0.4, 2.]]]), dtype=tf.float32)
         ret = self.likelihood(f)
         ret_types = [type(r) for r in ret]
-        expected_types = [tfp.distributions.Bernoulli, tfp.distributions.OneHotCategorical,
+        expected_types = [tfp.distributions.Bernoulli,
+                          tfp.distributions.OneHotCategorical,
                           tfp.distributions.Normal]
         self.assertAllEqual(ret_types, expected_types)
 

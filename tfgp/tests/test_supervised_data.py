@@ -48,6 +48,12 @@ class TestSupervisedData(tf.test.TestCase):
         self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
         self.assertIsInstance(y, np.ndarray)
 
+    def test_sin_ordinal(self) -> None:
+        x, likelihood, y = Supervised.make_sin_ordinal(self.num_data)
+        self.assertIsInstance(x, np.ndarray)
+        self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
+        self.assertIsInstance(y, np.ndarray)
+
 
 if __name__ == "__main__":
     tf.test.main()
