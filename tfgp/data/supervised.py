@@ -62,7 +62,7 @@ class Supervised(abc.ABC):
         x = np.linspace(0, 2 * np.pi, num_data)[:, None]
         latent = 2 * (1 + np.sin(x).flatten())
         y = np.floor(latent).astype(np.int)
-        num_categories = np.unique(y).size
+        num_categories = np.max(y) + 1
         y_one_hot = np.zeros((num_data, num_categories))
         y_one_hot[np.arange(num_data), y] = 1
         likelihood = MixedLikelihoodWrapper([Ordinal(4)])
