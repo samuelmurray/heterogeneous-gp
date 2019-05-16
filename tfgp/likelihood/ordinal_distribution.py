@@ -12,50 +12,54 @@ class OrdinalDistribution(tfp.distributions.Distribution):
         self.mean_param, self.theta = tf.split(params, num_or_size_splits=[1, -1], axis=-1)
 
     def _prob(self, y: tf.Tensor) -> tf.Tensor:
-        prob_of_category = self._prob_of_category()
-        prob_of_observation = self._prob_of_observation(y, prob_of_category)
+        with tf.name_scope("prob"):
+            prob_of_category = self._prob_of_category()
+            prob_of_observation = self._prob_of_observation(y, prob_of_category)
         return prob_of_observation
 
     def _prob_of_category(self) -> tf.Tensor:
         sigmoid_est_mean = self._sigmoid_est_mean()
         upper_cdf = self._cdf_of_category(sigmoid_est_mean)
         lower_cdf = self._cdf_of_below_category(sigmoid_est_mean)
-        return tf.subtract(upper_cdf, lower_cdf)
+        return tf.subtract(upper_cdf, lower_cdf, name="prob_of_category")
 
     def _sigmoid_est_mean(self) -> tf.Tensor:
-        theta_softplus = tf.nn.softplus(self.theta)
-        theta_cumsum = tf.cumsum(theta_softplus, axis=-1)
-        sigmoid_est_mean = tf.nn.sigmoid(theta_cumsum - self.mean_param)
+        theta_softplus = tf.nn.softplus(self.theta, name="theta_softplus")
+        theta_cumsum = tf.cumsum(theta_softplus, axis=-1, name="theta_cumsum")
+        sigmoid_est_mean = tf.nn.sigmoid(theta_cumsum - self.mean_param, name="sigmoid_est_mean")
         return sigmoid_est_mean
 
     @staticmethod
     def _cdf_of_category(sigmoid_est_mean: tf.Tensor) -> tf.Tensor:
         size = tf.shape(sigmoid_est_mean)[:-1]
-        ones = tf.ones(size)
-        ones_expanded = tf.expand_dims(ones, axis=-1)
-        return tf.concat([sigmoid_est_mean, ones_expanded], axis=-1)
+        ones = tf.ones(size, name="ones")
+        ones_expanded = tf.expand_dims(ones, axis=-1, name="ones_expanded")
+        return tf.concat([sigmoid_est_mean, ones_expanded], axis=-1, name="cdf_of_category")
 
     @staticmethod
     def _cdf_of_below_category(sigmoid_est_mean: tf.Tensor) -> tf.Tensor:
         size = tf.shape(sigmoid_est_mean)[:-1]
-        zeros = tf.zeros(size)
-        zeros_expanded = tf.expand_dims(zeros, axis=-1)
-        return tf.concat([zeros_expanded, sigmoid_est_mean], axis=-1)
+        zeros = tf.zeros(size, name="zeros")
+        zeros_expanded = tf.expand_dims(zeros, axis=-1, name="zeros_expanded")
+        return tf.concat([zeros_expanded, sigmoid_est_mean], axis=-1, name="cdf_of_below_category")
 
     @staticmethod
     def _prob_of_observation(y: tf.Tensor, prob_of_category: tf.Tensor) -> tf.Tensor:
-        prob_of_observation = tf.multiply(y, prob_of_category)
-        return tf.reduce_sum(prob_of_observation, axis=-1, keepdims=True)
+        prob_of_observation_ont_hot = tf.multiply(y, prob_of_category,
+                                                  name="prob_of_observation_ont_hot")
+        return tf.reduce_sum(prob_of_observation_ont_hot, axis=-1, keepdims=True,
+                             name="prob_of_observation")
 
     def _batch_shape(self) -> tf.TensorShape:
-        return self.theta.shape[:-1]
+        return tf.identity(self.theta.shape[:-1], name="batch_shape")
 
     def _event_shape(self) -> tf.TensorShape:
-        return self.theta.shape[-1] + 1
+        return tf.identity(self.theta.shape[-1] + 1, name="event_shape")
 
     def _mean(self) -> tf.Tensor:
-        return tf.squeeze(self.mean_param, axis=-1)
+        # Not clear how to report mean - the mean param gives reasonable values but is not correct
+        return tf.squeeze(self.mean_param, axis=-1, name="mean")
 
     def _stddev(self) -> tf.Tensor:
         # Not clear how to report std for this distribution - return zeros with correct shape
-        return tf.zeros_like(self.mean())
+        return tf.zeros_like(self.mean(), name="stddev")
