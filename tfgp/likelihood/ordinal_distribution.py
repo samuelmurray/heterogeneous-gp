@@ -15,7 +15,9 @@ class OrdinalDistribution(tfp.distributions.Distribution):
         with tf.name_scope("prob"):
             prob_of_category = self._prob_of_category()
             prob_of_observation = self._prob_of_observation(y, prob_of_category)
-        return prob_of_observation
+            # We need to clip to avoid zeros, otherwise we get log_prob = -inf
+            prob_clipped = self._clip_probability(prob_of_observation)
+        return prob_clipped
 
     def _prob_of_category(self) -> tf.Tensor:
         sigmoid_est_mean = self._sigmoid_est_mean()
@@ -49,6 +51,12 @@ class OrdinalDistribution(tfp.distributions.Distribution):
                                                   name="prob_of_observation_ont_hot")
         return tf.reduce_sum(prob_of_observation_ont_hot, axis=-1, keepdims=True,
                              name="prob_of_observation")
+
+    @staticmethod
+    def _clip_probability(probability: tf.Tensor) -> tf.Tensor:
+        min_value = 1e-10
+        max_value = 1.
+        return tf.clip_by_value(probability, min_value, max_value, name="prob_clipped")
 
     def _batch_shape(self) -> tf.TensorShape:
         return tf.identity(self.theta.shape[:-1], name="batch_shape")
