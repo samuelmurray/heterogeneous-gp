@@ -16,49 +16,47 @@ class TestSupervisedData(tf.test.TestCase):
         x, likelihood, y = Supervised.make_sin(self.num_data)
         self.assertEqual(self.num_data, x.shape[0])
         self.assertAllEqual((self.num_data, self.output_dim), y.shape)
-        self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
+        self.assertEqual(self.output_dim, likelihood.y_dim)
 
     def test_sin_binary(self) -> None:
         x, likelihood, y = Supervised.make_sin_binary(self.num_data)
         self.assertEqual(self.num_data, x.shape[0])
         self.assertAllEqual((self.num_data, self.output_dim), y.shape)
-        self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
+        self.assertEqual(self.output_dim, likelihood.y_dim)
 
     def test_sin_count(self) -> None:
         x, likelihood, y = Supervised.make_sin_count(self.num_data)
         self.assertEqual(self.num_data, x.shape[0])
         self.assertAllEqual((self.num_data, self.output_dim), y.shape)
-        self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
+        self.assertEqual(self.output_dim, likelihood.y_dim)
 
     def test_xcos(self) -> None:
         x, likelihood, y = Supervised.make_xcos(self.num_data)
         self.assertEqual(self.num_data, x.shape[0])
         self.assertAllEqual((self.num_data, self.output_dim), y.shape)
-        self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
+        self.assertEqual(self.output_dim, likelihood.y_dim)
 
     def test_xcos_binary(self) -> None:
         x, likelihood, y = Supervised.make_xcos_binary(self.num_data)
         self.assertEqual(self.num_data, x.shape[0])
         self.assertAllEqual((self.num_data, self.output_dim), y.shape)
-        self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
+        self.assertEqual(self.output_dim, likelihood.y_dim)
 
     def test_xsin_count(self) -> None:
         x, likelihood, y = Supervised.make_xsin_count(self.num_data)
         self.assertEqual(self.num_data, x.shape[0])
         self.assertAllEqual((self.num_data, self.output_dim), y.shape)
-        self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
+        self.assertEqual(self.output_dim, likelihood.y_dim)
 
     def test_sin_ordinal(self) -> None:
         x, likelihood, y = Supervised.make_sin_ordinal(self.num_data)
         self.assertEqual(self.num_data, x.shape[0])
         self.assertAllEqual((self.num_data,), y.shape)
-        self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
 
     def test_sin_ordinal_one_hot(self) -> None:
         x, likelihood, y = Supervised.make_sin_ordinal_one_hot(self.num_data)
         self.assertEqual(self.num_data, x.shape[0])
         self.assertEqual(self.num_data, y.shape[0])
-        self.assertIsInstance(likelihood, MixedLikelihoodWrapper)
 
 
 if __name__ == "__main__":
