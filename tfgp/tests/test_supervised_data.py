@@ -1,7 +1,6 @@
 import tensorflow as tf
 
 from tfgp.data import Supervised
-from tfgp.likelihood import MixedLikelihoodWrapper
 
 
 class TestSupervisedData(tf.test.TestCase):
