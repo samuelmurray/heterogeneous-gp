@@ -7,9 +7,10 @@ import seaborn as sns
 import tensorflow as tf
 
 import tfgp
+from tfgp.data import Unsupervised
 from tfgp.kernel import RBF
 from tfgp.model import GPLVM
-from tfgp.util import data, pca_reduce
+from tfgp.util import pca_reduce
 
 ROOT_PATH = os.path.dirname(tfgp.__file__)
 LOG_DIR_PATH = os.path.join(ROOT_PATH, os.pardir, "log")
@@ -20,7 +21,7 @@ if __name__ == "__main__":
     num_data = 100
     latent_dim = 2
     output_dim = 5
-    y, _, labels = data.make_gaussian_blobs(num_data, output_dim, 3)
+    y, _, labels = Unsupervised.make_gaussian_blobs(num_data, output_dim, 3)
     x = pca_reduce(y, latent_dim)
 
     print("Creating model...")

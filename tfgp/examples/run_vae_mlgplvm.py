@@ -8,8 +8,8 @@ import seaborn as sns
 import tensorflow as tf
 
 import tfgp
+from tfgp.data import Unsupervised
 from tfgp.model import VAEMLGPLVM
-from tfgp.util import data
 
 ROOT_PATH = os.path.dirname(tfgp.__file__)
 LOG_DIR_PATH = os.path.join(ROOT_PATH, os.pardir, "log")
@@ -21,7 +21,7 @@ if __name__ == "__main__":
     num_data = None
     latent_dim = 2
     output_dim = None
-    y, likelihood, labels = data.make_oilflow(num_data, output_dim)
+    y, likelihood, labels = Unsupervised.make_oilflow(num_data, output_dim)
     if num_data is None:
         num_data = y.shape[0]
     batch_size = 1000
