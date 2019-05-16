@@ -5,7 +5,6 @@ from tfgp.likelihood import OneHotOrdinalDistribution
 
 
 class TestOneHotOrdinalDistribution(tf.test.TestCase):
-
     def setUp(self) -> None:
         self.params = tf.convert_to_tensor([[4., 2., 1.], [2., 5., -1.]])
         self.distribution = OneHotOrdinalDistribution(self.params)
