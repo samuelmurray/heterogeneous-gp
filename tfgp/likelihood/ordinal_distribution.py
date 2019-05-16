@@ -20,16 +20,15 @@ class OrdinalDistribution(tfp.distributions.Distribution):
         return prob_clipped
 
     def _prob_of_category(self) -> tf.Tensor:
-        sigmoid_est_mean = self._sigmoid_est_mean()
+        sigmoid_est_mean = self._category_thresholds()
         upper_cdf = self._cdf_of_category(sigmoid_est_mean)
         lower_cdf = self._cdf_of_below_category(sigmoid_est_mean)
         return tf.subtract(upper_cdf, lower_cdf, name="prob_of_category")
 
-    def _sigmoid_est_mean(self) -> tf.Tensor:
+    def _category_thresholds(self) -> tf.Tensor:
         theta_softplus = tf.nn.softplus(self.theta, name="theta_softplus")
         theta_cumsum = tf.cumsum(theta_softplus, axis=-1, name="theta_cumsum")
-        sigmoid_est_mean = tf.nn.sigmoid(theta_cumsum - self.mean_param, name="sigmoid_est_mean")
-        return sigmoid_est_mean
+        return tf.nn.sigmoid(theta_cumsum - self.mean_param, name="thresholds")
 
     @staticmethod
     def _cdf_of_category(sigmoid_est_mean: tf.Tensor) -> tf.Tensor:
