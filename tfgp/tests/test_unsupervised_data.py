@@ -47,7 +47,9 @@ class TestStubOutDataFilesExist(tf.test.TestCase):
         self.num_data = 5
         self.num_classes = 2
         self.stubs = tf.test.StubOutForTesting()
-        stubbed_data = np.empty([1100, 10])
+        self.stub_num_data = 1100
+        self.stub_output_dim = 10
+        stubbed_data = np.empty([self.stub_num_data, self.stub_output_dim])
         self.stubs.Set(os.path, "isfile", lambda x: True)
         self.stubs.Set(np, "loadtxt", lambda x, delimiter=None: stubbed_data)
         self.stubs.Set(np, "genfromtxt",
@@ -60,6 +62,7 @@ class TestStubOutDataFilesExist(tf.test.TestCase):
         y, likelihood, labels = Unsupervised.make_abalone(self.num_data)
         self.assertEqual(self.num_data, y.shape[0])
         self.assertAllEqual((self.num_data,), labels.shape)
+        self.assertEqual(self.stub_output_dim - 1, y.shape[1])
 
     def test_adult(self) -> None:
         y, likelihood, labels = Unsupervised.make_adult(self.num_data)
@@ -84,11 +87,13 @@ class TestStubOutDataFilesExist(tf.test.TestCase):
         y, likelihood, labels = Unsupervised.make_cleveland(self.num_data)
         self.assertEqual(self.num_data, y.shape[0])
         self.assertAllEqual((self.num_data,), labels.shape)
+        self.assertEqual(self.stub_output_dim - 1, y.shape[1])
 
     def test_cleveland_quantized(self) -> None:
         y, likelihood, labels = Unsupervised.make_cleveland_quantized(self.num_data)
         self.assertEqual(self.num_data, y.shape[0])
         self.assertAllEqual((self.num_data,), labels.shape)
+        self.assertEqual(self.stub_output_dim - 1, y.shape[1])
 
     def test_default_credit(self) -> None:
         y, likelihood, labels = Unsupervised.make_default_credit(self.num_data)
@@ -99,16 +104,19 @@ class TestStubOutDataFilesExist(tf.test.TestCase):
         y, likelihood, labels = Unsupervised.make_mimic(self.num_data)
         self.assertEqual(self.num_data, y.shape[0])
         self.assertAllEqual((self.num_data,), labels.shape)
+        self.assertEqual(self.stub_output_dim - 1, y.shape[1])
 
     def test_mimic_labeled(self) -> None:
         y, likelihood, labels = Unsupervised.make_mimic_labeled(self.num_data)
         self.assertEqual(self.num_data, y.shape[0])
         self.assertAllEqual((self.num_data,), labels.shape)
+        self.assertEqual(self.stub_output_dim + 1, y.shape[1])
 
     def test_mimic_test(self) -> None:
         y, likelihood, labels = Unsupervised.make_mimic_test(self.num_data)
         self.assertEqual(self.num_data, y.shape[0])
         self.assertAllEqual((self.num_data,), labels.shape)
+        self.assertEqual(self.stub_output_dim - 1, y.shape[1])
 
     def test_wine(self) -> None:
         y, likelihood, labels = Unsupervised.make_wine(self.num_data)
