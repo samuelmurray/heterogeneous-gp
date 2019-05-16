@@ -60,7 +60,7 @@ class Supervised(abc.ABC):
     @staticmethod
     def make_sin_ordinal_one_hot(num_data: int) -> DataTuple:
         x = np.linspace(0, 2 * np.pi, num_data)[:, None]
-        latent = 2 * (1 + np.sin(x).flatten())
+        latent = 1.9 * (1 + np.sin(x).flatten())
         y = np.floor(latent).astype(np.int)
         num_categories = 4
         likelihood = MixedLikelihoodWrapper([Ordinal(num_categories)])
