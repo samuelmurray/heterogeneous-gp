@@ -8,9 +8,9 @@ import seaborn as sns
 import tensorflow as tf
 
 import tfgp
+from tfgp.data import Unsupervised
 from tfgp.kernel import ARDRBF
 from tfgp.model import MLGPLVM
-from tfgp.util import data
 
 ROOT_PATH = os.path.dirname(tfgp.__file__)
 LOG_DIR_PATH = os.path.join(ROOT_PATH, os.pardir, "log")
@@ -23,7 +23,7 @@ if __name__ == "__main__":
     latent_dim = 2
     output_dim = 5
     num_classes = 5
-    y, likelihood, labels = data.make_circle(num_data, output_dim)
+    y, likelihood, labels = Unsupervised.make_circle(num_data, output_dim)
 
     print("Creating model...")
     kernel = ARDRBF(x_dim=latent_dim)

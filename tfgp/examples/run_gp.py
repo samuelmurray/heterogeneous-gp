@@ -3,14 +3,14 @@ import numpy as np
 import seaborn as sns
 import tensorflow as tf
 
+from tfgp.data import Supervised
 from tfgp.kernel import RBF
 from tfgp.model import GP
-from tfgp.util import data
 
 if __name__ == "__main__":
     sns.set()
     num_data = 10
-    x_train, _, y_train = data.make_sin(num_data)
+    x_train, _, y_train = Supervised.make_sin(num_data)
     x = tf.convert_to_tensor(x_train, dtype=tf.float32)
     y = tf.convert_to_tensor(y_train, dtype=tf.float32)
     kernel = RBF()
