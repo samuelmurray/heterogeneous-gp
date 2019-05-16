@@ -20,9 +20,9 @@ class OrdinalDistribution(tfp.distributions.Distribution):
         return prob_clipped
 
     def _prob_of_category(self) -> tf.Tensor:
-        sigmoid_est_mean = self._category_thresholds()
-        upper_cdf = self._cdf_of_category(sigmoid_est_mean)
-        lower_cdf = self._cdf_of_below_category(sigmoid_est_mean)
+        category_thresholds = self._category_thresholds()
+        upper_cdf = self._cdf_of_category(category_thresholds)
+        lower_cdf = self._cdf_of_below_category(category_thresholds)
         return tf.subtract(upper_cdf, lower_cdf, name="prob_of_category")
 
     def _category_thresholds(self) -> tf.Tensor:
@@ -31,18 +31,19 @@ class OrdinalDistribution(tfp.distributions.Distribution):
         return tf.nn.sigmoid(theta_cumsum - self.mean_param, name="thresholds")
 
     @staticmethod
-    def _cdf_of_category(sigmoid_est_mean: tf.Tensor) -> tf.Tensor:
-        shape = tf.shape(sigmoid_est_mean)[:-1]
+    def _cdf_of_category(category_thresholds: tf.Tensor) -> tf.Tensor:
+        shape = tf.shape(category_thresholds)[:-1]
         ones = tf.ones(shape, name="ones")
         ones_expanded = tf.expand_dims(ones, axis=-1, name="ones_expanded")
-        return tf.concat([sigmoid_est_mean, ones_expanded], axis=-1, name="cdf_of_category")
+        return tf.concat([category_thresholds, ones_expanded], axis=-1, name="cdf_of_category")
 
     @staticmethod
-    def _cdf_of_below_category(sigmoid_est_mean: tf.Tensor) -> tf.Tensor:
-        shape = tf.shape(sigmoid_est_mean)[:-1]
+    def _cdf_of_below_category(category_thresholds: tf.Tensor) -> tf.Tensor:
+        shape = tf.shape(category_thresholds)[:-1]
         zeros = tf.zeros(shape, name="zeros")
         zeros_expanded = tf.expand_dims(zeros, axis=-1, name="zeros_expanded")
-        return tf.concat([zeros_expanded, sigmoid_est_mean], axis=-1, name="cdf_of_below_category")
+        return tf.concat([zeros_expanded, category_thresholds], axis=-1,
+                         name="cdf_of_below_category")
 
     @staticmethod
     def _prob_of_observation(y: tf.Tensor, prob_of_category: tf.Tensor) -> tf.Tensor:
