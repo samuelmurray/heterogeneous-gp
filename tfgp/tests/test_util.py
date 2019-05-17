@@ -25,6 +25,20 @@ class TestUtil(tf.test.TestCase):
         error = util.categorical_error(prediction, nans, ground_truth)
         self.assertAlmostEqual(2 / 3, error)
 
+    def test_ordinal_error(self) -> None:
+        prediction = np.array([[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]])
+        nans = np.ones_like(prediction) * np.nan
+        ground_truth = np.array([[1., 0., 0.], [1., 0., 0.], [1., 0., 0.]])
+        error = util.ordinal_error(prediction, nans, ground_truth)
+        self.assertAlmostEqual(1 / 3, error)
+
+    def test_ordinal_error_nans(self) -> None:
+        prediction = np.array([[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]])
+        nans = np.array([[np.nan, np.nan, np.nan], [np.nan, np.nan, np.nan], [1., 0., 0.]])
+        ground_truth = np.array([[1., 0., 0.], [1., 0., 0.], [1., 0., 0.]])
+        error = util.ordinal_error(prediction, nans, ground_truth)
+        self.assertAlmostEqual(1 / 9, error)
+
 
 if __name__ == "__main__":
     tf.test.main()
