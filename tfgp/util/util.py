@@ -3,7 +3,7 @@ from typing import Tuple
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
 
-from tfgp.likelihood import MixedLikelihoodWrapper, OneHotCategorical
+from tfgp.likelihood import MixedLikelihoodWrapper, OneHotCategorical, OneHotOrdinal
 
 
 def knn_abs_error(x: np.ndarray, labels: np.ndarray, k: int) -> float:
@@ -27,8 +27,8 @@ def knn_rmse(x: np.ndarray, labels: np.ndarray, k: int) -> float:
     return np.sqrt(np.mean(np.square(labels - guess)))
 
 
-def _nrmse(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray, *,
-           use_mean: bool) -> np.ndarray:
+def _normalised_rmse(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray, *,
+                     use_mean: bool) -> float:
     nan_mask = np.isnan(y_missing)
     y_filtered = y_true.copy()
     y_filtered[~nan_mask] = np.nan
@@ -37,18 +37,20 @@ def _nrmse(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray, 
     mean_square_error = np.nanmean(square_error, axis=0)
     rmse = np.sqrt(mean_square_error)
     if use_mean:
-        nrmse = rmse / np.nanmean(y_filtered, axis=0)
+        normalised_rmse = rmse / np.nanmean(y_filtered, axis=0)
     else:
-        nrmse = rmse / (np.nanmax(y_filtered, axis=0) - np.nanmin(y_filtered, axis=0))
-    return nrmse[0]
+        normalised_rmse = rmse / (np.nanmax(y_filtered, axis=0) - np.nanmin(y_filtered, axis=0))
+    return normalised_rmse[0]
 
 
-def nrmse_mean(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray) -> np.ndarray:
-    return _nrmse(y_imputation, y_missing, y_true, use_mean=True)
+def mean_normalised_rmse(y_imputation: np.ndarray, y_missing: np.ndarray,
+                         y_true: np.ndarray) -> float:
+    return _normalised_rmse(y_imputation, y_missing, y_true, use_mean=True)
 
 
-def nrmse_range(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray) -> np.ndarray:
-    return _nrmse(y_imputation, y_missing, y_true, use_mean=False)
+def range_normalised_rmse(y_imputation: np.ndarray, y_missing: np.ndarray,
+                          y_true: np.ndarray) -> float:
+    return _normalised_rmse(y_imputation, y_missing, y_true, use_mean=False)
 
 
 def categorical_error(y_imputation: np.ndarray, y_missing: np.ndarray,
@@ -73,22 +75,22 @@ def ordinal_error(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.nd
 
 def imputation_error(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray,
                      likelihood: MixedLikelihoodWrapper) -> Tuple[float, float]:
-    numerical_error: float = 0
-    num_numerical = 0
-    nominal_error: float = 0
-    num_nominal = 0
+    numerical_errors = []
+    nominal_errors = []
     for lik, dims in zip(likelihood.likelihoods, likelihood.y_dims_per_likelihood):
         if isinstance(lik, OneHotCategorical):
-            nominal_error += categorical_error(y_imputation[:, dims], y_missing[:, dims],
-                                               y_true[:, dims])
-            num_nominal += 1
+            error = categorical_error(y_imputation[:, dims], y_missing[:, dims], y_true[:, dims])
+            nominal_errors.append(error)
+        elif isinstance(lik, OneHotOrdinal):
+            error = ordinal_error(y_imputation[:, dims], y_missing[:, dims], y_true[:, dims])
+            nominal_errors.append(error)
         else:
-            numerical_error += nrmse_range(y_imputation[:, dims], y_missing[:, dims],
-                                           y_true[:, dims])
-            num_numerical += 1
-    avg_numerical_error = numerical_error / num_numerical
-    avg_nominal_error = nominal_error / num_nominal
-    return avg_numerical_error, avg_nominal_error
+            error = range_normalised_rmse(y_imputation[:, dims], y_missing[:, dims],
+                                          y_true[:, dims])
+            numerical_errors.append(error)
+    mean_numerical_error = np.mean(numerical_errors)
+    mean_nominal_error = np.mean(nominal_errors)
+    return mean_numerical_error, mean_nominal_error
 
 
 def pca_reduce(x: np.ndarray, latent_dim: int, *, whiten: bool = False) -> np.ndarray:
@@ -110,7 +112,7 @@ def remove_data(y: np.ndarray, indices: np.ndarray,
     for data, dim in indices:
         if data >= num_data:
             continue
-        idx[data, likelihood.f_dims_per_likelihood[dim]] = True
+        idx[data, likelihood.y_dims_per_likelihood[dim]] = True
     y_noisy[idx] = np.nan
     return y_noisy
 
@@ -125,6 +127,6 @@ def remove_data_randomly(y: np.ndarray, frac: float,
     idx = np.zeros(y.shape, dtype=bool)
     for i in range(dims_missing.shape[0]):
         for j in range(dims_missing.shape[1]):
-            idx[i, likelihood.f_dims_per_likelihood[dims_missing[i, j]]] = True
+            idx[i, likelihood.y_dims_per_likelihood[dims_missing[i, j]]] = True
     y_noisy[idx] = np.nan
     return y_noisy

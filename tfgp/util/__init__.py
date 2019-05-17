@@ -8,8 +8,8 @@ __all__ = [
     "knn_abs_error",
     "knn_error",
     "knn_rmse",
-    "nrmse_mean",
-    "nrmse_range",
+    "mean_normalised_rmse",
+    "range_normalised_rmse",
     "ordinal_error",
     "pca_reduce",
     "remove_data_randomly",
@@ -20,8 +20,8 @@ from .util import imputation_error
 from .util import knn_abs_error
 from .util import knn_error
 from .util import knn_rmse
-from .util import nrmse_mean
-from .util import nrmse_range
+from .util import mean_normalised_rmse
+from .util import range_normalised_rmse
 from .util import ordinal_error
 from .util import pca_reduce
 from .util import remove_data
