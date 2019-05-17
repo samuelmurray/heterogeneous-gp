@@ -12,6 +12,7 @@ __all__ = [
     "ordinal_error",
     "pca_reduce",
     "range_normalised_rmse",
+    "remove_data",
     "remove_data_randomly",
 ]
 
