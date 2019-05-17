@@ -27,8 +27,8 @@ def knn_rmse(x: np.ndarray, labels: np.ndarray, k: int) -> float:
     return np.sqrt(np.mean(np.square(labels - guess)))
 
 
-def _nrmse(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray, *,
-           use_mean: bool) -> np.ndarray:
+def _normalised_rmse(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray, *,
+                     use_mean: bool) -> np.ndarray:
     nan_mask = np.isnan(y_missing)
     y_filtered = y_true.copy()
     y_filtered[~nan_mask] = np.nan
@@ -43,12 +43,14 @@ def _nrmse(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray, 
     return nrmse[0]
 
 
-def nrmse_mean(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray) -> np.ndarray:
-    return _nrmse(y_imputation, y_missing, y_true, use_mean=True)
+def mean_normalised_rmse(y_imputation: np.ndarray, y_missing: np.ndarray,
+                         y_true: np.ndarray) -> np.ndarray:
+    return _normalised_rmse(y_imputation, y_missing, y_true, use_mean=True)
 
 
-def nrmse_range(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray) -> np.ndarray:
-    return _nrmse(y_imputation, y_missing, y_true, use_mean=False)
+def range_normalised_rmse(y_imputation: np.ndarray, y_missing: np.ndarray,
+                          y_true: np.ndarray) -> np.ndarray:
+    return _normalised_rmse(y_imputation, y_missing, y_true, use_mean=False)
 
 
 def categorical_error(y_imputation: np.ndarray, y_missing: np.ndarray,
@@ -83,8 +85,8 @@ def imputation_error(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np
                                                y_true[:, dims])
             num_nominal += 1
         else:
-            numerical_error += nrmse_range(y_imputation[:, dims], y_missing[:, dims],
-                                           y_true[:, dims])
+            numerical_error += range_normalised_rmse(y_imputation[:, dims], y_missing[:, dims],
+                                                     y_true[:, dims])
             num_numerical += 1
     avg_numerical_error = numerical_error / num_numerical
     avg_nominal_error = nominal_error / num_nominal
