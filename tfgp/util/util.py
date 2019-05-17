@@ -75,22 +75,19 @@ def ordinal_error(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.nd
 
 def imputation_error(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray,
                      likelihood: MixedLikelihoodWrapper) -> Tuple[float, float]:
-    numerical_error: float = 0
-    num_numerical = 0
-    nominal_error: float = 0
-    num_nominal = 0
+    numerical_errors = []
+    nominal_errors = []
     for lik, dims in zip(likelihood.likelihoods, likelihood.y_dims_per_likelihood):
         if isinstance(lik, OneHotCategorical):
-            nominal_error += categorical_error(y_imputation[:, dims], y_missing[:, dims],
-                                               y_true[:, dims])
-            num_nominal += 1
+            error = categorical_error(y_imputation[:, dims], y_missing[:, dims], y_true[:, dims])
+            nominal_errors.append(error)
         else:
-            numerical_error += range_normalised_rmse(y_imputation[:, dims], y_missing[:, dims],
-                                                     y_true[:, dims])
-            num_numerical += 1
-    avg_numerical_error = numerical_error / num_numerical
-    avg_nominal_error = nominal_error / num_nominal
-    return avg_numerical_error, avg_nominal_error
+            error = range_normalised_rmse(y_imputation[:, dims], y_missing[:, dims],
+                                          y_true[:, dims])
+            numerical_errors.append(error)
+    mean_numerical_error = np.mean(numerical_errors)
+    mean_nominal_error = np.mean(nominal_errors)
+    return mean_numerical_error, mean_nominal_error
 
 
 def pca_reduce(x: np.ndarray, latent_dim: int, *, whiten: bool = False) -> np.ndarray:
