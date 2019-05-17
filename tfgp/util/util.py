@@ -112,7 +112,7 @@ def remove_data(y: np.ndarray, indices: np.ndarray,
     for data, dim in indices:
         if data >= num_data:
             continue
-        idx[data, likelihood.f_dims_per_likelihood[dim]] = True
+        idx[data, likelihood.y_dims_per_likelihood[dim]] = True
     y_noisy[idx] = np.nan
     return y_noisy
 
@@ -127,6 +127,6 @@ def remove_data_randomly(y: np.ndarray, frac: float,
     idx = np.zeros(y.shape, dtype=bool)
     for i in range(dims_missing.shape[0]):
         for j in range(dims_missing.shape[1]):
-            idx[i, likelihood.f_dims_per_likelihood[dims_missing[i, j]]] = True
+            idx[i, likelihood.y_dims_per_likelihood[dims_missing[i, j]]] = True
     y_noisy[idx] = np.nan
     return y_noisy
