@@ -37,10 +37,10 @@ def _normalised_rmse(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np
     mean_square_error = np.nanmean(square_error, axis=0)
     rmse = np.sqrt(mean_square_error)
     if use_mean:
-        nrmse = rmse / np.nanmean(y_filtered, axis=0)
+        normalised_rmse = rmse / np.nanmean(y_filtered, axis=0)
     else:
-        nrmse = rmse / (np.nanmax(y_filtered, axis=0) - np.nanmin(y_filtered, axis=0))
-    return nrmse[0]
+        normalised_rmse = rmse / (np.nanmax(y_filtered, axis=0) - np.nanmin(y_filtered, axis=0))
+    return normalised_rmse[0]
 
 
 def mean_normalised_rmse(y_imputation: np.ndarray, y_missing: np.ndarray,
