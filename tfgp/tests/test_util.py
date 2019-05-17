@@ -2,6 +2,7 @@ import numpy as np
 import tensorflow as tf
 
 from tfgp import util
+from tfgp.likelihood import MixedLikelihoodWrapper, Normal, OneHotCategorical
 
 
 class TestUtil(tf.test.TestCase):
@@ -66,6 +67,17 @@ class TestUtil(tf.test.TestCase):
         ground_truth = np.array([[4.], [2.], [0.]])
         error = util.mean_normalised_rmse(prediction, nans, ground_truth)
         self.assertAlmostEqual(np.sqrt(5 / 18), error)
+
+    def test_remove_data(self) -> None:
+        original_data = np.ones((4, 3))
+        indices_to_remove = np.array([[1, 0], [2, 1], [3, 0], [3, 1]])
+        expected_data = np.array([[1., 1., 1.],
+                                  [np.nan, 1., 1., ],
+                                  [1., np.nan, np.nan],
+                                  [np.nan, np.nan, np.nan]])
+        likelihood = MixedLikelihoodWrapper([Normal(), OneHotCategorical(2)])
+        noisy_data = util.remove_data(original_data, indices_to_remove, likelihood)
+        self.assertAllEqual(expected_data, noisy_data)
 
 
 if __name__ == "__main__":
