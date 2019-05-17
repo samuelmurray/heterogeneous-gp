@@ -68,6 +68,16 @@ class TestUtil(tf.test.TestCase):
         error = util.mean_normalised_rmse(prediction, nans, ground_truth)
         self.assertAlmostEqual(np.sqrt(5 / 18), error)
 
+    def test_imputation_error(self) -> None:
+        prediction = np.array([[1., 1., 0.], [1., 0., 1.]])
+        nans = np.ones_like(prediction) * np.nan
+        ground_truth = np.array([[1., 1., 0.], [2., 1., 0.]])
+        likelihood = MixedLikelihoodWrapper([Normal(), OneHotCategorical(2)])
+        numerical_error, nominal_error = util.imputation_error(prediction, nans, ground_truth,
+                                                               likelihood)
+        self.assertEqual(np.sqrt(1 / 2), numerical_error)
+        self.assertEqual(0.5, nominal_error)
+
     def test_remove_data(self) -> None:
         original_data = np.ones((4, 3))
         indices_to_remove = np.array([[1, 0], [2, 1], [3, 0], [3, 1]])
