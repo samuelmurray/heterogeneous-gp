@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 
 from tfgp import util
-from tfgp.likelihood import MixedLikelihoodWrapper, Normal, OneHotCategorical
+from tfgp.likelihood import MixedLikelihoodWrapper, Normal, OneHotCategorical, OneHotOrdinal
 
 
 class TestUtil(tf.test.TestCase):
@@ -69,14 +69,18 @@ class TestUtil(tf.test.TestCase):
         self.assertAlmostEqual(np.sqrt(5 / 18), error)
 
     def test_imputation_error(self) -> None:
-        prediction = np.array([[1., 1., 0.], [1., 0., 1.]])
+        prediction = np.array([[1., 1., 0., 1., 0.], [1., 0., 1., 0., 1.]])
         nans = np.ones_like(prediction) * np.nan
-        ground_truth = np.array([[1., 1., 0.], [2., 1., 0.]])
-        likelihood = MixedLikelihoodWrapper([Normal(), OneHotCategorical(2)])
+        ground_truth = np.array([[1., 1., 0., 1., 0.], [2., 1., 0., 1., 0.]])
+        likelihood = MixedLikelihoodWrapper([Normal(), OneHotCategorical(2), OneHotOrdinal(2)])
         numerical_error, nominal_error = util.imputation_error(prediction, nans, ground_truth,
                                                                likelihood)
-        self.assertEqual(np.sqrt(1 / 2), numerical_error)
-        self.assertEqual(0.5, nominal_error)
+        expected_numerical_error = np.sqrt(1 / 2)
+        self.assertEqual(expected_numerical_error, numerical_error)
+        expected_categorical_error = 0.5
+        expected_ordinal_error = 0.25
+        expected_nominal_error = np.mean([expected_categorical_error, expected_ordinal_error])
+        self.assertEqual(expected_nominal_error, nominal_error)
 
     def test_remove_data(self) -> None:
         original_data = np.ones((4, 3))
