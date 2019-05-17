@@ -28,7 +28,7 @@ def knn_rmse(x: np.ndarray, labels: np.ndarray, k: int) -> float:
 
 
 def _normalised_rmse(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray, *,
-                     use_mean: bool) -> np.ndarray:
+                     use_mean: bool) -> float:
     nan_mask = np.isnan(y_missing)
     y_filtered = y_true.copy()
     y_filtered[~nan_mask] = np.nan
@@ -44,12 +44,12 @@ def _normalised_rmse(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np
 
 
 def mean_normalised_rmse(y_imputation: np.ndarray, y_missing: np.ndarray,
-                         y_true: np.ndarray) -> np.ndarray:
+                         y_true: np.ndarray) -> float:
     return _normalised_rmse(y_imputation, y_missing, y_true, use_mean=True)
 
 
 def range_normalised_rmse(y_imputation: np.ndarray, y_missing: np.ndarray,
-                          y_true: np.ndarray) -> np.ndarray:
+                          y_true: np.ndarray) -> float:
     return _normalised_rmse(y_imputation, y_missing, y_true, use_mean=False)
 
 
