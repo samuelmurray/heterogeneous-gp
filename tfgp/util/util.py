@@ -3,7 +3,7 @@ from typing import Tuple
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
 
-from tfgp.likelihood import MixedLikelihoodWrapper, OneHotCategorical
+from tfgp.likelihood import MixedLikelihoodWrapper, OneHotCategorical, OneHotOrdinal
 
 
 def knn_abs_error(x: np.ndarray, labels: np.ndarray, k: int) -> float:
@@ -80,6 +80,9 @@ def imputation_error(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np
     for lik, dims in zip(likelihood.likelihoods, likelihood.y_dims_per_likelihood):
         if isinstance(lik, OneHotCategorical):
             error = categorical_error(y_imputation[:, dims], y_missing[:, dims], y_true[:, dims])
+            nominal_errors.append(error)
+        elif isinstance(lik, OneHotOrdinal):
+            error = ordinal_error(y_imputation[:, dims], y_missing[:, dims], y_true[:, dims])
             nominal_errors.append(error)
         else:
             error = range_normalised_rmse(y_imputation[:, dims], y_missing[:, dims],
