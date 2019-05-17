@@ -44,14 +44,28 @@ class TestUtil(tf.test.TestCase):
         nans = np.array([[np.nan], [np.nan], [np.nan]])
         ground_truth = np.array([[4.], [2.], [0.]])
         error = util.range_normalised_rmse(prediction, nans, ground_truth)
-        self.assertAlmostEqual(np.sqrt(7/24), error)
+        self.assertAlmostEqual(np.sqrt(7 / 24), error)
 
     def test_range_normalised_rmse_nans(self) -> None:
         prediction = np.array([[5.], [4.], [3.]])
         nans = np.array([[np.nan], [np.nan], [0.]])
         ground_truth = np.array([[4.], [2.], [0.]])
         error = util.range_normalised_rmse(prediction, nans, ground_truth)
-        self.assertAlmostEqual(np.sqrt(5/8), error)
+        self.assertAlmostEqual(np.sqrt(5 / 8), error)
+
+    def test_mean_normalised_rmse(self) -> None:
+        prediction = np.array([[5.], [4.], [3.]])
+        nans = np.array([[np.nan], [np.nan], [np.nan]])
+        ground_truth = np.array([[4.], [2.], [0.]])
+        error = util.mean_normalised_rmse(prediction, nans, ground_truth)
+        self.assertAlmostEqual(np.sqrt(7 / 6), error)
+
+    def test_mean_normalised_rmse_nans(self) -> None:
+        prediction = np.array([[5.], [4.], [3.]])
+        nans = np.array([[np.nan], [np.nan], [0.]])
+        ground_truth = np.array([[4.], [2.], [0.]])
+        error = util.mean_normalised_rmse(prediction, nans, ground_truth)
+        self.assertAlmostEqual(np.sqrt(5 / 18), error)
 
 
 if __name__ == "__main__":
