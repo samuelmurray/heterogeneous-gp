@@ -68,15 +68,21 @@ class TestUtil(tf.test.TestCase):
         error = util.mean_normalised_rmse(prediction, nans, ground_truth)
         self.assertAlmostEqual(np.sqrt(5 / 18), error)
 
-    def test_imputation_error(self) -> None:
+    def test_imputation_error_numerical_part(self) -> None:
         prediction = np.array([[1., 1., 0., 1., 0.], [1., 0., 1., 0., 1.]])
         nans = np.ones_like(prediction) * np.nan
         ground_truth = np.array([[1., 1., 0., 1., 0.], [2., 1., 0., 1., 0.]])
         likelihood = MixedLikelihoodWrapper([Normal(), OneHotCategorical(2), OneHotOrdinal(2)])
-        numerical_error, nominal_error = util.imputation_error(prediction, nans, ground_truth,
-                                                               likelihood)
+        numerical_error, _ = util.imputation_error(prediction, nans, ground_truth, likelihood)
         expected_numerical_error = np.sqrt(1 / 2)
         self.assertEqual(expected_numerical_error, numerical_error)
+
+    def test_imputation_error_nominal_part(self) -> None:
+        prediction = np.array([[1., 1., 0., 1., 0.], [1., 0., 1., 0., 1.]])
+        nans = np.ones_like(prediction) * np.nan
+        ground_truth = np.array([[1., 1., 0., 1., 0.], [2., 1., 0., 1., 0.]])
+        likelihood = MixedLikelihoodWrapper([Normal(), OneHotCategorical(2), OneHotOrdinal(2)])
+        _, nominal_error = util.imputation_error(prediction, nans, ground_truth, likelihood)
         expected_categorical_error = 0.5
         expected_ordinal_error = 0.25
         expected_nominal_error = np.mean([expected_categorical_error, expected_ordinal_error])
