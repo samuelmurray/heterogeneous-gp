@@ -2,8 +2,8 @@
 
 [run]
 branch = True
-source = tfgp
-omit = ./tfgp/examples/*.py, ./tfgp/notebooks/*.py, ./tfgp/tests/*.py, ./tfgp/__version__.py, setup.py
+source = hgp
+omit = ./hgp/examples/*.py, ./hgp/notebooks/*.py, ./hgp/tests/*.py, ./hgp/__version__.py, setup.py
 
 [report]
 exclude_lines =
