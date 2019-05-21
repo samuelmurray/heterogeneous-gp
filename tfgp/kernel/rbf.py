@@ -35,7 +35,7 @@ class RBF(Kernel):
             rbf = self._variance * tf.exp(-self._gamma * square_dist)
         return (rbf + self._eps * tf.eye(tf.shape(x1)[-2])) if x2 is None else rbf
 
-    def diag(self, x: tf.Tensor, *, name: Optional[str] = None) -> tf.Tensor:
+    def diag_part(self, x: tf.Tensor, *, name: Optional[str] = None) -> tf.Tensor:
         with tf.name_scope(name):
             ones = tf.ones(tf.shape(x)[:-1], name="ones")
             diag = tf.multiply(self._variance, ones, name="diag")

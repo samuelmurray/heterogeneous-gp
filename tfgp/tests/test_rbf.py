@@ -58,20 +58,20 @@ class TestRBF(tf.test.TestCase):
             k_ab = k_rbf.eval()
         self.assertAllClose(k_ab, k_sklearn)
 
-    def test_diag_shape(self) -> None:
+    def test_diag_part_shape(self) -> None:
         a = np.random.normal(size=(self.num_a, self.x_dim))
-        diag = self.kernel.diag(tf.convert_to_tensor(a, dtype=tf.float32))
+        diag = self.kernel.diag_part(tf.convert_to_tensor(a, dtype=tf.float32))
         self.assertShapeEqual(np.empty(self.num_a), diag)
 
-    def test_diag_batch_shape(self) -> None:
+    def test_diag_part_batch_shape(self) -> None:
         a = np.random.normal(size=(self.batch_size, self.num_a, self.x_dim))
-        diag = self.kernel.diag(tf.convert_to_tensor(a, dtype=tf.float32))
+        diag = self.kernel.diag_part(tf.convert_to_tensor(a, dtype=tf.float32))
         self.assertShapeEqual(np.empty((self.batch_size, self.num_a)), diag)
 
-    def test_diag_equal_to_full(self) -> None:
+    def test_diag_part_equal_to_full(self) -> None:
         a = tf.convert_to_tensor(np.random.normal(size=(self.num_a, self.x_dim)), dtype=tf.float32)
         self.kernel._eps = 0
-        diag = self.kernel.diag(a)
+        diag = self.kernel.diag_part(a)
         full = self.kernel(a)
         init = tf.initialize_all_variables()
         with self.session() as sess:
@@ -80,11 +80,11 @@ class TestRBF(tf.test.TestCase):
             diag_part_of_full = sess.run(tf.matrix_diag_part(full))
         self.assertAllClose(diag_part, diag_part_of_full)
 
-    def test_diag_equal_to_full_batch(self) -> None:
+    def test_diag_part_equal_to_full_batch(self) -> None:
         a = tf.convert_to_tensor(np.random.normal(size=(self.batch_size, self.num_a, self.x_dim)),
                                  dtype=tf.float32)
         self.kernel._eps = 0
-        diag = self.kernel.diag(a)
+        diag = self.kernel.diag_part(a)
         full = self.kernel(a)
         init = tf.initialize_all_variables()
         with self.session() as sess:
