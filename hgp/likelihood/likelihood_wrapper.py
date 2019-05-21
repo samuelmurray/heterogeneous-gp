@@ -7,7 +7,7 @@ import tensorflow_probability as tfp
 from .likelihood import Likelihood
 
 
-class MixedLikelihoodWrapper:
+class LikelihoodWrapper:
     def __init__(self, likelihoods: Sequence[Likelihood]) -> None:
         self._likelihoods = list(likelihoods)
         self._num_likelihoods = len(self.likelihoods)

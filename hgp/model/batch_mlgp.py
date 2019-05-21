@@ -4,13 +4,13 @@ import tensorflow_probability as tfp
 
 from .mlgp import MLGP
 from hgp.kernel import Kernel
-from hgp.likelihood import MixedLikelihoodWrapper
+from hgp.likelihood import LikelihoodWrapper
 
 
 class BatchMLGP(MLGP):
     def __init__(self, x: np.ndarray, y: np.ndarray, *,
                  kernel: Kernel,
-                 likelihood: MixedLikelihoodWrapper,
+                 likelihood: LikelihoodWrapper,
                  num_inducing: int = 50,
                  num_samples: int = 10,
                  ) -> None:

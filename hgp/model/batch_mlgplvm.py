@@ -6,14 +6,14 @@ import tensorflow_probability as tfp
 
 from .mlgplvm import MLGPLVM
 from hgp.kernel import Kernel
-from hgp.likelihood import MixedLikelihoodWrapper
+from hgp.likelihood import LikelihoodWrapper
 
 
 class BatchMLGPLVM(MLGPLVM):
     def __init__(self, y: np.ndarray, x_dim: int, *,
                  x: Optional[np.ndarray] = None,
                  kernel: Kernel,
-                 likelihood: MixedLikelihoodWrapper,
+                 likelihood: LikelihoodWrapper,
                  num_inducing: int = 50,
                  num_samples: int = 10,
                  ) -> None:

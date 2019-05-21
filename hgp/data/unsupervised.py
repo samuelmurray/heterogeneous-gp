@@ -8,10 +8,10 @@ from sklearn.metrics.pairwise import rbf_kernel
 from sklearn.datasets import make_blobs
 
 import hgp
-from hgp.likelihood import (Bernoulli, Likelihood, LogNormal, MixedLikelihoodWrapper, Normal,
+from hgp.likelihood import (Bernoulli, Likelihood, LikelihoodWrapper, LogNormal, Normal,
                             OneHotCategorical, QuantizedNormal)
 
-DataTuple = Tuple[np.ndarray, MixedLikelihoodWrapper, np.ndarray]
+DataTuple = Tuple[np.ndarray, LikelihoodWrapper, np.ndarray]
 ROOT_PATH = os.path.dirname(hgp.__file__)
 DATA_DIR_PATH = os.path.join(ROOT_PATH, os.pardir, "util")
 
@@ -38,14 +38,14 @@ class Unsupervised(abc.ABC):
             y[:, half_output:] = np.random.binomial(1, 1 / (1 + np.exp(-f[:, half_output:])))
             likelihoods += [Normal() for _ in range(half_output)]
             likelihoods += [Bernoulli() for _ in range(output_dim - half_output)]
-        likelihood = MixedLikelihoodWrapper(likelihoods)
+        likelihood = LikelihoodWrapper(likelihoods)
         labels = np.zeros(num_data)
         return y, likelihood, labels
 
     @staticmethod
     def make_gaussian_blobs(num_data: int, output_dim: int, num_classes: int) -> DataTuple:
         y, labels = make_blobs(num_data, output_dim, num_classes)
-        likelihood = MixedLikelihoodWrapper([Normal() for _ in range(output_dim)])
+        likelihood = LikelihoodWrapper([Normal() for _ in range(output_dim)])
         return y, likelihood, labels
 
     @staticmethod
@@ -63,7 +63,7 @@ class Unsupervised(abc.ABC):
         y[half_data:, 2] = np.random.binomial(1, 0.3, size=num_data - half_data)
         labels[half_data:] = np.ones(num_data - half_data)
 
-        likelihood = MixedLikelihoodWrapper([Normal(), Normal(), Bernoulli()])
+        likelihood = LikelihoodWrapper([Normal(), Normal(), Bernoulli()])
         return y, likelihood, labels
 
     @staticmethod
@@ -78,7 +78,7 @@ class Unsupervised(abc.ABC):
         labels = data[data_indices, -1]
         likelihoods: List[Likelihood] = [OneHotCategorical(3)]
         likelihoods += [Normal() for _ in range(7)]
-        likelihood = MixedLikelihoodWrapper(likelihoods)
+        likelihood = LikelihoodWrapper(likelihoods)
         return y, likelihood, labels
 
     @staticmethod
@@ -89,7 +89,7 @@ class Unsupervised(abc.ABC):
         data = np.loadtxt(path, delimiter=",")
         y = data[:num_data]
         labels = np.zeros(y.shape[0])
-        likelihood = MixedLikelihoodWrapper(
+        likelihood = LikelihoodWrapper(
             [
                 Normal(),
                 OneHotCategorical(7),
@@ -141,7 +141,7 @@ class Unsupervised(abc.ABC):
             Bernoulli(),  # Wound_2
             OneHotCategorical(2),
         ]
-        likelihood = MixedLikelihoodWrapper(likelihoods)
+        likelihood = LikelihoodWrapper(likelihoods)
         return y, likelihood, labels
 
     @staticmethod
@@ -157,7 +157,7 @@ class Unsupervised(abc.ABC):
         data_indices = np.random.permutation(data_per_class * num_classes)[:num_data]
         y = y[data_indices]
         labels = labels[data_indices]
-        likelihood = MixedLikelihoodWrapper([Bernoulli() for _ in range(y.shape[1])])
+        likelihood = LikelihoodWrapper([Bernoulli() for _ in range(y.shape[1])])
         return y, likelihood, labels
 
     @staticmethod
@@ -174,7 +174,7 @@ class Unsupervised(abc.ABC):
         data_indices = np.random.permutation(data_per_class * num_classes)[:num_data]
         y = y[data_indices]
         labels = labels[data_indices]
-        likelihood = MixedLikelihoodWrapper([Bernoulli() for _ in range(y.shape[1])])
+        likelihood = LikelihoodWrapper([Bernoulli() for _ in range(y.shape[1])])
         return y, likelihood, labels
 
     @staticmethod
@@ -187,7 +187,7 @@ class Unsupervised(abc.ABC):
         data_indices = np.random.permutation(data_size)[:num_data]
         y = data[data_indices, :-1]
         labels = data[data_indices, -1]
-        likelihood = MixedLikelihoodWrapper(
+        likelihood = LikelihoodWrapper(
             [
                 Normal(),
                 Bernoulli(),
@@ -216,7 +216,7 @@ class Unsupervised(abc.ABC):
         data_indices = np.random.permutation(data_size)[:num_data]
         y = data[data_indices, :-1]
         labels = data[data_indices, -1]
-        likelihood = MixedLikelihoodWrapper(
+        likelihood = LikelihoodWrapper(
             [
                 QuantizedNormal(),
                 Bernoulli(),
@@ -243,7 +243,7 @@ class Unsupervised(abc.ABC):
         data = np.loadtxt(path, delimiter=",")
         y = data[:num_data]
         labels = np.zeros(y.shape[0])
-        likelihood = MixedLikelihoodWrapper(
+        likelihood = LikelihoodWrapper(
             [
                 Normal(),
                 OneHotCategorical(2),  # One category missing?
@@ -283,7 +283,7 @@ class Unsupervised(abc.ABC):
         data_indices = np.random.permutation(data_size)[:num_data]
         y = data[data_indices, :-1]
         labels = data[data_indices, -1]
-        likelihood = MixedLikelihoodWrapper(
+        likelihood = LikelihoodWrapper(
             [
                 Normal(),
                 Normal(),
@@ -319,7 +319,7 @@ class Unsupervised(abc.ABC):
         y[:, -2] = (y_tmp[:, -1] == 0)
         y[:, -1] = (y_tmp[:, -1] == 1)
         labels = np.zeros(y.shape[0])
-        likelihood = MixedLikelihoodWrapper(
+        likelihood = LikelihoodWrapper(
             [
                 Normal(),
                 Normal(),
@@ -353,7 +353,7 @@ class Unsupervised(abc.ABC):
         data_indices = np.random.permutation(data_size)[:num_data]
         y = data[data_indices, :-1]
         labels = data[data_indices, -1]
-        likelihood = MixedLikelihoodWrapper(
+        likelihood = LikelihoodWrapper(
             [
                 Normal(),
                 Normal(),
@@ -385,7 +385,7 @@ class Unsupervised(abc.ABC):
         dim_indices = np.random.permutation(12)[:output_dim]
         y = oil['X'][data_indices[:, None], dim_indices]
         labels = oil['Y'][data_indices, :]
-        likelihood = MixedLikelihoodWrapper([Normal() for _ in range(y.shape[1])])
+        likelihood = LikelihoodWrapper([Normal() for _ in range(y.shape[1])])
         if not one_hot_labels:
             labels = np.argmax(labels, axis=1)
         return y, likelihood, labels
@@ -400,7 +400,7 @@ class Unsupervised(abc.ABC):
         labels = np.zeros(y.shape[0])
         likelihoods: List[Likelihood] = [Normal() for _ in range(12)]
         likelihoods += [OneHotCategorical(2)]
-        likelihood = MixedLikelihoodWrapper(likelihoods)
+        likelihood = LikelihoodWrapper(likelihoods)
         return y, likelihood, labels
 
     @staticmethod
@@ -413,5 +413,5 @@ class Unsupervised(abc.ABC):
         labels = np.zeros(y.shape[0])
         likelihoods: List[Likelihood] = [LogNormal() for _ in range(12)]
         likelihoods += [OneHotCategorical(2)]
-        likelihood = MixedLikelihoodWrapper(likelihoods)
+        likelihood = LikelihoodWrapper(likelihoods)
         return y, likelihood, labels

@@ -3,7 +3,7 @@ from sklearn.datasets import make_blobs
 import tensorflow as tf
 
 from hgp.kernel import RBF
-from hgp.likelihood import MixedLikelihoodWrapper, Normal
+from hgp.likelihood import LikelihoodWrapper, Normal
 from hgp.model import MLGPLVM
 
 
@@ -18,7 +18,7 @@ class TestMLGPLVM(tf.test.TestCase):
             num_classes = 3
             y, _ = make_blobs(self.num_data, self.output_dim, num_classes)
             kernel = RBF()
-            likelihood = MixedLikelihoodWrapper([Normal() for _ in range(self.output_dim)])
+            likelihood = LikelihoodWrapper([Normal() for _ in range(self.output_dim)])
             self.m = MLGPLVM(y, self.latent_dim, kernel=kernel, likelihood=likelihood)
             self.m.initialize()
 
@@ -54,7 +54,7 @@ class TestMLGPLVM(tf.test.TestCase):
         num_data = 10
         x, y = np.empty((num_data, latent_dim)), np.empty((num_data, output_dim))
         kernel = RBF()
-        likelihood = MixedLikelihoodWrapper([Normal() for _ in range(output_dim)])
+        likelihood = LikelihoodWrapper([Normal() for _ in range(output_dim)])
         with self.assertRaises(ValueError):
             _ = MLGPLVM(y, latent_dim + 1, x=x, kernel=kernel, likelihood=likelihood)
 

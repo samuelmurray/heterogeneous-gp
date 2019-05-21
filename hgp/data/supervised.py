@@ -4,9 +4,9 @@ from typing import Tuple
 import numpy as np
 from scipy.special import expit
 
-from hgp.likelihood import Bernoulli, MixedLikelihoodWrapper, Normal, OneHotOrdinal, Poisson
+from hgp.likelihood import Bernoulli, LikelihoodWrapper, Normal, OneHotOrdinal, Poisson
 
-DataTuple = Tuple[np.ndarray, MixedLikelihoodWrapper, np.ndarray]
+DataTuple = Tuple[np.ndarray, LikelihoodWrapper, np.ndarray]
 
 
 class Supervised(abc.ABC):
@@ -15,7 +15,7 @@ class Supervised(abc.ABC):
     def make_sin(num_data: int) -> DataTuple:
         x = np.linspace(0, 2 * np.pi, num_data)[:, None]
         y = np.sin(x)
-        likelihood = MixedLikelihoodWrapper([Normal()])
+        likelihood = LikelihoodWrapper([Normal()])
         return x, likelihood, y
 
     @staticmethod
@@ -23,7 +23,7 @@ class Supervised(abc.ABC):
         x = np.linspace(0, 2 * np.pi, num_data)[:, None]
         p = expit(2 * np.sin(x))
         y = np.random.binomial(1, p)
-        likelihood = MixedLikelihoodWrapper([Bernoulli()])
+        likelihood = LikelihoodWrapper([Bernoulli()])
         return x, likelihood, y
 
     @staticmethod
@@ -31,14 +31,14 @@ class Supervised(abc.ABC):
         x = np.linspace(0, 2 * np.pi, num_data)[:, None]
         rate = np.exp(2 * np.sin(x))
         y = np.random.poisson(rate)
-        likelihood = MixedLikelihoodWrapper([Poisson()])
+        likelihood = LikelihoodWrapper([Poisson()])
         return x, likelihood, y
 
     @staticmethod
     def make_xcos(num_data: int) -> DataTuple:
         x = np.linspace(-2 * np.pi, 2 * np.pi, num_data)[:, None]
         y = x * np.cos(x)
-        likelihood = MixedLikelihoodWrapper([Normal()])
+        likelihood = LikelihoodWrapper([Normal()])
         return x, likelihood, y
 
     @staticmethod
@@ -46,7 +46,7 @@ class Supervised(abc.ABC):
         x = np.linspace(-2 * np.pi, 2 * np.pi, num_data)[:, None]
         p = expit(x * np.cos(x))
         y = np.random.binomial(1, p)
-        likelihood = MixedLikelihoodWrapper([Bernoulli()])
+        likelihood = LikelihoodWrapper([Bernoulli()])
         return x, likelihood, y
 
     @staticmethod
@@ -54,7 +54,7 @@ class Supervised(abc.ABC):
         x = np.linspace(-np.pi, np.pi, num_data)[:, None]
         rate = np.exp(x * np.sin(x))
         y = np.random.poisson(rate)
-        likelihood = MixedLikelihoodWrapper([Poisson()])
+        likelihood = LikelihoodWrapper([Poisson()])
         return x, likelihood, y
 
     @staticmethod
@@ -63,7 +63,7 @@ class Supervised(abc.ABC):
         latent = 1.9 * (1 + np.sin(x).flatten())
         y = np.floor(latent).astype(np.int)
         num_categories = 4
-        likelihood = MixedLikelihoodWrapper([OneHotOrdinal(num_categories)])
+        likelihood = LikelihoodWrapper([OneHotOrdinal(num_categories)])
         y_one_hot = np.zeros((num_data, num_categories))
         y_one_hot[np.arange(num_data), y] = 1
         return x, likelihood, y_one_hot

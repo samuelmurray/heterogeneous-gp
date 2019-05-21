@@ -3,7 +3,7 @@ from sklearn.datasets import make_regression
 import tensorflow as tf
 
 from hgp.kernel import RBF
-from hgp.likelihood import MixedLikelihoodWrapper, Normal
+from hgp.likelihood import LikelihoodWrapper, Normal
 from hgp.model import MLGP
 
 
@@ -18,7 +18,7 @@ class TestMLGP(tf.test.TestCase):
             x, y = make_regression(num_data, input_dim, input_dim, self.output_dim)
             y = y.reshape(num_data, self.output_dim)
             kernel = RBF()
-            likelihood = MixedLikelihoodWrapper([Normal() for _ in range(self.output_dim)])
+            likelihood = LikelihoodWrapper([Normal() for _ in range(self.output_dim)])
             num_inducing = 10
             self.m = MLGP(x, y, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing)
             self.m.initialize()
@@ -69,7 +69,7 @@ class TestMLGP(tf.test.TestCase):
         output_dim = 5
         x, y = np.empty((10, 1)), np.empty((6, output_dim))
         kernel = RBF()
-        likelihood = MixedLikelihoodWrapper([Normal() for _ in range(output_dim)])
+        likelihood = LikelihoodWrapper([Normal() for _ in range(output_dim)])
         num_inducing = 10
         with self.assertRaises(ValueError):
             _ = MLGP(x, y, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing)
@@ -78,7 +78,7 @@ class TestMLGP(tf.test.TestCase):
         output_dim = 5
         x, y = np.empty((10, 1)), np.empty((10, output_dim))
         kernel = RBF()
-        likelihood = MixedLikelihoodWrapper([Normal() for _ in range(output_dim)])
+        likelihood = LikelihoodWrapper([Normal() for _ in range(output_dim)])
         num_inducing = 20
         with self.assertRaises(ValueError):
             _ = MLGP(x, y, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing)
@@ -87,7 +87,7 @@ class TestMLGP(tf.test.TestCase):
         output_dim = 5
         x, y = np.empty((10, 1)), np.empty((10, output_dim))
         kernel = RBF()
-        likelihood = MixedLikelihoodWrapper([Normal() for _ in range(output_dim + 1)])
+        likelihood = LikelihoodWrapper([Normal() for _ in range(output_dim + 1)])
         num_inducing = 5
         with self.assertRaises(ValueError):
             _ = MLGP(x, y, kernel=kernel, likelihood=likelihood, num_inducing=num_inducing)

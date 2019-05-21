@@ -3,7 +3,7 @@ from sklearn.datasets import make_blobs
 import tensorflow as tf
 
 from hgp.kernel import RBF
-from hgp.likelihood import MixedLikelihoodWrapper, Normal
+from hgp.likelihood import LikelihoodWrapper, Normal
 from hgp.model import VAEMLGPLVM
 
 
@@ -18,7 +18,7 @@ class TestVAEMLGPLVM(tf.test.TestCase):
             num_classes = 3
             y, _ = make_blobs(self.num_data, self.output_dim, num_classes)
             kernel = RBF()
-            likelihood = MixedLikelihoodWrapper([Normal() for _ in range(self.output_dim)])
+            likelihood = LikelihoodWrapper([Normal() for _ in range(self.output_dim)])
             self.batch_size = 20
             num_hidden = 10
             num_samples = 10

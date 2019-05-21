@@ -5,8 +5,8 @@ Package for all supported likelihoods
 __all__ = [
     "Bernoulli",
     "Likelihood",
+    "LikelihoodWrapper",
     "LogNormal",
-    "MixedLikelihoodWrapper",
     "Normal",
     "OneHotCategorical",
     "OneHotOrdinal",
@@ -18,8 +18,8 @@ __all__ = [
 
 from .bernoulli import Bernoulli
 from .likelihood import Likelihood
+from .likelihood_wrapper import LikelihoodWrapper
 from .log_normal import LogNormal
-from .mixed_likelihood_wrapper import MixedLikelihoodWrapper
 from .normal import Normal
 from .one_hot_categorical import OneHotCategorical
 from .one_hot_ordinal import OneHotOrdinal

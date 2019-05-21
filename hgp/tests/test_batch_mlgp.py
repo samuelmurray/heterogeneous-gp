@@ -3,7 +3,7 @@ from sklearn.datasets import make_regression
 import tensorflow as tf
 
 from hgp.kernel import RBF
-from hgp.likelihood import MixedLikelihoodWrapper, Normal
+from hgp.likelihood import LikelihoodWrapper, Normal
 from hgp.model import BatchMLGP
 
 
@@ -18,7 +18,7 @@ class TestMLGP(tf.test.TestCase):
             self.x, self.y = make_regression(num_data, input_dim, input_dim, self.output_dim)
             self.y = self.y.reshape(num_data, self.output_dim)
             kernel = RBF()
-            likelihood = MixedLikelihoodWrapper([Normal() for _ in range(self.output_dim)])
+            likelihood = LikelihoodWrapper([Normal() for _ in range(self.output_dim)])
             num_inducing = 10
             self.batch_size = 5
             self.m = BatchMLGP(self.x, self.y, kernel=kernel, likelihood=likelihood,

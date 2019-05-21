@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 
 from hgp import util
-from hgp.likelihood import MixedLikelihoodWrapper, Normal, OneHotCategorical, OneHotOrdinal
+from hgp.likelihood import LikelihoodWrapper, Normal, OneHotCategorical, OneHotOrdinal
 
 
 class TestUtil(tf.test.TestCase):
@@ -72,7 +72,7 @@ class TestUtil(tf.test.TestCase):
         prediction = np.array([[1., 1., 0., 1., 0.], [1., 0., 1., 0., 1.]])
         nans = np.ones_like(prediction) * np.nan
         ground_truth = np.array([[1., 1., 0., 1., 0.], [2., 1., 0., 1., 0.]])
-        likelihood = MixedLikelihoodWrapper([Normal(), OneHotCategorical(2), OneHotOrdinal(2)])
+        likelihood = LikelihoodWrapper([Normal(), OneHotCategorical(2), OneHotOrdinal(2)])
         numerical_error, _ = util.imputation_error(prediction, nans, ground_truth, likelihood)
         expected_numerical_error = np.sqrt(1 / 2)
         self.assertEqual(expected_numerical_error, numerical_error)
@@ -81,7 +81,7 @@ class TestUtil(tf.test.TestCase):
         prediction = np.array([[1., 1., 0., 1., 0.], [1., 0., 1., 0., 1.]])
         nans = np.ones_like(prediction) * np.nan
         ground_truth = np.array([[1., 1., 0., 1., 0.], [2., 1., 0., 1., 0.]])
-        likelihood = MixedLikelihoodWrapper([Normal(), OneHotCategorical(2), OneHotOrdinal(2)])
+        likelihood = LikelihoodWrapper([Normal(), OneHotCategorical(2), OneHotOrdinal(2)])
         _, nominal_error = util.imputation_error(prediction, nans, ground_truth, likelihood)
         expected_categorical_error = 0.5
         expected_ordinal_error = 0.25
@@ -95,7 +95,7 @@ class TestUtil(tf.test.TestCase):
                                   [np.nan, 1., 1., ],
                                   [1., np.nan, np.nan],
                                   [np.nan, np.nan, np.nan]])
-        likelihood = MixedLikelihoodWrapper([Normal(), OneHotCategorical(2)])
+        likelihood = LikelihoodWrapper([Normal(), OneHotCategorical(2)])
         noisy_data = util.remove_data(original_data, indices_to_remove, likelihood)
         self.assertAllEqual(expected_data, noisy_data)
 

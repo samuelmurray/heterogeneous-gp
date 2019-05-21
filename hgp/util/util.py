@@ -3,7 +3,7 @@ from typing import Tuple
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
 
-from hgp.likelihood import MixedLikelihoodWrapper, OneHotCategorical, OneHotOrdinal
+from hgp.likelihood import LikelihoodWrapper, OneHotCategorical, OneHotOrdinal
 
 
 def knn_abs_error(x: np.ndarray, labels: np.ndarray, k: int) -> float:
@@ -74,7 +74,7 @@ def ordinal_error(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.nd
 
 
 def imputation_error(y_imputation: np.ndarray, y_missing: np.ndarray, y_true: np.ndarray,
-                     likelihood: MixedLikelihoodWrapper) -> Tuple[float, float]:
+                     likelihood: LikelihoodWrapper) -> Tuple[float, float]:
     numerical_errors = []
     nominal_errors = []
     for lik, dims in zip(likelihood.likelihoods, likelihood.y_dims_per_likelihood):
@@ -104,7 +104,7 @@ def pca_reduce(x: np.ndarray, latent_dim: int, *, whiten: bool = False) -> np.nd
 
 
 def remove_data(y: np.ndarray, indices: np.ndarray,
-                likelihood: MixedLikelihoodWrapper) -> np.ndarray:
+                likelihood: LikelihoodWrapper) -> np.ndarray:
     y_noisy = y.copy()
     num_data = y_noisy.shape[0]
     idx = np.zeros(y.shape, dtype=bool)
@@ -118,7 +118,7 @@ def remove_data(y: np.ndarray, indices: np.ndarray,
 
 
 def remove_data_randomly(y: np.ndarray, frac: float,
-                         likelihood: MixedLikelihoodWrapper) -> np.ndarray:
+                         likelihood: LikelihoodWrapper) -> np.ndarray:
     y_noisy = y.copy()
     num_missing = int(frac * likelihood.num_likelihoods)
     dims_missing = np.repeat([np.arange(likelihood.num_likelihoods)], y.shape[0], axis=0)

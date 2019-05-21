@@ -2,15 +2,15 @@ import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
 
-from hgp.likelihood import Bernoulli, MixedLikelihoodWrapper, Normal, OneHotCategorical
+from hgp.likelihood import Bernoulli, LikelihoodWrapper, Normal, OneHotCategorical
 
 
-class TestMixedLikelihoodWrapper(tf.test.TestCase):
+class TestLikelihoodWrapper(tf.test.TestCase):
     def setUp(self) -> None:
         ber = Bernoulli()
         cat = OneHotCategorical(3)
         nor = Normal()
-        self.likelihood = MixedLikelihoodWrapper([ber, cat, nor])
+        self.likelihood = LikelihoodWrapper([ber, cat, nor])
 
     def tearDown(self) -> None:
         tf.reset_default_graph()
