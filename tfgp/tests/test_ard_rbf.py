@@ -10,8 +10,9 @@ class TestARDRBF(tf.test.TestCase):
         np.random.seed(1363431413)
         tf.random.set_random_seed(1534135313)
         self.x_dim = 5
+        self.gamma = 0.5
         with tf.variable_scope("ardrbf", reuse=tf.AUTO_REUSE):
-            self.kernel = ARDRBF(1., 0.5, x_dim=self.x_dim)
+            self.kernel = ARDRBF(1., self.gamma, x_dim=self.x_dim)
 
     def tearDown(self) -> None:
         tf.reset_default_graph()
@@ -25,7 +26,7 @@ class TestARDRBF(tf.test.TestCase):
     def test_equal_to_sklearn(self) -> None:
         a = np.random.normal(size=(7, self.x_dim))
         b = np.random.normal(size=(6, self.x_dim))
-        k_sklearn = rbf_kernel(a, b, gamma=0.5)
+        k_sklearn = rbf_kernel(a, b, gamma=self.gamma)
         k_ard_rbf = self.kernel(tf.convert_to_tensor(a, dtype=tf.float32),
                                 tf.convert_to_tensor(b, dtype=tf.float32))
         init = tf.global_variables_initializer()
