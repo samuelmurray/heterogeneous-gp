@@ -99,10 +99,10 @@ class MLGPLVM(MLGP):
         # K~ = Kxx - Kxz * Kzz^(-1) * Kzx
         z_tiled = self._expand_and_tile(self.z, [self.num_samples, 1, 1], name="z_tiled")
         k_zx = self.kernel(z_tiled, x_samples, name="k_zx")
-        k_xx = self.kernel(x_samples, name="k_xx")
+        k_xx_diag_part = self.kernel.diag_part(x_samples, name="k_xx_diag_part")
         k_xz_mul_a = tf.matmul(k_zx, a, transpose_a=True)
-        k_tilde_full = tf.subtract(k_xx, k_xz_mul_a, name="k_tilde_full")
-        k_tilde = tf.matrix_diag_part(k_tilde_full, name="k_tilde")
+        k_xz_mul_a_diag_part = tf.matrix_diag_part(k_xz_mul_a, name="k_xz_mul_a_diag_part")
+        k_tilde = tf.subtract(k_xx_diag_part, k_xz_mul_a_diag_part, name="k_tilde")
         k_tilde_pos = tf.maximum(k_tilde, 1e-16, name="k_tilde_pos")  # k_tilde can't be negative
         return k_tilde_pos
 
