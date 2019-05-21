@@ -142,10 +142,10 @@ class MLGP(InducingPointsModel):
 
     def _compute_f_noise(self, x: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
         k_tilde_diag_part = self._compute_k_tilde_diag_part(x, a)
-        num_data = tf.shape(x)[0]
-        e_f = tf.random_normal(shape=[self.num_samples, self.f_dim, num_data], name="e_f")
         k_tilde_sqrt = tf.sqrt(k_tilde_diag_part, name="k_tilde_sqrt")
         k_tilde_sqrt_expanded = tf.expand_dims(k_tilde_sqrt, axis=1, name="k_tilde_sqrt_expanded")
+        num_data = tf.shape(x)[0]
+        e_f = tf.random_normal(shape=[self.num_samples, self.f_dim, num_data], name="e_f")
         f_noise = tf.multiply(k_tilde_sqrt_expanded, e_f, name="f_noise")
         return f_noise
 
