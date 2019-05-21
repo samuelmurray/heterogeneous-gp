@@ -75,11 +75,11 @@ class MLGPLVM(MLGP):
     def _sample_f_from_x_and_u(self, x_samples: tf.Tensor, u_samples: tf.Tensor) -> tf.Tensor:
         # f = a.T * u + sqrt(k_tilde) * e_f, e_f ~ N(0,1)
         a = self._compute_a(x_samples)
-        k_tilde = self._compute_k_tilde(x_samples, a)
+        k_tilde_diag_part = self._compute_k_tilde_diag_part(x_samples, a)
         num_data = tf.shape(x_samples)[1]
         e_f = tf.random_normal(shape=[self.num_samples, self.f_dim, num_data], name="e_f")
         f_mean = tf.matmul(u_samples, a, name="f_mean")
-        k_tilde_sqrt = tf.sqrt(k_tilde, name="k_tilde_sqrt")
+        k_tilde_sqrt = tf.sqrt(k_tilde_diag_part, name="k_tilde_sqrt")
         k_tilde_sqrt_expanded = tf.expand_dims(k_tilde_sqrt, axis=1, name="k_tilde_sqrt_expanded")
         f_noise = tf.multiply(k_tilde_sqrt_expanded, e_f, name="f_noise")
         f_samples = tf.add(f_mean, f_noise, name="f_samples")
@@ -95,15 +95,17 @@ class MLGPLVM(MLGP):
         a = tf.transpose(a_transposed, perm=[1, 0, 2], name="a")
         return a
 
-    def _compute_k_tilde(self, x_samples: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
+    def _compute_k_tilde_diag_part(self, x_samples: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
         # K~ = Kxx - Kxz * Kzz^(-1) * Kzx
         z_tiled = self._expand_and_tile(self.z, [self.num_samples, 1, 1], name="z_tiled")
         k_zx = self.kernel(z_tiled, x_samples, name="k_zx")
         k_xx_diag_part = self.kernel.diag_part(x_samples, name="k_xx_diag_part")
         k_xz_mul_a = tf.matmul(k_zx, a, transpose_a=True)
         k_xz_mul_a_diag_part = tf.matrix_diag_part(k_xz_mul_a, name="k_xz_mul_a_diag_part")
-        k_tilde = tf.subtract(k_xx_diag_part, k_xz_mul_a_diag_part, name="k_tilde")
-        k_tilde_pos = tf.maximum(k_tilde, 1e-16, name="k_tilde_pos")  # k_tilde can't be negative
+        k_tilde_diag_part = tf.subtract(k_xx_diag_part, k_xz_mul_a_diag_part,
+                                        name="k_tilde_diag_part")
+        # k_tilde_diag_part can't be negative
+        k_tilde_pos = tf.maximum(k_tilde_diag_part, 1e-16, name="k_tilde_pos")
         return k_tilde_pos
 
     def impute(self) -> tf.Tensor:
