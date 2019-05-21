@@ -41,8 +41,8 @@ class ARDRBF(Kernel):
 
     def diag(self, x: tf.Tensor, *, name: Optional[str] = None) -> tf.Tensor:
         with tf.name_scope(name):
-            identity = tf.eye(tf.shape(x)[-2], name="identity")
-            diag = tf.multiply(self._variance, identity, name="diag")
+            ones = tf.ones(tf.shape(x)[:-1], name="ones")
+            diag = tf.multiply(self._variance, ones, name="diag")
         return diag
 
     def create_summaries(self) -> None:
