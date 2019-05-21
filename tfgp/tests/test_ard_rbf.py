@@ -27,18 +27,6 @@ class TestARDRBF(tf.test.TestCase):
         with self.assertRaises(ValueError):
             self.kernel(a, b)
 
-    def test_equal_to_sklearn(self) -> None:
-        a = np.random.normal(size=(self.num_a, self.x_dim))
-        b = np.random.normal(size=(self.num_b, self.x_dim))
-        k_sklearn = rbf_kernel(a, b, gamma=self.gamma)
-        k_ard_rbf = self.kernel(tf.convert_to_tensor(a, dtype=tf.float32),
-                                tf.convert_to_tensor(b, dtype=tf.float32))
-        init = tf.global_variables_initializer()
-        with self.test_session() as sess:
-            sess.run(init)
-            k_ab = k_ard_rbf.eval()
-        self.assertAllClose(k_ab, k_sklearn)
-
     def test_simple(self) -> None:
         a = tf.convert_to_tensor(np.random.normal(size=(self.num_a, self.x_dim)), dtype=tf.float32)
         k = self.kernel(a)
@@ -67,6 +55,18 @@ class TestARDRBF(tf.test.TestCase):
             sess.run(init)
             eigen_values = sess.run(tf.self_adjoint_eigvals(k))
         self.assertAllGreaterEqual(eigen_values, 0.)
+
+    def test_equal_to_sklearn(self) -> None:
+        a = np.random.normal(size=(self.num_a, self.x_dim))
+        b = np.random.normal(size=(self.num_b, self.x_dim))
+        k_sklearn = rbf_kernel(a, b, gamma=self.gamma)
+        k_ard_rbf = self.kernel(tf.convert_to_tensor(a, dtype=tf.float32),
+                                tf.convert_to_tensor(b, dtype=tf.float32))
+        init = tf.global_variables_initializer()
+        with self.test_session() as sess:
+            sess.run(init)
+            k_ab = k_ard_rbf.eval()
+        self.assertAllClose(k_ab, k_sklearn)
 
     def test_diag_part_shape(self) -> None:
         a = np.random.normal(size=(self.num_a, self.x_dim))
