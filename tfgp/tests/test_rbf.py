@@ -13,8 +13,9 @@ class TestRBF(tf.test.TestCase):
         self.num_a = 5
         self.num_b = 4
         self.x_dim = 3
+        self.gamma = 0.5
         with tf.variable_scope("rbf", reuse=tf.AUTO_REUSE):
-            self.kernel = RBF(1., 0.5)
+            self.kernel = RBF(1., self.gamma)
 
     def tearDown(self) -> None:
         tf.reset_default_graph()
@@ -48,7 +49,7 @@ class TestRBF(tf.test.TestCase):
     def test_equal_to_sklearn(self) -> None:
         a = np.random.normal(size=(self.num_a, self.x_dim))
         b = np.random.normal(size=(self.num_b, self.x_dim))
-        k_sklearn = rbf_kernel(a, b, gamma=0.5)
+        k_sklearn = rbf_kernel(a, b, gamma=self.gamma)
         k_rbf = self.kernel(tf.convert_to_tensor(a, dtype=tf.float32),
                             tf.convert_to_tensor(b, dtype=tf.float32))
         init = tf.global_variables_initializer()
