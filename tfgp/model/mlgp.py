@@ -152,8 +152,8 @@ class MLGP(InducingPointsModel):
     def _compute_k_tilde_diag_part(self, x: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
         # K~ = Kxx - Kxz * Kzz^(-1) * Kzx
         k_zx = self.kernel(self.z, x, name="k_zx")
-        k_zx_times_a = tf.matmul(k_zx, a, transpose_a=True, name="k_zx_times_a")
-        k_zx_times_a_diag_part = tf.matrix_diag_part(k_zx_times_a, name="k_zx_times_a_diag_part")
+        k_zx_mul_a = tf.matmul(k_zx, a, transpose_a=True, name="k_zx_mul_a")
+        k_zx_times_a_diag_part = tf.matrix_diag_part(k_zx_mul_a, name="k_zx_times_a_diag_part")
         k_xx_diag_part = self.kernel.diag_part(x, name="k_xx_diag_part")
         k_tilde_diag_part = tf.subtract(k_xx_diag_part, k_zx_times_a_diag_part,
                                         name="k_tilde_diag_part")
