@@ -3,9 +3,9 @@ from typing import Dict
 
 from setuptools import setup, find_packages
 
-NAME = "tfgp"
+NAME = "hgp"
 DESCRIPTION = "MLGPLVM implementation in TF"
-URL = "https://github.com/samuelmurray/TF-GP"
+URL = "https://github.com/samuelmurray/heterogeneous-gp"
 EMAIL = "samuelmu@kth.se"
 AUTHOR = "Samuel Murray"
 PYTHON_VERSION = ">=3.6.0"
