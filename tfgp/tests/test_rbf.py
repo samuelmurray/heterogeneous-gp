@@ -27,15 +27,17 @@ class TestRBF(tf.test.TestCase):
         self.assertShapeEqual(np.empty([10, 10]), k)
 
     def test_extended(self) -> None:
-        a = tf.convert_to_tensor(np.random.normal(size=(2, 10, 5)), dtype=tf.float32)
+        batch_size = 2
+        a = tf.convert_to_tensor(np.random.normal(size=(batch_size, 10, 5)), dtype=tf.float32)
         k = self.kernel(a)
-        self.assertShapeEqual(np.empty([2, 10, 10]), k)
+        self.assertShapeEqual(np.empty([batch_size, 10, 10]), k)
 
     def test_full(self) -> None:
-        a = tf.convert_to_tensor(np.random.normal(size=(2, 10, 5)), dtype=tf.float32)
-        b = tf.convert_to_tensor(np.random.normal(size=(2, 12, 5)), dtype=tf.float32)
+        batch_size = 2
+        a = tf.convert_to_tensor(np.random.normal(size=(batch_size, 10, 5)), dtype=tf.float32)
+        b = tf.convert_to_tensor(np.random.normal(size=(batch_size, 12, 5)), dtype=tf.float32)
         k = self.kernel(a, b)
-        self.assertShapeEqual(np.empty([2, 10, 12]), k)
+        self.assertShapeEqual(np.empty([batch_size, 10, 12]), k)
 
     def test_equal_to_sklearn(self) -> None:
         a = np.random.normal(size=(5, 5))
