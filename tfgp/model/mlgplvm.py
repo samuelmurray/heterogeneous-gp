@@ -75,10 +75,10 @@ class MLGPLVM(MLGP):
     def _sample_f_from_x_and_u(self, x_samples: tf.Tensor, u_samples: tf.Tensor) -> tf.Tensor:
         # f = a.T * u + sqrt(k_tilde) * e_f, e_f ~ N(0,1)
         a = self._compute_a(x_samples)
+        f_mean = self._compute_f_mean(u_samples, a)
         k_tilde_diag_part = self._compute_k_tilde_diag_part(x_samples, a)
         num_data = tf.shape(x_samples)[1]
         e_f = tf.random_normal(shape=[self.num_samples, self.f_dim, num_data], name="e_f")
-        f_mean = tf.matmul(u_samples, a, name="f_mean")
         k_tilde_sqrt = tf.sqrt(k_tilde_diag_part, name="k_tilde_sqrt")
         k_tilde_sqrt_expanded = tf.expand_dims(k_tilde_sqrt, axis=1, name="k_tilde_sqrt_expanded")
         f_noise = tf.multiply(k_tilde_sqrt_expanded, e_f, name="f_noise")
@@ -94,6 +94,10 @@ class MLGPLVM(MLGP):
         a_transposed = tf.tensordot(k_zz_inv, k_zx, axes=[1, 1], name="a_transposed")
         a = tf.transpose(a_transposed, perm=[1, 0, 2], name="a")
         return a
+
+    def _compute_f_mean(self, u_samples: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
+        f_mean = tf.matmul(u_samples, a, name="f_mean")
+        return f_mean
 
     def _compute_k_tilde_diag_part(self, x_samples: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
         # K~ = Kxx - Kxz * Kzz^(-1) * Kzx
