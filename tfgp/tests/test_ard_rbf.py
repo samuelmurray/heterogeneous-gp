@@ -46,10 +46,13 @@ class TestARDRBF(tf.test.TestCase):
         self.assertShapeEqual(np.empty([2, 10, 10]), k)
 
     def test_full(self) -> None:
-        a = tf.convert_to_tensor(np.random.normal(size=(2, 10, self.x_dim)), dtype=tf.float32)
-        b = tf.convert_to_tensor(np.random.normal(size=(2, 12, self.x_dim)), dtype=tf.float32)
+        batch_size = 2
+        a = tf.convert_to_tensor(np.random.normal(size=(batch_size, 10, self.x_dim)),
+                                 dtype=tf.float32)
+        b = tf.convert_to_tensor(np.random.normal(size=(batch_size, 12, self.x_dim)),
+                                 dtype=tf.float32)
         k = self.kernel(a, b)
-        self.assertShapeEqual(np.empty([2, 10, 12]), k)
+        self.assertShapeEqual(np.empty([batch_size, 10, 12]), k)
 
     def test_create_summary(self) -> None:
         self.kernel.create_summaries()
