@@ -22,7 +22,8 @@ class TestARDRBF(tf.test.TestCase):
 
     def test_throw(self) -> None:
         a = tf.convert_to_tensor(np.random.normal(size=(self.num_a, self.x_dim)), dtype=tf.float32)
-        b = tf.convert_to_tensor(np.random.normal(size=(self.num_b, self.x_dim - 1)), dtype=tf.float32)
+        b = tf.convert_to_tensor(np.random.normal(size=(self.num_b, self.x_dim - 1)),
+                                 dtype=tf.float32)
         with self.assertRaises(ValueError):
             self.kernel(a, b)
 
@@ -56,6 +57,34 @@ class TestARDRBF(tf.test.TestCase):
                                  dtype=tf.float32)
         k = self.kernel(a, b)
         self.assertShapeEqual(np.empty([self.batch_size, self.num_a, self.num_b]), k)
+
+    def test_diag_shape(self) -> None:
+        a = np.random.normal(size=(self.num_a, self.x_dim))
+        diag = self.kernel.diag(tf.convert_to_tensor(a, dtype=tf.float32))
+        self.assertShapeEqual(np.empty((self.num_a, self.num_a)), diag)
+
+    def test_diag_zero_off_diagonals(self) -> None:
+        a = np.random.normal(size=(self.num_a, self.x_dim))
+        diag = self.kernel.diag(tf.convert_to_tensor(a, dtype=tf.float32))
+        diag_part = tf.matrix_diag(tf.matrix_diag_part(diag))
+        init = tf.initialize_all_variables()
+        with self.session() as sess:
+            sess.run(init)
+            difference = sess.run(tf.subtract(diag, diag_part))
+        zeros = np.zeros((self.num_a, self.num_a))
+        self.assertAllEqual(zeros, difference)
+
+    def test_diag_equal_to_full(self) -> None:
+        a = tf.convert_to_tensor(np.random.normal(size=(self.num_a, self.x_dim)), dtype=tf.float32)
+        self.kernel._eps = 0
+        diag = self.kernel.diag(a)
+        full = self.kernel(a)
+        init = tf.initialize_all_variables()
+        with self.session() as sess:
+            sess.run(init)
+            diag_part_of_diag = sess.run(tf.matrix_diag_part(diag))
+            diag_part_of_full = sess.run(tf.matrix_diag_part(full))
+        self.assertAllClose(diag_part_of_diag, diag_part_of_full)
 
     def test_create_summary(self) -> None:
         self.kernel.create_summaries()
