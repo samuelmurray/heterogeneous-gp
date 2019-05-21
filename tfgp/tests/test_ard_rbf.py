@@ -80,6 +80,19 @@ class TestARDRBF(tf.test.TestCase):
             diag_part_of_full = sess.run(tf.matrix_diag_part(full))
         self.assertAllClose(diag_part, diag_part_of_full)
 
+    def test_diag_equal_to_full_batch(self) -> None:
+        a = tf.convert_to_tensor(np.random.normal(size=(self.batch_size, self.num_a, self.x_dim)),
+                                 dtype=tf.float32)
+        self.kernel._eps = 0
+        diag = self.kernel.diag(a)
+        full = self.kernel(a)
+        init = tf.initialize_all_variables()
+        with self.session() as sess:
+            sess.run(init)
+            diag_part = sess.run(diag)
+            diag_part_of_full = sess.run(tf.matrix_diag_part(full))
+        self.assertAllClose(diag_part, diag_part_of_full)
+
     def test_create_summary(self) -> None:
         self.kernel.create_summaries()
         merged_summary = tf.summary.merge_all()
