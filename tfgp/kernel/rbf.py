@@ -37,7 +37,7 @@ class RBF(Kernel):
 
     def diag(self, x: tf.Tensor, *, name: Optional[str] = None) -> tf.Tensor:
         with tf.name_scope(name):
-            ones = tf.ones(tf.shape(x)[-2], name="ones")
+            ones = tf.ones(tf.shape(x)[:-1], name="ones")
             diag = tf.multiply(self._variance, ones, name="diag")
         return diag
 

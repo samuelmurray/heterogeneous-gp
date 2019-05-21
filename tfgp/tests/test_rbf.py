@@ -63,6 +63,11 @@ class TestRBF(tf.test.TestCase):
         diag = self.kernel.diag(tf.convert_to_tensor(a, dtype=tf.float32))
         self.assertShapeEqual(np.empty(self.num_a), diag)
 
+    def test_diag_batch_shape(self) -> None:
+        a = np.random.normal(size=(self.batch_size, self.num_a, self.x_dim))
+        diag = self.kernel.diag(tf.convert_to_tensor(a, dtype=tf.float32))
+        self.assertShapeEqual(np.empty((self.batch_size, self.num_a)), diag)
+
     def test_diag_equal_to_full(self) -> None:
         a = tf.convert_to_tensor(np.random.normal(size=(self.num_a, self.x_dim)), dtype=tf.float32)
         self.kernel._eps = 0
