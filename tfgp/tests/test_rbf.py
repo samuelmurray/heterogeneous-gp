@@ -61,18 +61,7 @@ class TestRBF(tf.test.TestCase):
     def test_diag_shape(self) -> None:
         a = np.random.normal(size=(self.num_a, self.x_dim))
         diag = self.kernel.diag(tf.convert_to_tensor(a, dtype=tf.float32))
-        self.assertShapeEqual(np.empty((self.num_a, self.num_a)), diag)
-
-    def test_diag_zero_off_diagonals(self) -> None:
-        a = np.random.normal(size=(self.num_a, self.x_dim))
-        diag = self.kernel.diag(tf.convert_to_tensor(a, dtype=tf.float32))
-        diag_part = tf.matrix_diag(tf.matrix_diag_part(diag))
-        init = tf.initialize_all_variables()
-        with self.session() as sess:
-            sess.run(init)
-            difference = sess.run(tf.subtract(diag, diag_part))
-        zeros = np.zeros((self.num_a, self.num_a))
-        self.assertAllEqual(zeros, difference)
+        self.assertShapeEqual(np.empty(self.num_a), diag)
 
     def test_diag_equal_to_full(self) -> None:
         a = tf.convert_to_tensor(np.random.normal(size=(self.num_a, self.x_dim)), dtype=tf.float32)
@@ -82,9 +71,9 @@ class TestRBF(tf.test.TestCase):
         init = tf.initialize_all_variables()
         with self.session() as sess:
             sess.run(init)
-            diag_part_of_diag = sess.run(tf.matrix_diag_part(diag))
+            diag_part = sess.run(diag)
             diag_part_of_full = sess.run(tf.matrix_diag_part(full))
-        self.assertAllClose(diag_part_of_diag, diag_part_of_full)
+        self.assertAllClose(diag_part, diag_part_of_full)
 
     def test_create_summary(self) -> None:
         self.kernel.create_summaries()
