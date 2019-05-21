@@ -122,16 +122,20 @@ class MLGP(InducingPointsModel):
     def _sample_f_from_x_and_u(self, x: tf.Tensor, u_samples: tf.Tensor) -> tf.Tensor:
         # f = a.T * u + sqrt(K~) * e_f, e_f ~ N(0,1)
         a = self._compute_a(x)
+        f_mean = self._compute_f_mean(a, u_samples)
         k_tilde_diag_part = self._compute_k_tilde_diag_part(x, a)
         num_data = tf.shape(x)[0]
         e_f = tf.random_normal(shape=[self.num_samples, self.f_dim, num_data], name="e_f")
-        a_tiled = self._expand_and_tile(a, [self.num_samples, 1, 1], name="a_tiled")
-        f_mean = tf.matmul(u_samples, a_tiled, name="f_mean")
         k_tilde_sqrt = tf.sqrt(k_tilde_diag_part, name="k_tilde_sqrt")
         k_tilde_sqrt_expanded = tf.expand_dims(k_tilde_sqrt, axis=1, name="k_tilde_sqrt_expanded")
         f_noise = tf.multiply(k_tilde_sqrt_expanded, e_f, name="f_noise")
         f_samples = tf.add(f_mean, f_noise, name="f_samples")
         return f_samples
+
+    def _compute_f_mean(self, a, u_samples):
+        a_tiled = self._expand_and_tile(a, [self.num_samples, 1, 1], name="a_tiled")
+        f_mean = tf.matmul(u_samples, a_tiled, name="f_mean")
+        return f_mean
 
     def _compute_a(self, x: tf.Tensor) -> tf.Tensor:
         # a = Kzz^(-1) * Kzx
