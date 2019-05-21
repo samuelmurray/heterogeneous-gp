@@ -12,12 +12,6 @@ PYTHON_VERSION = ">=3.6.0"
 LICENSE = "GNU General Public License v3.0"
 TEST_DIR = "tests"
 
-EXTRA_REQUIRED = {
-    "oilflow": [
-        "pods",
-    ],
-}
-
 # Read version number
 version_dummy: Dict[str, str] = {}
 with open(os.path.join(NAME, '__version__.py')) as f:
@@ -35,7 +29,6 @@ setup(
     url=URL,
     packages=find_packages(exclude=(TEST_DIR,)),
     test_suite=NAME + "." + TEST_DIR,
-    extras_require=EXTRA_REQUIRED,
     include_package_data=True,
     license=LICENSE,
     classifiers=[
