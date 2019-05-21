@@ -35,6 +35,12 @@ class RBF(Kernel):
             rbf = self._variance * tf.exp(-self._gamma * square_dist)
         return (rbf + self._eps * tf.eye(tf.shape(x1)[-2])) if x2 is None else rbf
 
+    def diag(self, x: tf.Tensor, *, name: Optional[str] = None) -> tf.Tensor:
+        with tf.name_scope(name):
+            identity = tf.eye(tf.shape(x)[-2], name="identity")
+            diag = tf.multiply(self._variance, identity, name="diag")
+        return diag
+
     def create_summaries(self) -> None:
         tf.summary.scalar(f"{self._name}_variance", tf.squeeze(self._variance),
                           family=self._summary_family)
