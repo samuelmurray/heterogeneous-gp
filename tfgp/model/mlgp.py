@@ -141,27 +141,28 @@ class MLGP(InducingPointsModel):
         return f_mean
 
     def _compute_f_noise(self, x: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
-        k_tilde_diag_part = self._compute_k_tilde_diag_part(x, a)
-        k_tilde_sqrt = tf.sqrt(k_tilde_diag_part, name="k_tilde_sqrt")
-        k_tilde_sqrt_expanded = tf.expand_dims(k_tilde_sqrt, axis=1, name="k_tilde_sqrt_expanded")
+        k_diag_part_sqrt = self._compute_k_tilde_diag_part_sqrt(x, a)
         num_data = tf.shape(x)[0]
         e_f = tf.random_normal(shape=[self.num_samples, self.f_dim, num_data], name="e_f")
-        f_noise = tf.multiply(k_tilde_sqrt_expanded, e_f, name="f_noise")
+        f_noise = tf.multiply(k_diag_part_sqrt, e_f, name="f_noise")
         return f_noise
 
-    def _compute_k_tilde_diag_part(self, x: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
+    def _compute_k_tilde_diag_part_sqrt(self, x: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
         # K~ = Kxx - Kxz * Kzz^(-1) * Kzx
         k_zx = self.kernel(self.z, x, name="k_zx")
         k_zx_mul_a = tf.matmul(k_zx, a, transpose_a=True, name="k_zx_mul_a")
         k_zx_mul_a_diag_part = tf.matrix_diag_part(k_zx_mul_a, name="k_zx_mul_a_diag_part")
         k_xx_diag_part = self.kernel.diag_part(x, name="k_xx_diag_part")
-        k_tilde_diag_part = tf.subtract(k_xx_diag_part, k_zx_mul_a_diag_part,
-                                        name="k_tilde_diag_part")
-        # k_tilde_diag_part can't be negative
-        k_tilde_pos = tf.maximum(k_tilde_diag_part, 1e-16, name="k_tilde_pos")
-        k_tilde_pos_tiled = self._expand_and_tile(k_tilde_pos, [self.num_samples, 1],
-                                                  name="k_tilde_pos_tiled")
-        return k_tilde_pos_tiled
+        diag_part = tf.subtract(k_xx_diag_part, k_zx_mul_a_diag_part, name="diag_part")
+        # diag_part can't be negative
+        diag_part_pos = tf.maximum(diag_part, 1e-16, name="diag_part_pos")
+        diag_part_sqrt = tf.sqrt(diag_part_pos, name="diag_part_sqrt")
+        diag_part_sqrt_expanded = self._expand_and_tile(diag_part_sqrt, [self.f_dim, 1],
+                                                        name="diag_part_sqrt_expanded")
+        diag_part_sqrt_twice_expanded = self._expand_and_tile(diag_part_sqrt_expanded,
+                                                              [self.num_samples, 1, 1],
+                                                              name="diag_part_sqrt_twice_expanded")
+        return diag_part_sqrt_twice_expanded
 
     @staticmethod
     def _expand_and_tile(tensor: tf.Tensor, shape: Sequence[int],

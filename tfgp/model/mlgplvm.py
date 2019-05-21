@@ -95,26 +95,26 @@ class MLGPLVM(MLGP):
         return f_mean
 
     def _compute_f_noise(self, x_samples: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
-        k_tilde_diag_part = self._compute_k_tilde_diag_part(x_samples, a)
-        k_tilde_sqrt = tf.sqrt(k_tilde_diag_part, name="k_tilde_sqrt")
-        k_tilde_sqrt_expanded = tf.expand_dims(k_tilde_sqrt, axis=1, name="k_tilde_sqrt_expanded")
+        k_diag_part_sqrt = self._compute_k_tilde_diag_part_sqrt(x_samples, a)
         num_data = tf.shape(x_samples)[1]
         e_f = tf.random_normal(shape=[self.num_samples, self.f_dim, num_data], name="e_f")
-        f_noise = tf.multiply(k_tilde_sqrt_expanded, e_f, name="f_noise")
+        f_noise = tf.multiply(k_diag_part_sqrt, e_f, name="f_noise")
         return f_noise
 
-    def _compute_k_tilde_diag_part(self, x_samples: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
+    def _compute_k_tilde_diag_part_sqrt(self, x_samples: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
         # K~ = Kxx - Kxz * Kzz^(-1) * Kzx
         z_tiled = self._expand_and_tile(self.z, [self.num_samples, 1, 1], name="z_tiled")
         k_zx = self.kernel(z_tiled, x_samples, name="k_zx")
         k_xx_diag_part = self.kernel.diag_part(x_samples, name="k_xx_diag_part")
         k_xz_mul_a = tf.matmul(k_zx, a, transpose_a=True)
         k_xz_mul_a_diag_part = tf.matrix_diag_part(k_xz_mul_a, name="k_xz_mul_a_diag_part")
-        k_tilde_diag_part = tf.subtract(k_xx_diag_part, k_xz_mul_a_diag_part,
-                                        name="k_tilde_diag_part")
-        # k_tilde_diag_part can't be negative
-        k_tilde_pos = tf.maximum(k_tilde_diag_part, 1e-16, name="k_tilde_pos")
-        return k_tilde_pos
+        diag_part = tf.subtract(k_xx_diag_part, k_xz_mul_a_diag_part, name="diag_part")
+        # diag_part can't be negative
+        diag_part_pos = tf.maximum(diag_part, 1e-16, name="diag_part_pos")
+        diag_part_sqrt = tf.sqrt(diag_part_pos, name="diag_part_sqrt")
+        diag_part_sqrt_expanded = tf.expand_dims(diag_part_sqrt, axis=1,
+                                                 name="diag_part_sqrt_expanded")
+        return diag_part_sqrt_expanded
 
     def impute(self) -> tf.Tensor:
         with tf.name_scope("impute"):
