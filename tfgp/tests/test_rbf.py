@@ -46,6 +46,16 @@ class TestRBF(tf.test.TestCase):
         k = self.kernel(a, b)
         self.assertShapeEqual(np.empty([self.batch_size, self.num_a, self.num_b]), k)
 
+    def test_is_psd(self) -> None:
+        a = tf.convert_to_tensor(np.random.normal(size=(self.batch_size, self.num_a, self.x_dim)),
+                                 dtype=tf.float32)
+        k = self.kernel(a)
+        init = tf.initialize_all_variables()
+        with self.session() as sess:
+            sess.run(init)
+            eigen_values = sess.run(tf.self_adjoint_eigvals(k))
+        self.assertAllGreaterEqual(eigen_values, 0.)
+
     def test_equal_to_sklearn(self) -> None:
         a = np.random.normal(size=(self.num_a, self.x_dim))
         b = np.random.normal(size=(self.num_b, self.x_dim))
