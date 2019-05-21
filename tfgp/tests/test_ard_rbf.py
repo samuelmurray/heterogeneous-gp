@@ -9,7 +9,10 @@ class TestARDRBF(tf.test.TestCase):
     def setUp(self) -> None:
         np.random.seed(1363431413)
         tf.random.set_random_seed(1534135313)
-        self.x_dim = 5
+        self.batch_size = 2
+        self.num_a = 5
+        self.num_b = 4
+        self.x_dim = 3
         self.gamma = 0.5
         with tf.variable_scope("ardrbf", reuse=tf.AUTO_REUSE):
             self.kernel = ARDRBF(1., self.gamma, x_dim=self.x_dim)
@@ -18,14 +21,14 @@ class TestARDRBF(tf.test.TestCase):
         tf.reset_default_graph()
 
     def test_throw(self) -> None:
-        a = tf.convert_to_tensor(np.random.normal(size=(10, self.x_dim)), dtype=tf.float32)
-        b = tf.convert_to_tensor(np.random.normal(size=(12, self.x_dim - 1)), dtype=tf.float32)
+        a = tf.convert_to_tensor(np.random.normal(size=(self.num_a, self.x_dim)), dtype=tf.float32)
+        b = tf.convert_to_tensor(np.random.normal(size=(self.num_b, self.x_dim - 1)), dtype=tf.float32)
         with self.assertRaises(ValueError):
             self.kernel(a, b)
 
     def test_equal_to_sklearn(self) -> None:
-        a = np.random.normal(size=(7, self.x_dim))
-        b = np.random.normal(size=(6, self.x_dim))
+        a = np.random.normal(size=(self.num_a, self.x_dim))
+        b = np.random.normal(size=(self.num_b, self.x_dim))
         k_sklearn = rbf_kernel(a, b, gamma=self.gamma)
         k_ard_rbf = self.kernel(tf.convert_to_tensor(a, dtype=tf.float32),
                                 tf.convert_to_tensor(b, dtype=tf.float32))
@@ -36,29 +39,23 @@ class TestARDRBF(tf.test.TestCase):
         self.assertAllClose(k_ab, k_sklearn)
 
     def test_simple(self) -> None:
-        num_a = 10
-        a = tf.convert_to_tensor(np.random.normal(size=(num_a, self.x_dim)), dtype=tf.float32)
+        a = tf.convert_to_tensor(np.random.normal(size=(self.num_a, self.x_dim)), dtype=tf.float32)
         k = self.kernel(a)
-        self.assertShapeEqual(np.empty([num_a, num_a]), k)
+        self.assertShapeEqual(np.empty([self.num_a, self.num_a]), k)
 
     def test_extended(self) -> None:
-        batch_size = 2
-        num_a = 10
-        a = tf.convert_to_tensor(np.random.normal(size=(batch_size, num_a, self.x_dim)),
+        a = tf.convert_to_tensor(np.random.normal(size=(self.batch_size, self.num_a, self.x_dim)),
                                  dtype=tf.float32)
         k = self.kernel(a)
-        self.assertShapeEqual(np.empty([batch_size, num_a, num_a]), k)
+        self.assertShapeEqual(np.empty([self.batch_size, self.num_a, self.num_a]), k)
 
     def test_full(self) -> None:
-        batch_size = 2
-        num_a = 10
-        num_b = 12
-        a = tf.convert_to_tensor(np.random.normal(size=(batch_size, num_a, self.x_dim)),
+        a = tf.convert_to_tensor(np.random.normal(size=(self.batch_size, self.num_a, self.x_dim)),
                                  dtype=tf.float32)
-        b = tf.convert_to_tensor(np.random.normal(size=(batch_size, num_b, self.x_dim)),
+        b = tf.convert_to_tensor(np.random.normal(size=(self.batch_size, self.num_b, self.x_dim)),
                                  dtype=tf.float32)
         k = self.kernel(a, b)
-        self.assertShapeEqual(np.empty([batch_size, num_a, num_b]), k)
+        self.assertShapeEqual(np.empty([self.batch_size, self.num_a, self.num_b]), k)
 
     def test_create_summary(self) -> None:
         self.kernel.create_summaries()
