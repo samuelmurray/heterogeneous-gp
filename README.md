@@ -1,4 +1,4 @@
-# TF-GP
+# heterogeneous-gp
 
 Gaussian Process implementation in TF.
 
