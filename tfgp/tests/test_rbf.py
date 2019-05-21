@@ -9,6 +9,7 @@ class TestRBF(tf.test.TestCase):
     def setUp(self) -> None:
         np.random.seed(1363431413)
         tf.random.set_random_seed(1534135313)
+        self.batch_size = 2
         self.num_a = 5
         self.num_b = 4
         self.x_dim = 5
@@ -31,20 +32,18 @@ class TestRBF(tf.test.TestCase):
         self.assertShapeEqual(np.empty([self.num_a, self.num_a]), k)
 
     def test_extended(self) -> None:
-        batch_size = 2
-        a = tf.convert_to_tensor(np.random.normal(size=(batch_size, self.num_a, self.x_dim)),
+        a = tf.convert_to_tensor(np.random.normal(size=(self.batch_size, self.num_a, self.x_dim)),
                                  dtype=tf.float32)
         k = self.kernel(a)
-        self.assertShapeEqual(np.empty([batch_size, self.num_a, self.num_a]), k)
+        self.assertShapeEqual(np.empty([self.batch_size, self.num_a, self.num_a]), k)
 
     def test_full(self) -> None:
-        batch_size = 2
-        a = tf.convert_to_tensor(np.random.normal(size=(batch_size, self.num_a, self.x_dim)),
+        a = tf.convert_to_tensor(np.random.normal(size=(self.batch_size, self.num_a, self.x_dim)),
                                  dtype=tf.float32)
-        b = tf.convert_to_tensor(np.random.normal(size=(batch_size, self.num_b, self.x_dim)),
+        b = tf.convert_to_tensor(np.random.normal(size=(self.batch_size, self.num_b, self.x_dim)),
                                  dtype=tf.float32)
         k = self.kernel(a, b)
-        self.assertShapeEqual(np.empty([batch_size, self.num_a, self.num_b]), k)
+        self.assertShapeEqual(np.empty([self.batch_size, self.num_a, self.num_b]), k)
 
     def test_equal_to_sklearn(self) -> None:
         a = np.random.normal(size=(self.num_a, self.x_dim))
