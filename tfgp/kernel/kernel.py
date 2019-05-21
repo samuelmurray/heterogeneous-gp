@@ -15,5 +15,9 @@ class Kernel(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
+    def diag_part(self, x: tf.Tensor, *, name: Optional[str] = None) -> tf.Tensor:
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def create_summaries(self) -> None:
         raise NotImplementedError
