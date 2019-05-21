@@ -12,7 +12,7 @@ class TestRBF(tf.test.TestCase):
         self.batch_size = 2
         self.num_a = 5
         self.num_b = 4
-        self.x_dim = 5
+        self.x_dim = 3
         with tf.variable_scope("rbf", reuse=tf.AUTO_REUSE):
             self.kernel = RBF(1., 0.5)
 
