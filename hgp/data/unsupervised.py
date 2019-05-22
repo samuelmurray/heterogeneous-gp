@@ -9,7 +9,7 @@ from sklearn.datasets import make_blobs
 
 import hgp
 from hgp.likelihood import (Bernoulli, Likelihood, LikelihoodWrapper, LogNormal, Normal,
-                            OneHotCategorical, QuantizedNormal)
+                            OneHotCategorical, OneHotOrdinal, QuantizedNormal)
 
 DataTuple = Tuple[np.ndarray, LikelihoodWrapper, np.ndarray]
 ROOT_PATH = os.path.dirname(hgp.__file__)
@@ -94,7 +94,7 @@ class Unsupervised(abc.ABC):
                 Normal(),
                 OneHotCategorical(7),
                 Normal(),
-                OneHotCategorical(16),
+                OneHotOrdinal(16),
                 OneHotCategorical(7),
                 OneHotCategorical(14),
                 OneHotCategorical(6),
@@ -250,12 +250,12 @@ class Unsupervised(abc.ABC):
                 OneHotCategorical(7),
                 OneHotCategorical(4),
                 Normal(),
-                OneHotCategorical(11),
-                OneHotCategorical(11),
-                OneHotCategorical(11),
-                OneHotCategorical(11),
-                OneHotCategorical(10),  # One value missing?
-                OneHotCategorical(10),  # One value missing?
+                OneHotOrdinal(11),
+                OneHotOrdinal(11),
+                OneHotOrdinal(11),
+                OneHotOrdinal(11),
+                OneHotOrdinal(10),  # One value missing?
+                OneHotOrdinal(10),  # One value missing?
                 Normal(),
                 Normal(),
                 Normal(),
