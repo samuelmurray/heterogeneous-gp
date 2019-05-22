@@ -68,6 +68,9 @@ class OneHotOrdinalDistribution(tfp.distributions.Distribution):
         # Not clear how to report mean - the mean param gives reasonable values but is not correct
         return tf.squeeze(self.mean_param, axis=-1, name="mean")
 
+    def _mode(self) -> tf.Tensor:
+        return tf.squeeze(self.mean_param, axis=-1, name="mode")
+
     def _stddev(self) -> tf.Tensor:
         # Not clear how to report std for this distribution - return zeros with correct shape
         return tf.zeros_like(self.mean(), name="stddev")

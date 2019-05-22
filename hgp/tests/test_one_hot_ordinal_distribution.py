@@ -75,6 +75,11 @@ class TestOneHotOrdinalDistribution(tf.test.TestCase):
         mean = self.distribution.mean()
         self.assertAllEqual(expected_shape, mean.shape)
 
+    def test_mode_shape(self) -> None:
+        expected_shape = self.distribution.batch_shape
+        mode = self.distribution.mean()
+        self.assertAllEqual(expected_shape, mean.shape)
+
     def test_stddev_shape(self) -> None:
         expected_shape = self.distribution.batch_shape
         stddev = self.distribution.stddev()
