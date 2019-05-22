@@ -69,7 +69,10 @@ class OneHotOrdinalDistribution(tfp.distributions.Distribution):
         return tf.squeeze(self.mean_param, axis=-1, name="mean")
 
     def _mode(self) -> tf.Tensor:
-        return tf.squeeze(self.mean_param, axis=-1, name="mode")
+        prob_of_category = self._prob_of_category()
+        mode = tf.argmax(prob_of_category, axis=-1, name="mode")
+        one_hot_mode = tf.one_hot(mode, self._event_shape(), name="one_hot_mode")
+        return one_hot_mode
 
     def _stddev(self) -> tf.Tensor:
         # Not clear how to report std for this distribution - return zeros with correct shape

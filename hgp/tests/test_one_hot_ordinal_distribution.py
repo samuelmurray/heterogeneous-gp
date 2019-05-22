@@ -76,9 +76,11 @@ class TestOneHotOrdinalDistribution(tf.test.TestCase):
         self.assertAllEqual(expected_shape, mean.shape)
 
     def test_mode_shape(self) -> None:
-        expected_shape = self.distribution.batch_shape
-        mode = self.distribution.mean()
-        self.assertAllEqual(expected_shape, mean.shape)
+        expected_batch_shape = self.distribution.batch_shape
+        expected_event_shape = self.distribution.event_shape
+        mode = self.distribution.mode()
+        self.assertEqual(expected_batch_shape, mode.shape[:-1])
+        self.assertEqual(expected_event_shape, mode.shape[-1:])
 
     def test_stddev_shape(self) -> None:
         expected_shape = self.distribution.batch_shape
@@ -114,9 +116,6 @@ class TestOneHotOrdinalDistribution(tf.test.TestCase):
 
     def test_covariance_not_implemented(self) -> None:
         self.assertRaises(NotImplementedError, self.distribution._covariance)
-
-    def test_mode_not_implemented(self) -> None:
-        self.assertRaises(NotImplementedError, self.distribution._mode)
 
 
 if __name__ == "__main__":
