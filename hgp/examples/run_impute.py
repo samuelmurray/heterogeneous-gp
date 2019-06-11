@@ -1,7 +1,7 @@
 import argparse
 import os
 import time
-from typing import Tuple
+from typing import List, Tuple
 
 from comet_ml import Experiment
 import numpy as np
@@ -17,6 +17,9 @@ import hgp.util
 ROOT_PATH = os.path.dirname(hgp.__file__)
 LOG_DIR_PATH = os.path.join(ROOT_PATH, os.pardir, "log")
 UTIL_PATH = os.path.join(ROOT_PATH, os.pardir, "util")
+
+NUMPY_SEED = 114123
+TENSORFLOW_SEED = 135314
 
 parser = argparse.ArgumentParser(description="Impute missing values")
 parser.add_argument("--model", choices=["batch", "vae"], required=True)
@@ -41,17 +44,12 @@ if args.model == "vae":
 
 
 def run() -> None:
-    sns.set()
-    np.random.seed(114123)
-    tf.random.set_random_seed(135314)
+    initialize()
     numerical_errors = []
     nominal_errors = []
     for i in range(1, 11):
-        print("Generating data...")
         y_true, y_noisy, likelihood = load_data(i)
-        with tf.name_scope("model"):
-            print("Creating model...")
-            m = create_model(y_noisy, likelihood)
+        m = create_model(y_noisy, likelihood)
         numerical_error, nominal_error = train_impute(m, y_true, y_noisy)
         experiment.log_metric(f"numerical error {i}", numerical_error)
         experiment.log_metric(f"nominal error {i}", nominal_error)
@@ -59,7 +57,16 @@ def run() -> None:
         nominal_errors.append(nominal_error)
         # Reset TF graph before restarting
         tf.reset_default_graph()
+    final_logging(nominal_errors, numerical_errors)
 
+
+def initialize() -> None:
+    sns.set()
+    np.random.seed(NUMPY_SEED)
+    tf.random.set_random_seed(TENSORFLOW_SEED)
+
+
+def final_logging(nominal_errors: List[float], numerical_errors: List[float]) -> None:
     mean_numerical_error = np.mean(numerical_errors)
     mean_nominal_error = np.mean(nominal_errors)
     print("-------------------")
@@ -71,7 +78,6 @@ def run() -> None:
 def train_impute(model: BatchMLGPLVM, y_true: np.ndarray, y_noisy: np.ndarray
                  ) -> Tuple[float, float]:
     model.initialize()
-    print("Building graph...")
     loss = tf.losses.get_total_loss()
     with tf.name_scope("train"):
         optimizer = tf.train.RMSPropOptimizer(args.lr, name="RMSProp")
@@ -88,10 +94,8 @@ def train_impute(model: BatchMLGPLVM, y_true: np.ndarray, y_noisy: np.ndarray
     with tf.Session() as sess:
         log_dir = os.path.join(LOG_DIR_PATH, "impute", f"{time.strftime('%Y%m%d%H%M%S')}")
         summary_writer = tf.summary.FileWriter(log_dir, sess.graph)
-        print("Initializing variables...")
         sess.run(init)
         print(f"Initial loss: {sess.run(loss, feed_dict={model.batch_indices: all_indices})}")
-        print("Starting training...")
         n_iter = int(model.num_data / args.batch_size * args.epochs)
         for i in range(n_iter):
             batch_indices = np.random.choice(model.num_data, args.batch_size, replace=False)
@@ -115,10 +119,11 @@ def train_impute(model: BatchMLGPLVM, y_true: np.ndarray, y_noisy: np.ndarray
 
 
 def create_model(y_noisy: np.ndarray, likelihood: LikelihoodWrapper) -> BatchMLGPLVM:
-    if args.model == "batch":
-        return create_batch_mlgplvm(y_noisy, likelihood)
-    if args.model == "vae":
-        return create_vae_mlgplvm(y_noisy, likelihood)
+    with tf.name_scope("model"):
+        if args.model == "batch":
+            return create_batch_mlgplvm(y_noisy, likelihood)
+        if args.model == "vae":
+            return create_vae_mlgplvm(y_noisy, likelihood)
     raise ValueError("Only 'batch' and 'vae' allowed")
 
 
