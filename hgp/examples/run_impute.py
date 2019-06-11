@@ -34,6 +34,7 @@ args = parser.parse_args()
 experiment = Experiment(project_name="heterogeneous-gp", workspace="samuelmurray")
 experiment.log_parameter("epochs", args.epochs)
 experiment.log_parameter("latent dim", args.latent_dim)
+experiment.add_tags([args.model, args.data, args.missing])
 if args.model == "vae":
     experiment.log_parameter("num hidden", args.num_hidden)
     experiment.log_parameter("num layers", args.num_layers)
@@ -43,18 +44,32 @@ def run() -> None:
     sns.set()
     np.random.seed(114123)
     tf.random.set_random_seed(135314)
+    numerical_errors = []
+    nominal_errors = []
     for i in range(1, 11):
         print("Generating data...")
         y_true, y_noisy, likelihood = load_data(i)
         with tf.name_scope("model"):
             print("Creating model...")
             m = create_model(y_noisy, likelihood)
-        train_impute(m, y_true, y_noisy)
+        numerical_error, nominal_error = train_impute(m, y_true, y_noisy)
+        experiment.log_metric(f"numerical error {i}", numerical_error)
+        experiment.log_metric(f"nominal error {i}", nominal_error)
+        numerical_errors.append(numerical_error)
+        nominal_errors.append(nominal_error)
         # Reset TF graph before restarting
         tf.reset_default_graph()
 
+    mean_numerical_error = np.mean(numerical_errors)
+    mean_nominal_error = np.mean(nominal_errors)
+    print("-------------------")
+    print(f"Average imputation errors: {mean_numerical_error},  {mean_nominal_error}")
+    experiment.log_metric(f"numerical error avg", mean_numerical_error)
+    experiment.log_metric(f"nominal error avg", mean_nominal_error)
 
-def train_impute(model: BatchMLGPLVM, y_true: np.ndarray, y_noisy: np.ndarray) -> None:
+
+def train_impute(model: BatchMLGPLVM, y_true: np.ndarray, y_noisy: np.ndarray
+                 ) -> Tuple[float, float]:
     model.initialize()
     print("Building graph...")
     loss = tf.losses.get_total_loss()
@@ -96,6 +111,7 @@ def train_impute(model: BatchMLGPLVM, y_true: np.ndarray, y_noisy: np.ndarray) -
                 experiment.set_step(i)
                 experiment.log_metric("numerical error", imputation_error[0])
                 experiment.log_metric("nominal error", imputation_error[1])
+    return imputation_error
 
 
 def create_model(y_noisy: np.ndarray, likelihood: LikelihoodWrapper) -> BatchMLGPLVM:
