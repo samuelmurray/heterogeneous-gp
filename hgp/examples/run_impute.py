@@ -31,8 +31,8 @@ parser.add_argument("--data", choices=["wine", "default_credit", "adult"], requi
 parser.add_argument("--missing", type=int, choices=[10, 20, 30, 40, 50], required=True)
 args = parser.parse_args()
 
-experiment = Experiment(project_name="general", workspace="samuelmurray")
-experiment.log_parameter("epochs",args.epochs)
+experiment = Experiment(project_name="heterogeneous-gp", workspace="samuelmurray")
+experiment.log_parameter("epochs", args.epochs)
 experiment.log_parameter("latent dim", args.latent_dim)
 if args.model == "vae":
     experiment.log_parameter("num hidden", args.num_hidden)
