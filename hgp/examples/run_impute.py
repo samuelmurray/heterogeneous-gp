@@ -1,6 +1,5 @@
 import argparse
 import os
-import time
 from typing import List, Tuple
 
 from comet_ml import Experiment
@@ -51,8 +50,7 @@ def run() -> None:
         y_true, y_noisy, likelihood = load_data(i)
         m = create_model(y_noisy, likelihood)
         numerical_error, nominal_error = train_impute(m, y_true, y_noisy)
-        experiment.log_metric(f"numerical error {i}", numerical_error)
-        experiment.log_metric(f"nominal error {i}", nominal_error)
+        split_logging(i, numerical_error, nominal_error)
         numerical_errors.append(numerical_error)
         nominal_errors.append(nominal_error)
         # Reset TF graph before restarting
@@ -100,6 +98,12 @@ def train_logging(step: int, loss: float, numerical_error: float, nominal_error:
     experiment.set_step(step)
     experiment.log_metric("numerical error", numerical_error)
     experiment.log_metric("nominal error", nominal_error)
+
+
+def split_logging(split: int, numerical_error: float, nominal_error: float) -> None:
+    print(f"Final imputation errors for step {split}: {numerical_error}, {nominal_error}")
+    experiment.log_metric(f"numerical error {split}", numerical_error)
+    experiment.log_metric(f"nominal error {split}", nominal_error)
 
 
 def final_logging(nominal_errors: List[float], numerical_errors: List[float]) -> None:
