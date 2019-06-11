@@ -66,15 +66,6 @@ def initialize() -> None:
     tf.random.set_random_seed(TENSORFLOW_SEED)
 
 
-def final_logging(nominal_errors: List[float], numerical_errors: List[float]) -> None:
-    mean_numerical_error = np.mean(numerical_errors)
-    mean_nominal_error = np.mean(nominal_errors)
-    print("-------------------")
-    print(f"Average imputation errors: {mean_numerical_error},  {mean_nominal_error}")
-    experiment.log_metric(f"numerical error avg", mean_numerical_error)
-    experiment.log_metric(f"nominal error avg", mean_nominal_error)
-
-
 def train_impute(model: BatchMLGPLVM, y_true: np.ndarray, y_noisy: np.ndarray
                  ) -> Tuple[float, float]:
     model.initialize()
@@ -109,6 +100,15 @@ def train_logging(i: int, loss: float, numerical_error: float, nominal_error: fl
     experiment.set_step(i)
     experiment.log_metric("numerical error", numerical_error)
     experiment.log_metric("nominal error", nominal_error)
+
+
+def final_logging(nominal_errors: List[float], numerical_errors: List[float]) -> None:
+    mean_numerical_error = np.mean(numerical_errors)
+    mean_nominal_error = np.mean(nominal_errors)
+    print("-------------------")
+    print(f"Average imputation errors: {mean_numerical_error},  {mean_nominal_error}")
+    experiment.log_metric(f"numerical error avg", mean_numerical_error)
+    experiment.log_metric(f"nominal error avg", mean_nominal_error)
 
 
 def create_model(y_noisy: np.ndarray, likelihood: LikelihoodWrapper) -> BatchMLGPLVM:
