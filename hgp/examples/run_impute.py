@@ -84,38 +84,31 @@ def train_impute(model: BatchMLGPLVM, y_true: np.ndarray, y_noisy: np.ndarray
         train_all = optimizer.minimize(loss, var_list=tf.trainable_variables(),
                                        global_step=tf.train.create_global_step(),
                                        name="train")
-    with tf.name_scope("summary"):
-        model.create_summaries()
-        merged_summary = tf.summary.merge_all()
-
     init = tf.global_variables_initializer()
-
     all_indices = np.arange(model.num_data)
+    impute = model.impute()
     with tf.Session() as sess:
-        log_dir = os.path.join(LOG_DIR_PATH, "impute", f"{time.strftime('%Y%m%d%H%M%S')}")
-        summary_writer = tf.summary.FileWriter(log_dir, sess.graph)
         sess.run(init)
-        print(f"Initial loss: {sess.run(loss, feed_dict={model.batch_indices: all_indices})}")
         n_iter = int(model.num_data / args.batch_size * args.epochs)
         for i in range(n_iter):
             batch_indices = np.random.choice(model.num_data, args.batch_size, replace=False)
             sess.run(train_all, feed_dict={model.batch_indices: batch_indices})
             if i % args.print_interval == 0:
-                run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
-                run_metadata = tf.RunMetadata()
-                train_loss, summary = sess.run([loss, merged_summary], options=run_options,
-                                               run_metadata=run_metadata,
-                                               feed_dict={model.batch_indices: all_indices})
-                summary_writer.add_run_metadata(run_metadata, f"step{i}")
-                summary_writer.add_summary(summary, i)
-                imputation = sess.run(model.impute(), feed_dict={model.batch_indices: all_indices})
-                imputation_error = hgp.util.imputation_error(imputation, y_noisy, y_true,
-                                                             model.likelihood)
-                print(f"Step {i} \tLoss: {train_loss} \tImputation error: {imputation_error}")
-                experiment.set_step(i)
-                experiment.log_metric("numerical error", imputation_error[0])
-                experiment.log_metric("nominal error", imputation_error[1])
-    return imputation_error
+                train_loss = sess.run(loss, feed_dict={model.batch_indices: all_indices})
+                imputation = sess.run(impute, feed_dict={model.batch_indices: all_indices})
+                numerical_error, nominal_error = hgp.util.imputation_error(imputation,
+                                                                           y_noisy,
+                                                                           y_true,
+                                                                           model.likelihood)
+                train_logging(i, train_loss, numerical_error, nominal_error)
+    return numerical_error, nominal_error
+
+
+def train_logging(i: int, loss: float, numerical_error: float, nominal_error: float) -> None:
+    print(f"Step {i} \tLoss: {loss} \tImputation error: {numerical_error}, {nominal_error}")
+    experiment.set_step(i)
+    experiment.log_metric("numerical error", numerical_error)
+    experiment.log_metric("nominal error", nominal_error)
 
 
 def create_model(y_noisy: np.ndarray, likelihood: LikelihoodWrapper) -> BatchMLGPLVM:
