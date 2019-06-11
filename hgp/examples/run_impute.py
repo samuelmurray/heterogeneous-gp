@@ -95,9 +95,9 @@ def train_impute(model: BatchMLGPLVM, y_true: np.ndarray, y_noisy: np.ndarray
     return numerical_error, nominal_error
 
 
-def train_logging(i: int, loss: float, numerical_error: float, nominal_error: float) -> None:
-    print(f"Step {i} \tLoss: {loss} \tImputation error: {numerical_error}, {nominal_error}")
-    experiment.set_step(i)
+def train_logging(step: int, loss: float, numerical_error: float, nominal_error: float) -> None:
+    print(f"Step {step} \tLoss: {loss} \tImputation error: {numerical_error}, {nominal_error}")
+    experiment.set_step(step)
     experiment.log_metric("numerical error", numerical_error)
     experiment.log_metric("nominal error", nominal_error)
 
