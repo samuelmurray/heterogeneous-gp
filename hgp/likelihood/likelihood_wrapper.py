@@ -28,7 +28,7 @@ class LikelihoodWrapper:
         return dim, dims_per_likelihood
 
     def __call__(self, f: tf.Tensor) -> List[tfp.distributions.Distribution]:
-        return [likelihood(f[:, :, dims]) for likelihood, dims in
+        return [likelihood(f[..., :, dims]) for likelihood, dims in
                 zip(self.likelihoods, self.f_dims_per_likelihood)]
 
     @property

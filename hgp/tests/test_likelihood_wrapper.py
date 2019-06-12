@@ -16,6 +16,15 @@ class TestLikelihoodWrapper(tf.test.TestCase):
         tf.reset_default_graph()
 
     def test_call_return_type(self) -> None:
+        f = tf.constant(np.array([[0.7, 0.4, 0.4, 2.]]), dtype=tf.float32)
+        ret = self.likelihood(f)
+        ret_types = [type(r) for r in ret]
+        expected_types = [tfp.distributions.Bernoulli,
+                          tfp.distributions.OneHotCategorical,
+                          tfp.distributions.Normal]
+        self.assertAllEqual(ret_types, expected_types)
+
+    def test_call_return_type_3D(self) -> None:
         f = tf.constant(np.array([[[0.7, 0.4, 0.4, 2.]]]), dtype=tf.float32)
         ret = self.likelihood(f)
         ret_types = [type(r) for r in ret]
