@@ -34,10 +34,18 @@ class TestLikelihoodWrapper(tf.test.TestCase):
         self.assertAllEqual(ret_types, expected_types)
 
     def test_log_prob(self) -> None:
-        f = tf.constant(np.array([[[0.7, 0.4, 0.4, 2.]]]), dtype=tf.float32)
-        y = tf.constant(np.array([[1, 1, 0, 0, 2.3]]), dtype=tf.float32)
+        f = tf.constant(np.array([[0.7, 0.4, 0.4, 2.], [0.7, 0.4, 0.4, 2.]]), dtype=tf.float32)
+        y = tf.constant(np.array([[1, 1, 0, 0, 2.3], [1, 1, 0, 0, 2.3]]), dtype=tf.float32)
         log_prob = self.likelihood.log_prob(f, y)
-        self.assertShapeEqual(np.empty((1, 1, 3)), log_prob)
+        self.assertShapeEqual(np.empty((1, 2, 3)), log_prob)
+
+    def test_log_prob_3D(self) -> None:
+        f = tf.constant(np.array([[[0.7, 0.4, 0.4, 2.], [0.6, 0.3, 0.3, 1.]],
+                                  [[0.7, 0.4, 0.4, 2.], [0.6, 0.3, 0.3, 1.]]]),
+                        dtype=tf.float32)
+        y = tf.constant(np.array([[1, 1, 0, 0, 2.3], [1, 1, 0, 0, 2.3]]), dtype=tf.float32)
+        log_prob = self.likelihood.log_prob(f, y)
+        self.assertShapeEqual(np.empty((2, 2, 3)), log_prob)
 
     def test_likelihoods(self) -> None:
         likelihoods = self.likelihood.likelihoods
