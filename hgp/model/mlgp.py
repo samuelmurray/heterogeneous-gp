@@ -166,6 +166,7 @@ class MLGP(InducingPointsModel):
     @staticmethod
     def _expand_and_tile(tensor: tf.Tensor, shape: Sequence[int],
                          name: Optional[str] = None) -> tf.Tensor:
+        # TODO: This will (maybe) be obsolete with tf v1.14, since matmul will support broadcasting
         expanded_tensor = tf.expand_dims(tensor, axis=0)
         return tf.tile(expanded_tensor, multiples=shape, name=name)
 
