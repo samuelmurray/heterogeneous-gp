@@ -52,7 +52,7 @@ class TestMLGP(tf.test.TestCase):
             init = tf.global_variables_initializer()
             with self.session() as sess:
                 sess.run(init)
-                x_test = np.linspace(-2, 2 * np.pi + 2, num_test)[:, None]
+                x_test = np.linspace(-2, 2 * np.pi + 2, num_test)[:, np.newaxis]
                 mean, _ = self.m.predict(x_test)
             self.assertShapeEqual(np.empty([num_test, self.output_dim]), mean)
 
@@ -62,7 +62,7 @@ class TestMLGP(tf.test.TestCase):
             init = tf.global_variables_initializer()
             with self.session() as sess:
                 sess.run(init)
-                x_test = np.linspace(-2, 2 * np.pi + 2, num_test)[:, None]
+                x_test = np.linspace(-2, 2 * np.pi + 2, num_test)[:, np.newaxis]
                 _, std = self.m.predict(x_test)
             self.assertShapeEqual(np.empty([num_test, self.output_dim]), std)
 

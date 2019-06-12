@@ -46,7 +46,7 @@ if __name__ == "__main__":
 
     plt.axis([-5, 5, -5, 5])
     plt.ion()
-    x_test = np.linspace(np.min(x) - 1, np.max(x) + 1, 100)[:, None]
+    x_test = np.linspace(np.min(x) - 1, np.max(x) + 1, 100)[:, np.newaxis]
     with tf.Session() as sess:
         log_dir = os.path.join(LOG_DIR_PATH, "mlgp", f"{time.strftime('%Y%m%d%H%M%S')}")
         summary_writer = tf.summary.FileWriter(log_dir, sess.graph)

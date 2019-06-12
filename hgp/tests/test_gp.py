@@ -11,7 +11,7 @@ class TestGP(tf.test.TestCase):
         tf.random.set_random_seed(1534135313)
         with tf.variable_scope("gp", reuse=tf.AUTO_REUSE):
             self.output_dim = 1
-            x_train = np.linspace(0, 2 * np.pi, 10)[:, None]
+            x_train = np.linspace(0, 2 * np.pi, 10)[:, np.newaxis]
             y_train = np.sin(x_train)
             kernel = RBF()
             self.m = GP(x_train, y_train, kernel=kernel)
@@ -26,7 +26,7 @@ class TestGP(tf.test.TestCase):
             init = tf.global_variables_initializer()
             with self.session() as sess:
                 sess.run(init)
-                x_test = np.linspace(0, 2 * np.pi, num_test)[:, None]
+                x_test = np.linspace(0, 2 * np.pi, num_test)[:, np.newaxis]
                 mean, _ = self.m.predict(x_test)
             self.assertShapeEqual(np.empty([num_test, self.output_dim]), mean)
 
@@ -36,7 +36,7 @@ class TestGP(tf.test.TestCase):
             init = tf.global_variables_initializer()
             with self.session() as sess:
                 sess.run(init)
-                x_test = np.linspace(0, 2 * np.pi, num_test)[:, None]
+                x_test = np.linspace(0, 2 * np.pi, num_test)[:, np.newaxis]
                 _, cov = self.m.predict(x_test)
             self.assertShapeEqual(np.empty([num_test, num_test]), cov)
 

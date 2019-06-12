@@ -383,7 +383,7 @@ class Unsupervised(abc.ABC):
         data_size = oil['X'].shape[0]
         data_indices = np.random.permutation(data_size)[:num_data]
         dim_indices = np.random.permutation(12)[:output_dim]
-        y = oil['X'][data_indices[:, None], dim_indices]
+        y = oil['X'][data_indices[:, np.newaxis], dim_indices]
         labels = oil['Y'][data_indices, :]
         likelihood = LikelihoodWrapper([Normal() for _ in range(y.shape[1])])
         if not one_hot_labels:

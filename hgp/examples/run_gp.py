@@ -19,9 +19,9 @@ if __name__ == "__main__":
     init = tf.global_variables_initializer()
     with tf.Session() as sess:
         sess.run(init)
-        x_test = np.linspace(0, 2 * np.pi, 50)[:, None]
+        x_test = np.linspace(0, 2 * np.pi, 50)[:, np.newaxis]
         y_test_mean, y_test_cov = sess.run(m.predict(x_test))
-        y_test_std = np.sqrt(np.diag(y_test_cov))[:, None]
+        y_test_std = np.sqrt(np.diag(y_test_cov))[:, np.newaxis]
         plt.scatter(x_train, y_train, marker="o")
         plt.plot(x_test, y_test_mean, "k")
         plt.plot(x_test, y_test_mean + y_test_std, "k--")
