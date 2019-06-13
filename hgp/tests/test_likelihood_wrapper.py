@@ -2,7 +2,8 @@ import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
 
-from hgp.likelihood import Bernoulli, LikelihoodWrapper, Normal, OneHotCategorical
+from hgp.likelihood import (Bernoulli, LikelihoodWrapper, Normal, OneHotCategorical,
+                            OneHotCategoricalDistribution)
 
 
 class TestLikelihoodWrapper(tf.test.TestCase):
@@ -20,7 +21,7 @@ class TestLikelihoodWrapper(tf.test.TestCase):
         ret = self.likelihood(f)
         ret_types = [type(r) for r in ret]
         expected_types = [tfp.distributions.Bernoulli,
-                          tfp.distributions.OneHotCategorical,
+                          OneHotCategoricalDistribution,
                           tfp.distributions.Normal]
         self.assertAllEqual(ret_types, expected_types)
 
@@ -29,7 +30,7 @@ class TestLikelihoodWrapper(tf.test.TestCase):
         ret = self.likelihood(f)
         ret_types = [type(r) for r in ret]
         expected_types = [tfp.distributions.Bernoulli,
-                          tfp.distributions.OneHotCategorical,
+                          OneHotCategoricalDistribution,
                           tfp.distributions.Normal]
         self.assertAllEqual(ret_types, expected_types)
 
