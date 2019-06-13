@@ -3,7 +3,7 @@ import tensorflow_probability as tfp
 
 
 class OneHotOrdinalDistribution(tfp.distributions.Distribution):
-    def __init__(self, params: tf.Tensor, name: str = "Ordinal") -> None:
+    def __init__(self, params: tf.Tensor, name: str = "OneHotOrdinal") -> None:
         super().__init__(dtype=tf.int32,
                          reparameterization_type=tfp.distributions.NOT_REPARAMETERIZED,
                          validate_args=False,
