@@ -73,10 +73,9 @@ class LikelihoodWrapper:
         return log_prob
 
     def _create_log_prob_mask(self, log_prob: tf.Tensor, nan_mask: tf.Tensor) -> tf.Tensor:
-        f_masks = [nan_mask[:, dims.start] for dims in self.f_dims_per_likelihood]
-        f_mask = tf.stack(f_masks, axis=1, name="f_mask")
-        f_mask_tiled = tf.broadcast_to(f_mask, tf.shape(log_prob))
-        return f_mask_tiled
+        log_prob_masks = [nan_mask[:, dims.start] for dims in self.f_dims_per_likelihood]
+        log_prob_mask = tf.stack(log_prob_masks, axis=1, name="log_prob_mask")
+        return tf.broadcast_to(log_prob_mask, tf.shape(log_prob), name="log_prob_mask_broadcast")
 
     def create_summaries(self) -> None:
         for likelihood in self.likelihoods:
