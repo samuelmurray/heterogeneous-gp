@@ -99,6 +99,20 @@ class TestUtil(tf.test.TestCase):
         noisy_data = util.remove_data(original_data, indices_to_remove, likelihood)
         self.assertAllEqual(expected_data, noisy_data)
 
+    def test_remove_data_randomly_frac_0_keeps_all(self) -> None:
+        original_data = np.ones((4, 3))
+        expected_data = np.ones((4, 3))
+        likelihood = LikelihoodWrapper([Normal(), OneHotCategorical(2)])
+        noisy_data = util.remove_data_randomly(original_data, 0., likelihood)
+        self.assertAllEqual(expected_data, noisy_data)
+
+    def test_remove_data_randomly_frac_1_removes_all(self) -> None:
+        original_data = np.ones((4, 3))
+        expected_data = np.ones((4, 3)) * np.nan
+        likelihood = LikelihoodWrapper([Normal(), OneHotCategorical(2)])
+        noisy_data = util.remove_data_randomly(original_data, 1., likelihood)
+        self.assertAllEqual(expected_data, noisy_data)
+
 
 if __name__ == "__main__":
     tf.test.main()
