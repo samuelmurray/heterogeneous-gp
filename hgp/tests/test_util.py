@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn.decomposition import PCA
 import tensorflow as tf
 
 from hgp import util
@@ -112,6 +113,14 @@ class TestUtil(tf.test.TestCase):
         likelihood = LikelihoodWrapper([Normal(), OneHotCategorical(2)])
         noisy_data = util.remove_data_randomly(original_data, 1., likelihood)
         self.assertAllEqual(expected_data, noisy_data)
+
+    def test_pca_reduce_equal_to_sklearn(self) -> None:
+        np.random.seed(10101010)
+        x = np.random.randn(5, 3)
+        latent_dim = 1
+        x_pca = util.pca_reduce(x, latent_dim)
+        x_pca_sklearn = PCA(latent_dim).fit_transform(x)
+        self.assertAllClose(x_pca, -x_pca_sklearn)
 
 
 if __name__ == "__main__":
