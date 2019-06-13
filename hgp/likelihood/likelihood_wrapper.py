@@ -66,7 +66,7 @@ class LikelihoodWrapper:
 
     def _create_log_prob(self, f: tf.Tensor, y: tf.Tensor, nan_mask: tf.Tensor) -> tf.Tensor:
         y_wo_nans = tf.where(nan_mask, tf.zeros_like(y), y, name="y_wo_nans")
-        log_probs = [likelihood(f[..., :, f_dims]).log_prob(y_wo_nans[:, y_dims]) for
+        log_probs = [likelihood(f[..., f_dims]).log_prob(y_wo_nans[..., y_dims]) for
                      likelihood, f_dims, y_dims in
                      zip(self.likelihoods, self.f_dims_per_likelihood, self.y_dims_per_likelihood)]
         log_prob = tf.concat(log_probs, axis=-1)
