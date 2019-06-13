@@ -17,4 +17,4 @@ class OneHotCategoricalDistribution(tfp.distributions.OneHotCategorical):
 
     def _log_prob(self, x: tf.Tensor) -> tf.Tensor:
         log_prob = super()._log_prob(x)
-        return tf.expand_dims(log_prob, axis=-1)
+        return tf.expand_dims(log_prob, axis=-1, name="log_prob")
