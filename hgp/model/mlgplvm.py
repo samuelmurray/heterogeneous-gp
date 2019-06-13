@@ -106,7 +106,7 @@ class MLGPLVM(MLGP):
         z_tiled = self._expand_and_tile(self.z, [self.num_samples, 1, 1], name="z_tiled")
         k_zx = self.kernel(z_tiled, x_samples, name="k_zx")
         k_xx_diag_part = self.kernel.diag_part(x_samples, name="k_xx_diag_part")
-        k_xz_mul_a = tf.matmul(k_zx, a, transpose_a=True)
+        k_xz_mul_a = tf.matmul(k_zx, a, transpose_a=True, name="k_xz_mul_a")
         k_xz_mul_a_diag_part = tf.matrix_diag_part(k_xz_mul_a, name="k_xz_mul_a_diag_part")
         diag_part = tf.subtract(k_xx_diag_part, k_xz_mul_a_diag_part, name="diag_part")
         # diag_part can't be negative
@@ -122,7 +122,8 @@ class MLGPLVM(MLGP):
             k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
             qx_mean, _ = self._get_or_subsample_qx()
             k_zx = self.kernel(self.z, qx_mean, name="k_zx")
-            k_xz_mul_k_zz_inv = tf.matmul(k_zx, k_zz_inv, transpose_a=True)
+            k_xz_mul_k_zz_inv = tf.matmul(k_zx, k_zz_inv, transpose_a=True,
+                                          name="k_xz_mul_k_zz_inv")
             f_mean = tf.matmul(k_xz_mul_k_zz_inv, self.qu_mean, transpose_b=True, name="f_mean")
             f_mean_expanded = tf.expand_dims(f_mean, axis=0, name="f_mean_expanded")
             posteriors = self.likelihood(f_mean_expanded)
