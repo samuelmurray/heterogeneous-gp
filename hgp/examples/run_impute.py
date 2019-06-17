@@ -29,7 +29,8 @@ parser.add_argument("--num_hidden", type=int, default=100)
 parser.add_argument("--num_layers", type=int, default=1)
 parser.add_argument("--print_interval", type=int, default=1000)
 parser.add_argument("--lr", type=float, default=5e-4)
-parser.add_argument("--data", choices=["wine", "default_credit", "adult"], required=True)
+parser.add_argument("--data", choices=["adult", "default_credit", "wine", "wine_pos"],
+                    required=True)
 parser.add_argument("--missing", type=int, choices=[10, 20, 30, 40, 50], required=True)
 args = parser.parse_args()
 
@@ -144,11 +145,13 @@ def load_data(split: int) -> Tuple[np.ndarray, np.ndarray, LikelihoodWrapper]:
 def load_true_data() -> Tuple[np.ndarray, LikelihoodWrapper]:
     if args.data == "wine":
         return Unsupervised.make_wine()[:2]
+    if args.data == "wine_pos":
+        return Unsupervised.make_wine_pos()[:2]
     if args.data == "adult":
         return Unsupervised.make_adult()[:2]
     if args.data == "default_credit":
         return Unsupervised.make_default_credit()[:2]
-    raise ValueError("Only 'adult', 'default_credit' and 'wine' allowed")
+    raise ValueError("Only 'adult', 'default_credit', 'wine' and 'wine_pos' allowed")
 
 
 def remove_data(y: np.ndarray, likelihood: LikelihoodWrapper, split: int) -> np.ndarray:
