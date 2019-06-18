@@ -31,7 +31,9 @@ parser.add_argument("--print_interval", type=int, default=1000)
 parser.add_argument("--lr", type=float, default=5e-4)
 parser.add_argument("--data", choices=["adult", "default_credit", "wine", "wine_pos"],
                     required=True)
-parser.add_argument("--missing", type=int, choices=[10, 20, 30, 40, 50], required=True)
+parser.add_argument("--missing", type=int, choices=[10, 20, 30, 40, 50, 60, 70, 80, 90],
+                    required=True)
+parser.add_argument("--missing_randomly", action="store_true")
 args = parser.parse_args()
 
 experiment = Experiment(project_name="heterogeneous-gp", workspace="samuelmurray")
@@ -138,7 +140,10 @@ def create_vae_mlgplvm(y_noisy: np.ndarray, likelihood: LikelihoodWrapper) -> VA
 
 def load_data(split: int) -> Tuple[np.ndarray, np.ndarray, LikelihoodWrapper]:
     y_true, likelihood = load_true_data()
-    y_noisy = remove_data(y_true, likelihood, split)
+    if args.missing_randomly:
+        y_noisy = remove_data_randomly(y_true, likelihood)
+    else:
+        y_noisy = remove_data(y_true, likelihood, split)
     return y_true, y_noisy, likelihood
 
 
@@ -152,6 +157,12 @@ def load_true_data() -> Tuple[np.ndarray, LikelihoodWrapper]:
     if args.data == "default_credit":
         return Unsupervised.make_default_credit()[:2]
     raise ValueError("Only 'adult', 'default_credit', 'wine' and 'wine_pos' allowed")
+
+
+def remove_data_randomly(y: np.ndarray, likelihood: LikelihoodWrapper) -> np.ndarray:
+    fraction_missing = args.missing / 100
+    y_noisy = hgp.util.remove_data_randomly(y, fraction_missing, likelihood)
+    return y_noisy
 
 
 def remove_data(y: np.ndarray, likelihood: LikelihoodWrapper, split: int) -> np.ndarray:
