@@ -50,7 +50,7 @@ class TestARDRBF(tf.test.TestCase):
         a = tf.convert_to_tensor(np.random.normal(size=(self.batch_size, self.num_a, self.x_dim)),
                                  dtype=tf.float32)
         k = self.kernel(a)
-        init = tf.initialize_all_variables()
+        init = tf.global_variables_initializer()
         with self.session() as sess:
             sess.run(init)
             eigen_values = sess.run(tf.self_adjoint_eigvals(k))
@@ -83,7 +83,7 @@ class TestARDRBF(tf.test.TestCase):
         self.kernel._eps = 0
         diag_part = self.kernel.diag_part(a)
         full = self.kernel(a)
-        init = tf.initialize_all_variables()
+        init = tf.global_variables_initializer()
         with self.session() as sess:
             sess.run(init)
             diag_part = sess.run(diag_part)
@@ -96,7 +96,7 @@ class TestARDRBF(tf.test.TestCase):
         self.kernel._eps = 0
         diag_part = self.kernel.diag_part(a)
         full = self.kernel(a)
-        init = tf.initialize_all_variables()
+        init = tf.global_variables_initializer()
         with self.session() as sess:
             sess.run(init)
             diag_part = sess.run(diag_part)
