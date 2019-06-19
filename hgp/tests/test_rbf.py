@@ -63,7 +63,7 @@ class TestRBF(tf.test.TestCase):
         k_rbf = self.kernel(tf.convert_to_tensor(a, dtype=tf.float32),
                             tf.convert_to_tensor(b, dtype=tf.float32))
         init = tf.global_variables_initializer()
-        with self.test_session() as sess:
+        with self.session() as sess:
             sess.run(init)
             k_ab = k_rbf.eval()
         self.assertAllClose(k_ab, k_sklearn)
