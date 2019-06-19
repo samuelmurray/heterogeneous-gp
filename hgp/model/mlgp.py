@@ -163,13 +163,6 @@ class MLGP(InducingPointsModel):
                                                        name="diag_part_sqrt_twice_expanded")
         return diag_part_sqrt_twice_expanded
 
-    @staticmethod
-    def _expand_and_tile(tensor: tf.Tensor, shape: Sequence[int],
-                         name: Optional[str] = None) -> tf.Tensor:
-        # TODO: This will (maybe) be obsolete with tf v1.14, since matmul will support broadcasting
-        expanded_tensor = tf.expand_dims(tensor, axis=0)
-        return tf.tile(expanded_tensor, multiples=shape, name=name)
-
     def predict(self, xs: np.ndarray) -> Tuple[tf.Tensor, tf.Tensor]:
         # TODO: Not clear how to report the variances.
         # Should we use qu_scale?
