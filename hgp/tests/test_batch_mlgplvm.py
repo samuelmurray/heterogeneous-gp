@@ -19,7 +19,7 @@ class TestBatchMLGPLVM(tf.test.TestCase):
             y, _ = make_blobs(self.num_data, self.output_dim, num_classes)
             kernel = RBF()
             likelihood = LikelihoodWrapper([Normal() for _ in range(self.output_dim)])
-            self.batch_size = 5
+            self.batch_size = 1
             self.m = BatchMLGPLVM(y, self.latent_dim, kernel=kernel, likelihood=likelihood)
             self.m.initialize()
 
