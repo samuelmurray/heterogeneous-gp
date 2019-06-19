@@ -55,9 +55,10 @@ class MLGP(InducingPointsModel):
                                             initializer=tf.zeros_initializer())
             log_scale = tfp.distributions.fill_triangular(log_scale_vec, name="log_scale")
             log_scale_diag_part = tf.linalg.diag_part(log_scale)
+            log_scale_diag = tf.linalg.diag(log_scale_diag_part)
             scale_diag_part = tf.exp(log_scale_diag_part)
             scale = tf.identity(log_scale
-                                - tf.linalg.diag(log_scale_diag_part)
+                                - log_scale_diag
                                 + tf.linalg.diag(scale_diag_part),
                                 name="scale")
         return mean, scale
