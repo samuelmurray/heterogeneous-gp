@@ -19,9 +19,9 @@ class GP(Model):
         self.y = tf.convert_to_tensor(y, dtype=tf.float32, name="y")
         self.kernel = kernel
         self.k_xx = self.kernel(self.x, name="k_xx")
-        self.chol_xx = tf.cholesky(self.k_xx, name="chol_xx")
-        rhs = tf.matrix_solve(self.chol_xx, self.y)
-        self.a = tf.matrix_solve(tf.transpose(self.chol_xx), rhs, name="a")
+        self.chol_xx = tf.linalg.cholesky(self.k_xx, name="chol_xx")
+        rhs = tf.linalg.solve(self.chol_xx, self.y)
+        self.a = tf.linalg.solve(tf.transpose(self.chol_xx), rhs, name="a")
 
     def initialize(self) -> None:
         pass
@@ -32,7 +32,7 @@ class GP(Model):
             k_xsx = self.kernel(xs, self.x, name="k_xsx")
             k_xsxs = self.kernel(xs, xs, name="k_xsxs")
             mean = tf.matmul(k_xsx, self.a, name="mean")
-            v = tf.matrix_solve(self.chol_xx, tf.transpose(k_xsx), name="v")
+            v = tf.linalg.solve(self.chol_xx, tf.transpose(k_xsx), name="v")
             vv = tf.matmul(v, v, transpose_a=True, name="vv")
             cov = tf.subtract(k_xsxs, vv, name="cov")
         return mean, cov

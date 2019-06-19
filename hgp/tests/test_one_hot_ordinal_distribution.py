@@ -16,7 +16,7 @@ class TestOneHotOrdinalDistribution(tf.test.TestCase):
         y = tf.convert_to_tensor([[0., 0., 1.], [0., 1., 0.]])
         prob = self.distribution._prob(y)
         log_prob = self.distribution.log_prob(y)
-        self.assertAllEqual(log_prob, tf.log(prob))
+        self.assertAllEqual(log_prob, tf.math.log(prob))
 
     def test_most_likely_category(self) -> None:
         params = tf.convert_to_tensor([[5., 0.]])
