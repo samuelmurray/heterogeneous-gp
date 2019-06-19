@@ -41,7 +41,7 @@ class VAEMLGPLVM(BatchMLGPLVM):
 
     def _create_encoder(self) -> Tuple[tf.Tensor, tf.Tensor]:
         with tf.variable_scope("encoder"):
-            nan_mask = tf.is_nan(self.y_batch, name="nan_mask")
+            nan_mask = tf.math.is_nan(self.y_batch, name="nan_mask")
             y_batch_wo_nans = tf.where(nan_mask, tf.zeros_like(self.y_batch), self.y_batch,
                                        name="y_batch_wo_nans")
             hidden = y_batch_wo_nans

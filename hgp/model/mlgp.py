@@ -96,7 +96,8 @@ class MLGP(InducingPointsModel):
     def _log_prob(self, samples: tf.Tensor) -> tf.Tensor:
         with tf.name_scope("log_prob"):
             y = self._get_or_subsample_y()
-            log_prob = self.likelihood.log_prob(tf.matrix_transpose(samples), y, name="log_prob")
+            samples_transpose = tf.linalg.matrix_transpose(samples)
+            log_prob = self.likelihood.log_prob(samples_transpose, y, name="log_prob")
         return log_prob
 
     def _get_or_subsample_y(self) -> tf.Tensor:
@@ -114,7 +115,7 @@ class MLGP(InducingPointsModel):
 
     def _sample_u(self) -> tf.Tensor:
         # u = qu_mean + qu_scale * e_u, e_u ~ N(0,1)
-        e_u = tf.random_normal(shape=[self.num_samples, self.f_dim, self.num_inducing], name="e_u")
+        e_u = tf.random.normal(shape=[self.num_samples, self.f_dim, self.num_inducing], name="e_u")
         u_noise = tf.einsum("ijk,tik->tij", self.qu_scale, e_u, name="u_noise")
         u_samples = tf.add(self.qu_mean, u_noise, name="u_samples")
         return u_samples
@@ -130,7 +131,7 @@ class MLGP(InducingPointsModel):
     def _compute_a(self, x: tf.Tensor) -> tf.Tensor:
         # a = Kzz^(-1) * Kzx
         k_zz = self.kernel(self.z, name="k_zz")
-        k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
+        k_zz_inv = tf.linalg.inv(k_zz, name="k_zz_inv")
         k_zx = self.kernel(self.z, x, name="k_zx")
         a = tf.matmul(k_zz_inv, k_zx, name="a")
         return a
@@ -143,7 +144,7 @@ class MLGP(InducingPointsModel):
     def _compute_f_noise(self, x: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
         k_diag_part_sqrt = self._compute_k_tilde_diag_part_sqrt(x, a)
         num_data = tf.shape(x)[0]
-        e_f = tf.random_normal(shape=[self.num_samples, self.f_dim, num_data], name="e_f")
+        e_f = tf.random.normal(shape=[self.num_samples, self.f_dim, num_data], name="e_f")
         f_noise = tf.multiply(k_diag_part_sqrt, e_f, name="f_noise")
         return f_noise
 
@@ -178,7 +179,7 @@ class MLGP(InducingPointsModel):
         with tf.name_scope("predict"):
             xs = tf.convert_to_tensor(xs, dtype=tf.float32, name="xs")
             k_zz = self.kernel(self.z, name="k_zz")
-            k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
+            k_zz_inv = tf.linalg.inv(k_zz, name="k_zz_inv")
             k_xs_z = self.kernel(xs, self.z, name="k_xs_z")
             k_xs_z_mul_kzz_inv = tf.matmul(k_xs_z, k_zz_inv, name="k_xs_z_mul_kzz_inv")
             f_mean = tf.matmul(k_xs_z_mul_kzz_inv, self.qu_mean, transpose_b=True, name="f_mean")
