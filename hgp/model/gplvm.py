@@ -47,7 +47,7 @@ class GPLVM(Model):
             a = tf.linalg.solve(tf.transpose(chol_xx), tf.linalg.solve(chol_xx, self.y), name="a")
             y_transp_a = tf.multiply(0.5, tf.linalg.trace(tf.matmul(self.y, a, transpose_a=True)),
                                      name="y_transp_a")
-            chol_xx_diag = tf.diag_part(chol_xx, name="chol_xx_diag")
+            chol_xx_diag = tf.linalg.diag_part(chol_xx, name="chol_xx_diag")
             log_chol_xx_diag = tf.math.log(chol_xx_diag, name="log_chol_xx_diag")
             log_chol_xx_sum = tf.reduce_sum(log_chol_xx_diag, axis=0, name="log_chol_xx_sum")
             chol_trace = tf.multiply(log_chol_xx_sum, self.y_dim, name="chol_trace")
