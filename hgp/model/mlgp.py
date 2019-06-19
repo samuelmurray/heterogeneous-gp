@@ -137,8 +137,7 @@ class MLGP(InducingPointsModel):
         return a
 
     def _compute_f_mean(self, u_samples: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
-        a_tiled = self._expand_and_tile(a, [self.num_samples, 1, 1], name="a_tiled")
-        f_mean = tf.matmul(u_samples, a_tiled, name="f_mean")
+        f_mean = tf.matmul(u_samples, a, name="f_mean")
         return f_mean
 
     def _compute_f_noise(self, x: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
