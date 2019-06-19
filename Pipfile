@@ -7,7 +7,7 @@ verify_ssl = true
 python_version = "3.7"
 
 [scripts]
-test = "pytest --disable-pytest-warnings --codestyle --flakes --mypy"
+test = "pytest --codestyle --flakes --mypy"
 
 [packages]
 IPython = "*"
