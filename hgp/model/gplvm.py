@@ -49,9 +49,8 @@ class GPLVM(Model):
                                      name="y_transp_a")
             chol_xx_diag = tf.diag_part(chol_xx, name="chol_xx_diag")
             log_chol_xx_diag = tf.math.log(chol_xx_diag, name="log_chol_xx_diag")
-            chol_trace = tf.multiply(tf.reduce_sum(log_chol_xx_diag, axis=0),
-                                     self.y_dim,
-                                     name="chol_trace")
+            log_chol_xx_sum = tf.reduce_sum(log_chol_xx_diag, axis=0, name="log_chol_xx_sum")
+            chol_trace = tf.multiply(log_chol_xx_sum, self.y_dim, name="chol_trace")
             const = tf.identity(self.y_dim * self.num_data * self._HALF_LN2PI, name="const")
             log_likelihood = tf.negative(y_transp_a + chol_trace + const, name="log_likelihood")
         return log_likelihood
