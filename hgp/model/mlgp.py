@@ -54,10 +54,10 @@ class MLGP(InducingPointsModel):
             log_scale_vec = tf.get_variable("log_scale_vec", shape=log_scale_shape,
                                             initializer=tf.zeros_initializer())
             log_scale = tfp.distributions.fill_triangular(log_scale_vec, name="log_scale")
-            log_scale_diag_part = tf.matrix_diag_part(log_scale)
+            log_scale_diag_part = tf.linalg.diag_part(log_scale)
             scale = tf.identity(log_scale
-                                - tf.matrix_diag(log_scale_diag_part)
-                                + tf.matrix_diag(tf.exp(log_scale_diag_part)),
+                                - tf.linalg.diag(log_scale_diag_part)
+                                + tf.linalg.diag(tf.exp(log_scale_diag_part)),
                                 name="scale")
         return mean, scale
 
@@ -151,7 +151,7 @@ class MLGP(InducingPointsModel):
         # K~ = Kxx - Kxz * Kzz^(-1) * Kzx
         k_zx = self.kernel(self.z, x, name="k_zx")
         k_zx_mul_a = tf.matmul(k_zx, a, transpose_a=True, name="k_zx_mul_a")
-        k_zx_mul_a_diag_part = tf.matrix_diag_part(k_zx_mul_a, name="k_zx_mul_a_diag_part")
+        k_zx_mul_a_diag_part = tf.linalg.diag_part(k_zx_mul_a, name="k_zx_mul_a_diag_part")
         k_xx_diag_part = self.kernel.diag_part(x, name="k_xx_diag_part")
         diag_part = tf.subtract(k_xx_diag_part, k_zx_mul_a_diag_part, name="diag_part")
         # diag_part can't be negative

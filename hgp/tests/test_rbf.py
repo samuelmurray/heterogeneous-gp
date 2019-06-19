@@ -87,7 +87,7 @@ class TestRBF(tf.test.TestCase):
         with self.session() as sess:
             sess.run(init)
             diag_part = sess.run(diag_part)
-            diag_part_of_full = sess.run(tf.matrix_diag_part(full))
+            diag_part_of_full = sess.run(tf.linalg.diag_part(full))
         self.assertAllClose(diag_part_of_full, diag_part)
 
     def test_diag_part_equal_to_full_batch(self) -> None:
@@ -100,7 +100,7 @@ class TestRBF(tf.test.TestCase):
         with self.session() as sess:
             sess.run(init)
             diag_part = sess.run(diag_part)
-            diag_part_of_full = sess.run(tf.matrix_diag_part(full))
+            diag_part_of_full = sess.run(tf.linalg.diag_part(full))
         self.assertAllClose(diag_part_of_full, diag_part)
 
     def test_create_summary(self) -> None:

@@ -107,7 +107,7 @@ class MLGPLVM(MLGP):
         k_zx = self.kernel(z_tiled, x_samples, name="k_zx")
         k_xx_diag_part = self.kernel.diag_part(x_samples, name="k_xx_diag_part")
         k_xz_mul_a = tf.matmul(k_zx, a, transpose_a=True, name="k_xz_mul_a")
-        k_xz_mul_a_diag_part = tf.matrix_diag_part(k_xz_mul_a, name="k_xz_mul_a_diag_part")
+        k_xz_mul_a_diag_part = tf.linalg.diag_part(k_xz_mul_a, name="k_xz_mul_a_diag_part")
         diag_part = tf.subtract(k_xx_diag_part, k_xz_mul_a_diag_part, name="diag_part")
         # diag_part can't be negative
         diag_part_pos = tf.maximum(diag_part, 1e-16, name="diag_part_pos")
