@@ -19,7 +19,6 @@ scipy = "*"
 seaborn = "*"
 hgp = {editable = true,path = "."}
 tensorflow = "==1.14.0"
-tensorflow-estimator = "==1.14.0rc1"
 tensorflow-probability = "==0.7.0rc0"
 pods = "==0.0.2a"
 
