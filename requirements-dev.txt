@@ -1,6 +1,9 @@
 -i https://pypi.org/simple
+appnope==0.1.0 ; sys_platform == 'darwin'
 atomicwrites==1.3.0
 attrs==19.1.0
+backcall==0.1.0
+bleach==3.1.0
 certifi==2019.6.16
 chardet==3.0.4
 codecov==2.0.15
@@ -8,20 +11,46 @@ comet-git-pure==0.19.11
 comet-ml==2.0.0
 configobj==5.0.6
 coverage==4.5.3
+decorator==4.4.0
+defusedxml==0.6.0
+entrypoints==0.3
 everett[ini]==1.0.2 ; python_version >= '3.0'
 idna==2.8
 importlib-metadata==0.18
+ipykernel==5.1.1
+ipython-genutils==0.2.0
+ipython==7.5.0
+ipywidgets==7.4.2
+jedi==0.13.3
+jinja2==2.10.1
 jsonschema==3.0.1
+jupyter-client==5.2.4
+jupyter-console==6.0.0
+jupyter-core==4.5.0
+jupyter==1.0.0
+markupsafe==1.1.1
+mistune==0.8.4
 more-itertools==7.0.0 ; python_version > '2.7'
 mypy-extensions==0.4.1
-mypy==0.701
+mypy==0.710
+nbconvert==5.5.0
+nbformat==4.4.0
 netifaces==0.10.9
+notebook==5.7.8
 nvidia-ml-py3==7.352.0
 packaging==19.0
+pandocfilters==1.4.2
+parso==0.4.0
+pexpect==4.7.0 ; sys_platform != 'win32'
+pickleshare==0.7.5
 pluggy==0.12.0
+prometheus-client==0.7.1
+prompt-toolkit==2.0.9
+ptyprocess==0.6.0 ; os_name != 'nt'
 py==1.8.0
 pycodestyle==2.5.0
 pyflakes==2.1.1
+pygments==2.4.2
 pyparsing==2.4.0
 pyrsistent==0.15.2
 pytest-codestyle==1.4.0
@@ -29,11 +58,21 @@ pytest-cov==2.7.1
 pytest-flakes==4.0.0
 pytest-mypy==0.3.2
 pytest==4.6.3
+python-dateutil==2.8.0
+pyzmq==18.0.1
+qtconsole==4.5.1
 requests==2.22.0
+send2trash==1.5.0
 six==1.12.0
-typed-ast==1.3.5
+terminado==0.8.2
+testpath==0.4.2
+tornado==6.0.2
+traitlets==4.3.2
+typed-ast==1.4.0
 urllib3==1.25.3
 wcwidth==0.1.7
+webencodings==0.5.1
 websocket-client==0.56.0
+widgetsnbextension==3.4.2
 wurlitzer==1.0.3
 zipp==0.5.1
