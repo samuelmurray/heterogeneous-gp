@@ -1,4 +1,4 @@
-from typing import Optional, Sequence, Tuple
+from typing import Tuple
 
 import numpy as np
 import tensorflow as tf
@@ -54,11 +54,11 @@ class MLGP(InducingPointsModel):
             log_scale_vec = tf.get_variable("log_scale_vec", shape=log_scale_shape,
                                             initializer=tf.zeros_initializer())
             log_scale = tfp.distributions.fill_triangular(log_scale_vec, name="log_scale")
-            log_scale_diag_part = tf.matrix_diag_part(log_scale)
-            scale = tf.identity(log_scale
-                                - tf.matrix_diag(log_scale_diag_part)
-                                + tf.matrix_diag(tf.exp(log_scale_diag_part)),
-                                name="scale")
+            log_scale_diag_part = tf.linalg.diag_part(log_scale)
+            log_scale_diag = tf.linalg.diag(log_scale_diag_part)
+            scale_diag_part = tf.exp(log_scale_diag_part)
+            scale_diag = tf.linalg.diag(scale_diag_part)
+            scale = tf.identity(log_scale - log_scale_diag + scale_diag, name="scale")
         return mean, scale
 
     def initialize(self) -> None:
@@ -78,7 +78,7 @@ class MLGP(InducingPointsModel):
         with tf.name_scope("kl_qu_pu"):
             qu = tfp.distributions.MultivariateNormalTriL(self.qu_mean, self.qu_scale, name="qu")
             k_zz = self.kernel(self.z, name="k_zz")
-            chol_zz = tf.cholesky(k_zz, name="chol_zz")
+            chol_zz = tf.linalg.cholesky(k_zz, name="chol_zz")
             zeros = tf.zeros(self.num_inducing)
             pu = tfp.distributions.MultivariateNormalTriL(zeros, chol_zz, name="pu")
             kl = tfp.distributions.kl_divergence(qu, pu, allow_nan_stats=False, name="kl")
@@ -96,7 +96,8 @@ class MLGP(InducingPointsModel):
     def _log_prob(self, samples: tf.Tensor) -> tf.Tensor:
         with tf.name_scope("log_prob"):
             y = self._get_or_subsample_y()
-            log_prob = self.likelihood.log_prob(tf.matrix_transpose(samples), y, name="log_prob")
+            samples_transpose = tf.linalg.matrix_transpose(samples)
+            log_prob = self.likelihood.log_prob(samples_transpose, y, name="log_prob")
         return log_prob
 
     def _get_or_subsample_y(self) -> tf.Tensor:
@@ -114,7 +115,7 @@ class MLGP(InducingPointsModel):
 
     def _sample_u(self) -> tf.Tensor:
         # u = qu_mean + qu_scale * e_u, e_u ~ N(0,1)
-        e_u = tf.random_normal(shape=[self.num_samples, self.f_dim, self.num_inducing], name="e_u")
+        e_u = tf.random.normal(shape=[self.num_samples, self.f_dim, self.num_inducing], name="e_u")
         u_noise = tf.einsum("ijk,tik->tij", self.qu_scale, e_u, name="u_noise")
         u_samples = tf.add(self.qu_mean, u_noise, name="u_samples")
         return u_samples
@@ -130,20 +131,19 @@ class MLGP(InducingPointsModel):
     def _compute_a(self, x: tf.Tensor) -> tf.Tensor:
         # a = Kzz^(-1) * Kzx
         k_zz = self.kernel(self.z, name="k_zz")
-        k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
+        k_zz_inv = tf.linalg.inv(k_zz, name="k_zz_inv")
         k_zx = self.kernel(self.z, x, name="k_zx")
         a = tf.matmul(k_zz_inv, k_zx, name="a")
         return a
 
     def _compute_f_mean(self, u_samples: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
-        a_tiled = self._expand_and_tile(a, [self.num_samples, 1, 1], name="a_tiled")
-        f_mean = tf.matmul(u_samples, a_tiled, name="f_mean")
+        f_mean = tf.matmul(u_samples, a, name="f_mean")
         return f_mean
 
     def _compute_f_noise(self, x: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
         k_diag_part_sqrt = self._compute_k_tilde_diag_part_sqrt(x, a)
         num_data = tf.shape(x)[0]
-        e_f = tf.random_normal(shape=[self.num_samples, self.f_dim, num_data], name="e_f")
+        e_f = tf.random.normal(shape=[self.num_samples, self.f_dim, num_data], name="e_f")
         f_noise = tf.multiply(k_diag_part_sqrt, e_f, name="f_noise")
         return f_noise
 
@@ -151,7 +151,7 @@ class MLGP(InducingPointsModel):
         # K~ = Kxx - Kxz * Kzz^(-1) * Kzx
         k_zx = self.kernel(self.z, x, name="k_zx")
         k_zx_mul_a = tf.matmul(k_zx, a, transpose_a=True, name="k_zx_mul_a")
-        k_zx_mul_a_diag_part = tf.matrix_diag_part(k_zx_mul_a, name="k_zx_mul_a_diag_part")
+        k_zx_mul_a_diag_part = tf.linalg.diag_part(k_zx_mul_a, name="k_zx_mul_a_diag_part")
         k_xx_diag_part = self.kernel.diag_part(x, name="k_xx_diag_part")
         diag_part = tf.subtract(k_xx_diag_part, k_zx_mul_a_diag_part, name="diag_part")
         # diag_part can't be negative
@@ -163,13 +163,6 @@ class MLGP(InducingPointsModel):
                                                        name="diag_part_sqrt_twice_expanded")
         return diag_part_sqrt_twice_expanded
 
-    @staticmethod
-    def _expand_and_tile(tensor: tf.Tensor, shape: Sequence[int],
-                         name: Optional[str] = None) -> tf.Tensor:
-        # TODO: This will (maybe) be obsolete with tf v1.14, since matmul will support broadcasting
-        expanded_tensor = tf.expand_dims(tensor, axis=0)
-        return tf.tile(expanded_tensor, multiples=shape, name=name)
-
     def predict(self, xs: np.ndarray) -> Tuple[tf.Tensor, tf.Tensor]:
         # TODO: Not clear how to report the variances.
         # Should we use qu_scale?
@@ -178,7 +171,7 @@ class MLGP(InducingPointsModel):
         with tf.name_scope("predict"):
             xs = tf.convert_to_tensor(xs, dtype=tf.float32, name="xs")
             k_zz = self.kernel(self.z, name="k_zz")
-            k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
+            k_zz_inv = tf.linalg.inv(k_zz, name="k_zz_inv")
             k_xs_z = self.kernel(xs, self.z, name="k_xs_z")
             k_xs_z_mul_kzz_inv = tf.matmul(k_xs_z, k_zz_inv, name="k_xs_z_mul_kzz_inv")
             f_mean = tf.matmul(k_xs_z_mul_kzz_inv, self.qu_mean, transpose_b=True, name="f_mean")

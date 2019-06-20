@@ -13,7 +13,7 @@ class GPLVM(Model):
                  kernel: Kernel,
                  ) -> None:
         super().__init__(x_dim, y.shape[1], y.shape[0])
-        self._HALF_LN2PI = 0.5 * tf.log(2 * np.pi)
+        self._HALF_LN2PI = 0.5 * tf.math.log(2 * np.pi)
         if x is None:
             x = np.random.normal(size=(self.num_data, self.x_dim))
         elif x.shape[0] != self.num_data:
@@ -43,13 +43,14 @@ class GPLVM(Model):
     def _log_likelihood(self) -> tf.Tensor:
         with tf.name_scope("log_likelihood"):
             k_xx = self.kernel(self.x, name="k_xx")
-            chol_xx = tf.cholesky(k_xx, name="chol_xx")
-            a = tf.matrix_solve(tf.transpose(chol_xx), tf.matrix_solve(chol_xx, self.y), name="a")
-            y_transp_a = tf.multiply(0.5, tf.trace(tf.matmul(self.y, a, transpose_a=True)),
+            chol_xx = tf.linalg.cholesky(k_xx, name="chol_xx")
+            a = tf.linalg.solve(tf.transpose(chol_xx), tf.linalg.solve(chol_xx, self.y), name="a")
+            y_transp_a = tf.multiply(0.5, tf.linalg.trace(tf.matmul(self.y, a, transpose_a=True)),
                                      name="y_transp_a")
-            chol_trace = tf.multiply(tf.reduce_sum(tf.log(tf.diag_part(chol_xx)), axis=0),
-                                     self.y_dim,
-                                     name="chol_trace")
+            chol_xx_diag = tf.linalg.diag_part(chol_xx, name="chol_xx_diag")
+            log_chol_xx_diag = tf.math.log(chol_xx_diag, name="log_chol_xx_diag")
+            log_chol_xx_sum = tf.reduce_sum(log_chol_xx_diag, axis=0, name="log_chol_xx_sum")
+            chol_trace = tf.multiply(log_chol_xx_sum, self.y_dim, name="chol_trace")
             const = tf.identity(self.y_dim * self.num_data * self._HALF_LN2PI, name="const")
             log_likelihood = tf.negative(y_transp_a + chol_trace + const, name="log_likelihood")
         return log_likelihood

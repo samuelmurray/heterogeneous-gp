@@ -7,26 +7,26 @@ verify_ssl = true
 python_version = "3.7"
 
 [scripts]
-test = "pytest --disable-pytest-warnings --codestyle --flakes --mypy"
+test = "pytest --codestyle --flakes --mypy"
 
 [packages]
+hgp = {editable = true,path = "."}
 matplotlib = "*"
 numpy = "*"
+pods = "==0.0.2a"
 scikit-learn = ">=0.20"
 scipy = "*"
 seaborn = "*"
-hgp = {editable = true,path = "."}
-tensorflow = ">=1.12.0,<1.14"
-tensorflow-probability = ">=0.5.0"
-pods = "==0.0.2a"
+tensorflow = ">=1.14.0,<2.0"
+tensorflow-probability = ">=0.7.0"
 
 [dev-packages]
 codecov = "*"
+comet-ml = "*"
+ipython = "*"
+jupyter = "*"
 pytest = "*"
 pytest-codestyle = "*"
 pytest-cov = "*"
 pytest-flakes = "*"
 pytest-mypy = "*"
-comet-ml = "*"
-ipython = "*"
-jupyter = "*"

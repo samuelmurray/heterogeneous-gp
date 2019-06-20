@@ -57,7 +57,7 @@ class LikelihoodWrapper:
 
     def log_prob(self, f: tf.Tensor, y: tf.Tensor, name: Optional[str] = None) -> tf.Tensor:
         with tf.name_scope(name):
-            nan_mask = tf.is_nan(y, name="nan_mask")
+            nan_mask = tf.math.is_nan(y, name="nan_mask")
             log_prob = self._create_log_prob(f, y, nan_mask)
             log_prob_mask = self._create_log_prob_mask(log_prob, nan_mask)
             filtered_log_prob = tf.where(log_prob_mask, tf.zeros_like(log_prob), log_prob,

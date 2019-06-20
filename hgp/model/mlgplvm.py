@@ -63,7 +63,7 @@ class MLGPLVM(MLGP):
         # x = qx_mean + qx_std * e_x, e_x ~ N(0,1)
         qx_mean, qx_var = self._get_or_subsample_qx()
         num_data = tf.shape(qx_mean)[0]
-        e_x = tf.random_normal(shape=[self.num_samples, num_data, self.x_dim], name="e_x")
+        e_x = tf.random.normal(shape=[self.num_samples, num_data, self.x_dim], name="e_x")
         qx_var_sqrt = tf.sqrt(qx_var, name="qx_var_sqrt")
         x_noise = tf.multiply(qx_var_sqrt, e_x, name="x_noise")
         x_samples = tf.add(qx_mean, x_noise, name="x_samples")
@@ -82,10 +82,9 @@ class MLGPLVM(MLGP):
 
     def _compute_a(self, x_samples: tf.Tensor) -> tf.Tensor:
         # a = Kzz^(-1) * Kzx
-        z_tiled = self._expand_and_tile(self.z, [self.num_samples, 1, 1], name="z_tiled")
-        k_zx = self.kernel(z_tiled, x_samples, name="k_zx")
+        k_zx = self.kernel(self.z, x_samples, name="k_zx")
         k_zz = self.kernel(self.z, name="k_zz")
-        k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
+        k_zz_inv = tf.linalg.inv(k_zz, name="k_zz_inv")
         a_transposed = tf.tensordot(k_zz_inv, k_zx, axes=[1, 1], name="a_transposed")
         a = tf.transpose(a_transposed, perm=[1, 0, 2], name="a")
         return a
@@ -97,17 +96,16 @@ class MLGPLVM(MLGP):
     def _compute_f_noise(self, x_samples: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
         k_diag_part_sqrt = self._compute_k_tilde_diag_part_sqrt(x_samples, a)
         num_data = tf.shape(x_samples)[1]
-        e_f = tf.random_normal(shape=[self.num_samples, self.f_dim, num_data], name="e_f")
+        e_f = tf.random.normal(shape=[self.num_samples, self.f_dim, num_data], name="e_f")
         f_noise = tf.multiply(k_diag_part_sqrt, e_f, name="f_noise")
         return f_noise
 
     def _compute_k_tilde_diag_part_sqrt(self, x_samples: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
         # K~ = Kxx - Kxz * Kzz^(-1) * Kzx
-        z_tiled = self._expand_and_tile(self.z, [self.num_samples, 1, 1], name="z_tiled")
-        k_zx = self.kernel(z_tiled, x_samples, name="k_zx")
+        k_zx = self.kernel(self.z, x_samples, name="k_zx")
         k_xx_diag_part = self.kernel.diag_part(x_samples, name="k_xx_diag_part")
         k_xz_mul_a = tf.matmul(k_zx, a, transpose_a=True, name="k_xz_mul_a")
-        k_xz_mul_a_diag_part = tf.matrix_diag_part(k_xz_mul_a, name="k_xz_mul_a_diag_part")
+        k_xz_mul_a_diag_part = tf.linalg.diag_part(k_xz_mul_a, name="k_xz_mul_a_diag_part")
         diag_part = tf.subtract(k_xx_diag_part, k_xz_mul_a_diag_part, name="diag_part")
         # diag_part can't be negative
         diag_part_pos = tf.maximum(diag_part, 1e-16, name="diag_part_pos")
@@ -119,7 +117,7 @@ class MLGPLVM(MLGP):
     def impute(self) -> tf.Tensor:
         with tf.name_scope("impute"):
             k_zz = self.kernel(self.z, name="k_zz")
-            k_zz_inv = tf.matrix_inverse(k_zz, name="k_zz_inv")
+            k_zz_inv = tf.linalg.inv(k_zz, name="k_zz_inv")
             qx_mean, _ = self._get_or_subsample_qx()
             k_zx = self.kernel(self.z, qx_mean, name="k_zx")
             k_xz_mul_k_zz_inv = tf.matmul(k_zx, k_zz_inv, transpose_a=True,
@@ -134,7 +132,7 @@ class MLGPLVM(MLGP):
             mode = tf.concat(modes_as_float, axis=1, name="modes")
 
             y = self._get_or_subsample_y()
-            nan_mask = tf.is_nan(y, name="nan_mask")
+            nan_mask = tf.math.is_nan(y, name="nan_mask")
             imputation = tf.where(nan_mask, mode, y, name="imputation")
         return imputation
 
