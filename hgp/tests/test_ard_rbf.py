@@ -103,6 +103,32 @@ class TestARDRBF(tf.test.TestCase):
             diag_part_of_full = sess.run(tf.linalg.diag_part(full))
         self.assertAllClose(diag_part_of_full, diag_part)
 
+    def test_broadcasting_first_argument(self) -> None:
+        a = tf.convert_to_tensor(np.random.normal(size=(self.num_a, self.x_dim)),
+                                 dtype=tf.float32)
+        b = tf.convert_to_tensor(np.random.normal(size=(self.batch_size, self.num_b, self.x_dim)),
+                                 dtype=tf.float32)
+        a_tiled = tf.tile(tf.expand_dims(a, axis=0), multiples=[self.batch_size, 1, 1])
+        init = tf.global_variables_initializer()
+        with self.session() as sess:
+            sess.run(init)
+            k_ab = sess.run(self.kernel(a, b))
+            k_ab_tiled = sess.run(self.kernel(a_tiled, b))
+        self.assertAllClose(k_ab, k_ab_tiled)
+
+    def test_broadcasting_second_argument(self) -> None:
+        a = tf.convert_to_tensor(np.random.normal(size=(self.batch_size, self.num_a, self.x_dim)),
+                                 dtype=tf.float32)
+        b = tf.convert_to_tensor(np.random.normal(size=(self.num_b, self.x_dim)),
+                                 dtype=tf.float32)
+        b_tiled = tf.tile(tf.expand_dims(b, axis=0), multiples=[self.batch_size, 1, 1])
+        init = tf.global_variables_initializer()
+        with self.session() as sess:
+            sess.run(init)
+            k_ab = sess.run(self.kernel(a, b))
+            k_ab_tiled = sess.run(self.kernel(a, b_tiled))
+        self.assertAllClose(k_ab, k_ab_tiled)
+
     def test_create_summary(self) -> None:
         self.kernel.create_summaries()
         merged_summary = tf.summary.merge_all()
