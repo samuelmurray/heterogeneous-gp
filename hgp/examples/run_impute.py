@@ -149,8 +149,6 @@ def load_data(split: int) -> Tuple[np.ndarray, np.ndarray, LikelihoodWrapper]:
         y_noisy = remove_data_randomly(y_true, likelihood)
     else:
         y_noisy = remove_data(y_true, likelihood, split)
-    print(y_true.shape)
-    print(y_noisy.shape)
     return y_true, y_noisy, likelihood
 
 
