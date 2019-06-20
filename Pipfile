@@ -10,23 +10,23 @@ python_version = "3.7"
 test = "pytest --codestyle --flakes --mypy"
 
 [packages]
+hgp = {editable = true,path = "."}
 matplotlib = "*"
 numpy = "*"
+pods = "==0.0.2a"
 scikit-learn = ">=0.20"
 scipy = "*"
 seaborn = "*"
-hgp = {editable = true,path = "."}
 tensorflow = ">=1.14.0,<2.0"
 tensorflow-probability = "==0.7.0rc0"
-pods = "==0.0.2a"
 
 [dev-packages]
 codecov = "*"
+comet-ml = "*"
+ipython = "*"
+jupyter = "*"
 pytest = "*"
 pytest-codestyle = "*"
 pytest-cov = "*"
 pytest-flakes = "*"
 pytest-mypy = "*"
-comet-ml = "*"
-ipython = "*"
-jupyter = "*"
