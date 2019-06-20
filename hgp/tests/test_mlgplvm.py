@@ -58,6 +58,18 @@ class TestMLGPLVM(tf.test.TestCase):
         with self.assertRaises(ValueError):
             _ = MLGPLVM(y, latent_dim + 1, x=x, kernel=kernel, likelihood=likelihood)
 
+    def test_specifying_x(self) -> None:
+        x = np.empty((self.num_data, self.latent_dim))
+        y = np.empty((self.num_data, self.output_dim))
+        kernel = RBF()
+        likelihood = LikelihoodWrapper([Normal() for _ in range(self.output_dim)])
+        m = MLGPLVM(y, self.latent_dim, x=x, kernel=kernel, likelihood=likelihood)
+        init = tf.global_variables_initializer()
+        with self.session() as sess:
+            sess.run(init)
+            qx_mean = sess.run(m.qx_mean)
+        self.assertAllClose(x, qx_mean)
+
     def test_create_summary(self) -> None:
         self.m.create_summaries()
         merged_summary = tf.summary.merge_all()

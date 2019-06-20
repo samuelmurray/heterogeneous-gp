@@ -31,7 +31,7 @@ class MLGPLVM(MLGP):
     def _create_qx(self, x: np.ndarray) -> Tuple[tf.Tensor, tf.Tensor]:
         with tf.variable_scope("qx"):
             mean = tf.get_variable("mean", shape=[self.num_data, self.x_dim],
-                                   initializer=tf.constant_initializer(x.T))
+                                   initializer=tf.constant_initializer(x))
             log_var = tf.get_variable("log_var", shape=[self.num_data, self.x_dim],
                                       initializer=tf.constant_initializer(0.1))
             var = tf.exp(log_var, name="var")
