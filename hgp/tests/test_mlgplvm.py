@@ -59,8 +59,8 @@ class TestMLGPLVM(tf.test.TestCase):
             _ = MLGPLVM(y, latent_dim + 1, x=x, kernel=kernel, likelihood=likelihood)
 
     def test_specifying_x(self) -> None:
-        x = np.empty((self.num_data, self.output_dim))
-        y = np.empty((self.num_data, self.latent_dim))
+        x = np.empty((self.num_data, self.latent_dim))
+        y = np.empty((self.num_data, self.output_dim))
         kernel = RBF()
         likelihood = LikelihoodWrapper([Normal() for _ in range(self.output_dim)])
         m = MLGPLVM(y, self.latent_dim, x=x, kernel=kernel, likelihood=likelihood)
