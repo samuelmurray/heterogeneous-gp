@@ -34,6 +34,7 @@ parser.add_argument("--data", choices=["adult", "default_credit", "wine", "wine_
 parser.add_argument("--missing", type=int, choices=[10, 20, 30, 40, 50, 60, 70, 80, 90],
                     required=True)
 parser.add_argument("--missing_randomly", action="store_true")
+parser.add_argument("--subsample_data", type=int, default=100)
 args = parser.parse_args()
 
 experiment = Experiment(project_name="heterogeneous-gp", workspace="samuelmurray")
@@ -43,6 +44,8 @@ experiment.add_tags([args.model, args.data, args.missing])
 if args.model == "vae":
     experiment.log_parameter("num hidden", args.num_hidden)
     experiment.log_parameter("num layers", args.num_layers)
+if args.subsample_data < 100:
+    experiment.add_tag(args.subsample_data / 100)
 
 
 def run() -> None:
@@ -140,10 +143,14 @@ def create_vae_mlgplvm(y_noisy: np.ndarray, likelihood: LikelihoodWrapper) -> VA
 
 def load_data(split: int) -> Tuple[np.ndarray, np.ndarray, LikelihoodWrapper]:
     y_true, likelihood = load_true_data()
+    if args.subsample_data < 100:
+        y_true = subsample_data(y_true)
     if args.missing_randomly:
         y_noisy = remove_data_randomly(y_true, likelihood)
     else:
         y_noisy = remove_data(y_true, likelihood, split)
+    print(y_true.shape)
+    print(y_noisy.shape)
     return y_true, y_noisy, likelihood
 
 
@@ -157,6 +164,13 @@ def load_true_data() -> Tuple[np.ndarray, LikelihoodWrapper]:
     if args.data == "default_credit":
         return Unsupervised.make_default_credit()[:2]
     raise ValueError("Only 'adult', 'default_credit', 'wine' and 'wine_pos' allowed")
+
+
+def subsample_data(y: np.ndarray) -> np.ndarray:
+    num_data = y.shape[0]
+    num_subsampled = int(num_data * args.subsample_data / 100)
+    rows = np.random.choice(num_data, size=num_subsampled, replace=False)
+    return y[rows].copy()
 
 
 def remove_data_randomly(y: np.ndarray, likelihood: LikelihoodWrapper) -> np.ndarray:
