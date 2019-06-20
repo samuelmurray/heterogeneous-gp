@@ -59,6 +59,16 @@ class TestGPLVM(tf.test.TestCase):
         kernel = RBF()
         with self.assertRaises(ValueError):
             _ = GPLVM(y, latent_dim + 1, x=x, kernel=kernel)
+            
+    def test_specifying_x(self) -> None:
+        x, y = np.empty((self.num_data, self.latent_dim)), np.empty((self.num_data, self.output_dim))
+        kernel = RBF()
+        m = GPLVM(y, self.latent_dim, x=x, kernel=kernel)
+        init = tf.global_variables_initializer()
+        with self.session() as sess:
+            sess.run(init)
+            m_x = sess.run(m.x)
+        self.assertAllClose(x, m_x)
 
     def test_create_summary(self) -> None:
         self.m.create_summaries()
