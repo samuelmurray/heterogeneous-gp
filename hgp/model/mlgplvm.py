@@ -72,14 +72,6 @@ class MLGPLVM(MLGP):
     def _get_or_subsample_qx(self) -> Tuple[tf.Tensor, tf.Tensor]:
         return self.qx_mean, self.qx_var
 
-    def _sample_f_from_x_and_u(self, x_samples: tf.Tensor, u_samples: tf.Tensor) -> tf.Tensor:
-        # f = a.T * u + sqrt(k_tilde) * e_f, e_f ~ N(0,1)
-        a = self._compute_a(x_samples)
-        f_mean = self._compute_f_mean(u_samples, a)
-        f_noise = self._compute_f_noise(x_samples, a)
-        f_samples = tf.add(f_mean, f_noise, name="f_samples")
-        return f_samples
-
     def _compute_a(self, x_samples: tf.Tensor) -> tf.Tensor:
         # a = Kzz^(-1) * Kzx
         k_zx = self.kernel(self.z, x_samples, name="k_zx")
@@ -88,10 +80,6 @@ class MLGPLVM(MLGP):
         a_transposed = tf.tensordot(k_zz_inv, k_zx, axes=[1, 1], name="a_transposed")
         a = tf.transpose(a_transposed, perm=[1, 0, 2], name="a")
         return a
-
-    def _compute_f_mean(self, u_samples: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
-        f_mean = tf.matmul(u_samples, a, name="f_mean")
-        return f_mean
 
     def _compute_f_noise(self, x_samples: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
         k_diag_part_sqrt = self._compute_k_tilde_diag_part_sqrt(x_samples, a)
