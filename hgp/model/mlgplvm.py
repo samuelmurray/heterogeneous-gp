@@ -81,13 +81,6 @@ class MLGPLVM(MLGP):
         a = tf.transpose(a_transposed, perm=[1, 0, 2], name="a")
         return a
 
-    def _compute_f_noise(self, x_samples: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
-        k_diag_part_sqrt = self._compute_k_tilde_diag_part_sqrt(x_samples, a)
-        num_data = self._get_num_data_from_x(x_samples)
-        e_f = tf.random.normal(shape=[self.num_samples, self.f_dim, num_data], name="e_f")
-        f_noise = tf.multiply(k_diag_part_sqrt, e_f, name="f_noise")
-        return f_noise
-
     @staticmethod
     def _get_num_data_from_x(x):
         return tf.shape(x)[1]
