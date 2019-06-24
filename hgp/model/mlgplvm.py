@@ -85,18 +85,6 @@ class MLGPLVM(MLGP):
     def _get_num_data_from_x(x):
         return tf.shape(x)[1]
 
-    def _compute_k_tilde_diag_part_sqrt(self, x_samples: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
-        # K~ = Kxx - Kxz * Kzz^(-1) * Kzx
-        k_zx = self.kernel(self.z, x_samples, name="k_zx")
-        k_xz_mul_a = tf.matmul(k_zx, a, transpose_a=True, name="k_xz_mul_a")
-        k_xz_mul_a_diag_part = tf.linalg.diag_part(k_xz_mul_a, name="k_xz_mul_a_diag_part")
-        k_xx_diag_part = self.kernel.diag_part(x_samples, name="k_xx_diag_part")
-        diag_part = tf.subtract(k_xx_diag_part, k_xz_mul_a_diag_part, name="diag_part")
-        # diag_part can't be negative
-        diag_part_pos = tf.maximum(diag_part, 1e-16, name="diag_part_pos")
-        diag_part_sqrt = tf.sqrt(diag_part_pos, name="diag_part_sqrt")
-        return self._expand_k(diag_part_sqrt)
-
     @staticmethod
     def _expand_k(diag_part_sqrt):
         diag_part_sqrt_expanded = tf.expand_dims(diag_part_sqrt, axis=1,
