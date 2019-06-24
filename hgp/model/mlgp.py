@@ -168,12 +168,9 @@ class MLGP(InducingPointsModel):
         return self._expand_k(diag_part_sqrt)
 
     @staticmethod
-    def _expand_k(diag_part_sqrt):
-        diag_part_sqrt_expanded = tf.expand_dims(diag_part_sqrt, axis=0,
-                                                 name="diag_part_sqrt_expanded")
-        diag_part_sqrt_twice_expanded = tf.expand_dims(diag_part_sqrt_expanded, axis=0,
-                                                       name="diag_part_sqrt_twice_expanded")
-        return diag_part_sqrt_twice_expanded
+    def _expand_k(k: tf.Tensor) -> tf.Tensor:
+        k_expanded = tf.expand_dims(k, axis=0, name="k_expanded")
+        return tf.expand_dims(k_expanded, axis=0, name="k_twice_expanded")
 
     def predict(self, xs: np.ndarray) -> Tuple[tf.Tensor, tf.Tensor]:
         # TODO: Not clear how to report the variances.

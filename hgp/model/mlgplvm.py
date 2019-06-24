@@ -91,10 +91,8 @@ class MLGPLVM(MLGP):
         return tf.shape(x)[1]
 
     @staticmethod
-    def _expand_k(diag_part_sqrt):
-        diag_part_sqrt_expanded = tf.expand_dims(diag_part_sqrt, axis=1,
-                                                 name="diag_part_sqrt_expanded")
-        return diag_part_sqrt_expanded
+    def _expand_k(k: tf.Tensor) -> tf.Tensor:
+        return tf.expand_dims(k, axis=1, name="k_expanded")
 
     def impute(self) -> tf.Tensor:
         with tf.name_scope("impute"):
