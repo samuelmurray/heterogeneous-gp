@@ -91,8 +91,8 @@ class MLGPLVM(MLGP):
         return tf.shape(x)[1]
 
     @staticmethod
-    def _expand_k(k: tf.Tensor) -> tf.Tensor:
-        return tf.expand_dims(k, axis=1, name="k_expanded")
+    def _expand_f_var(f_var: tf.Tensor) -> tf.Tensor:
+        return tf.expand_dims(f_var, axis=1, name="f_var_expanded")
 
     def impute(self) -> tf.Tensor:
         with tf.name_scope("impute"):

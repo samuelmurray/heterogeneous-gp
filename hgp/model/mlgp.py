@@ -145,32 +145,32 @@ class MLGP(InducingPointsModel):
         return tf.matmul(u_samples, a, name="f_mean")
 
     def _compute_f_noise(self, x: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
-        k_diag_part_sqrt = self._compute_k_tilde_diag_part_sqrt(x, a)
+        f_var_sqrt = self._compute_f_var_sqrt(x, a)
         num_data = self._get_num_data_from_x(x)
         e_f = tf.random.normal(shape=[self.num_samples, self.f_dim, num_data], name="e_f")
-        f_noise = tf.multiply(k_diag_part_sqrt, e_f, name="f_noise")
+        f_noise = tf.multiply(f_var_sqrt, e_f, name="f_noise")
         return f_noise
 
     @staticmethod
     def _get_num_data_from_x(x: tf.Tensor) -> tf.Tensor:
         return tf.shape(x)[0]
 
-    def _compute_k_tilde_diag_part_sqrt(self, x: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
+    def _compute_f_var_sqrt(self, x: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
         # K~ = Kxx - Kxz * Kzz^(-1) * Kzx
         k_zx = self.kernel(self.z, x, name="k_zx")
         k_xz_mul_a = tf.matmul(k_zx, a, transpose_a=True, name="k_xz_mul_a")
         k_xz_mul_a_diag_part = tf.linalg.diag_part(k_xz_mul_a, name="k_xz_mul_a_diag_part")
         k_xx_diag_part = self.kernel.diag_part(x, name="k_xx_diag_part")
-        diag_part = tf.subtract(k_xx_diag_part, k_xz_mul_a_diag_part, name="diag_part")
-        # diag_part can't be negative
-        diag_part_pos = tf.maximum(diag_part, 1e-16, name="diag_part_pos")
-        diag_part_sqrt = tf.sqrt(diag_part_pos, name="diag_part_sqrt")
-        return self._expand_k(diag_part_sqrt)
+        f_var_diag_part = tf.subtract(k_xx_diag_part, k_xz_mul_a_diag_part, name="f_var_diag_part")
+        # f_var_diag_part can't be negative
+        f_var_diag_part_pos = tf.maximum(f_var_diag_part, 1e-16, name="f_var_diag_part_pos")
+        f_var_diag_part_sqrt = tf.sqrt(f_var_diag_part_pos, name="f_var_diag_part_sqrt")
+        return self._expand_f_var(f_var_diag_part_sqrt)
 
     @staticmethod
-    def _expand_k(k: tf.Tensor) -> tf.Tensor:
-        k_expanded = tf.expand_dims(k, axis=0, name="k_expanded")
-        return tf.expand_dims(k_expanded, axis=0, name="k_twice_expanded")
+    def _expand_f_var(f_var: tf.Tensor) -> tf.Tensor:
+        f_var_expanded = tf.expand_dims(f_var, axis=0, name="f_var_expanded")
+        return tf.expand_dims(f_var_expanded, axis=0, name="f_var_twice_expanded")
 
     def predict(self, xs: np.ndarray) -> Tuple[tf.Tensor, tf.Tensor]:
         # TODO: Not clear how to report the variances.
