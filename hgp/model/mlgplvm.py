@@ -61,12 +61,13 @@ class MLGPLVM(MLGP):
 
     def _sample_x(self) -> tf.Tensor:
         # x = qx_mean + qx_std * e_x, e_x ~ N(0,1)
-        qx_mean, qx_var = self._get_or_subsample_qx()
-        x_noise = self._compute_x_noise(qx_mean, qx_var)
+        qx_mean, _ = self._get_or_subsample_qx()
+        x_noise = self._compute_x_noise()
         x_samples = tf.add(qx_mean, x_noise, name="x_samples")
         return x_samples
 
-    def _compute_x_noise(self, qx_mean, qx_var):
+    def _compute_x_noise(self) -> tf.Tensor:
+        qx_mean, qx_var = self._get_or_subsample_qx()
         num_data = tf.shape(qx_mean)[0]
         qx_var_sqrt = tf.sqrt(qx_var, name="qx_var_sqrt")
         e_x = tf.random.normal(shape=[self.num_samples, num_data, self.x_dim], name="e_x")
@@ -86,7 +87,7 @@ class MLGPLVM(MLGP):
         return a
 
     @staticmethod
-    def _get_num_data_from_x(x):
+    def _get_num_data_from_x(x: tf.Tensor) -> tf.Tensor:
         return tf.shape(x)[1]
 
     @staticmethod

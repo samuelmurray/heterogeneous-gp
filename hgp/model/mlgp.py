@@ -152,7 +152,7 @@ class MLGP(InducingPointsModel):
         return f_noise
 
     @staticmethod
-    def _get_num_data_from_x(x):
+    def _get_num_data_from_x(x: tf.Tensor) -> tf.Tensor:
         return tf.shape(x)[0]
 
     def _compute_k_tilde_diag_part_sqrt(self, x: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
