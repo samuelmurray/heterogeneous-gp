@@ -49,14 +49,12 @@ class TestMLGPLVM(tf.test.TestCase):
             self.assertShapeEqual(np.empty((self.num_data, self.output_dim)), y_impute)
 
     def test_x_dim_exception(self) -> None:
-        latent_dim = 1
-        output_dim = 5
-        num_data = 10
-        x, y = np.empty((num_data, latent_dim)), np.empty((num_data, output_dim))
+        x = np.empty((self.num_data, self.latent_dim))
+        y = np.empty((self.num_data, self.output_dim))
         kernel = RBF()
-        likelihood = LikelihoodWrapper([Normal() for _ in range(output_dim)])
+        likelihood = LikelihoodWrapper([Normal() for _ in range(self.output_dim)])
         with self.assertRaises(ValueError):
-            _ = MLGPLVM(y, latent_dim + 1, x=x, kernel=kernel, likelihood=likelihood)
+            _ = MLGPLVM(y, self.latent_dim + 1, x=x, kernel=kernel, likelihood=likelihood)
 
     def test_specifying_x(self) -> None:
         x = np.empty((self.num_data, self.latent_dim))
