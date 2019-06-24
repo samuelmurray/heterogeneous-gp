@@ -136,9 +136,9 @@ class MLGP(InducingPointsModel):
         a = tf.matmul(k_zz_inv, k_zx, name="a")
         return a
 
-    def _compute_f_mean(self, u_samples: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
-        f_mean = tf.matmul(u_samples, a, name="f_mean")
-        return f_mean
+    @staticmethod
+    def _compute_f_mean(u_samples: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
+        return tf.matmul(u_samples, a, name="f_mean")
 
     def _compute_f_noise(self, x: tf.Tensor, a: tf.Tensor) -> tf.Tensor:
         k_diag_part_sqrt = self._compute_k_tilde_diag_part_sqrt(x, a)
