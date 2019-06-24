@@ -161,6 +161,10 @@ class MLGP(InducingPointsModel):
         # diag_part can't be negative
         diag_part_pos = tf.maximum(diag_part, 1e-16, name="diag_part_pos")
         diag_part_sqrt = tf.sqrt(diag_part_pos, name="diag_part_sqrt")
+        return self._expand_k(diag_part_sqrt)
+
+    @staticmethod
+    def _expand_k(diag_part_sqrt):
         diag_part_sqrt_expanded = tf.expand_dims(diag_part_sqrt, axis=0,
                                                  name="diag_part_sqrt_expanded")
         diag_part_sqrt_twice_expanded = tf.expand_dims(diag_part_sqrt_expanded, axis=0,

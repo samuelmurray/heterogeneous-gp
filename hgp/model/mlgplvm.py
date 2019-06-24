@@ -95,6 +95,10 @@ class MLGPLVM(MLGP):
         # diag_part can't be negative
         diag_part_pos = tf.maximum(diag_part, 1e-16, name="diag_part_pos")
         diag_part_sqrt = tf.sqrt(diag_part_pos, name="diag_part_sqrt")
+        return self._expand_k(diag_part_sqrt)
+
+    @staticmethod
+    def _expand_k(diag_part_sqrt):
         diag_part_sqrt_expanded = tf.expand_dims(diag_part_sqrt, axis=1,
                                                  name="diag_part_sqrt_expanded")
         return diag_part_sqrt_expanded
