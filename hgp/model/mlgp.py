@@ -54,10 +54,10 @@ class MLGP(InducingPointsModel):
             log_scale_vec = tf.get_variable("log_scale_vec", shape=log_scale_shape,
                                             initializer=tf.zeros_initializer())
             log_scale = tfp.distributions.fill_triangular(log_scale_vec, name="log_scale")
-            log_scale_diag_part = tf.linalg.diag_part(log_scale)
-            log_scale_diag = tf.linalg.diag(log_scale_diag_part)
-            scale_diag_part = tf.exp(log_scale_diag_part)
-            scale_diag = tf.linalg.diag(scale_diag_part)
+            log_scale_diag_part = tf.linalg.diag_part(log_scale, name="log_scale_diag_part")
+            log_scale_diag = tf.linalg.diag(log_scale_diag_part, name="log_scale_diag")
+            scale_diag_part = tf.exp(log_scale_diag_part, name="scale_diag_part")
+            scale_diag = tf.linalg.diag(scale_diag_part, name="scale_diag")
             scale = tf.identity(log_scale - log_scale_diag + scale_diag, name="scale")
         return mean, scale
 
@@ -79,7 +79,7 @@ class MLGP(InducingPointsModel):
             qu = tfp.distributions.MultivariateNormalTriL(self.qu_mean, self.qu_scale, name="qu")
             k_zz = self.kernel(self.z, name="k_zz")
             chol_zz = tf.linalg.cholesky(k_zz, name="chol_zz")
-            zeros = tf.zeros(self.num_inducing)
+            zeros = tf.zeros(self.num_inducing, name="zeros")
             pu = tfp.distributions.MultivariateNormalTriL(zeros, chol_zz, name="pu")
             kl = tfp.distributions.kl_divergence(qu, pu, allow_nan_stats=False, name="kl")
             kl_sum = tf.reduce_sum(kl, axis=0, name="kl_sum")
@@ -96,7 +96,7 @@ class MLGP(InducingPointsModel):
     def _log_prob(self, samples: tf.Tensor) -> tf.Tensor:
         with tf.name_scope("log_prob"):
             y = self._get_or_subsample_y()
-            samples_transpose = tf.linalg.matrix_transpose(samples)
+            samples_transpose = tf.linalg.matrix_transpose(samples, name="samples_transpose")
             log_prob = self.likelihood.log_prob(samples_transpose, y, name="log_prob")
         return log_prob
 
