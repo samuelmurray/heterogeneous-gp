@@ -119,8 +119,7 @@ class TestARDRBF(tf.test.TestCase):
     def test_broadcasting_second_argument(self) -> None:
         a = tf.convert_to_tensor(np.random.normal(size=(self.batch_size, self.num_a, self.x_dim)),
                                  dtype=tf.float32)
-        b = tf.convert_to_tensor(np.random.normal(size=(self.num_b, self.x_dim)),
-                                 dtype=tf.float32)
+        b = tf.convert_to_tensor(np.random.normal(size=(self.num_b, self.x_dim)), dtype=tf.float32)
         b_tiled = tf.tile(tf.expand_dims(b, axis=0), multiples=[self.batch_size, 1, 1])
         init = tf.global_variables_initializer()
         with self.session() as sess:
