@@ -34,7 +34,7 @@ class TestVAEMLGPLVM(tf.test.TestCase):
     def test_train_loss(self) -> None:
         with tf.variable_scope("vae_mlgplvm", reuse=tf.AUTO_REUSE):
             loss = tf.losses.get_total_loss()
-            learning_rate = 0.1
+            learning_rate = 0.01
             optimizer = tf.train.RMSPropOptimizer(learning_rate)
             train_all = optimizer.minimize(loss, var_list=tf.trainable_variables())
 
