@@ -17,8 +17,8 @@ pods = "==0.0.2a"
 scikit-learn = ">=0.20"
 scipy = "*"
 seaborn = "*"
-tensorflow = ">=1.14.0,<2.0"
-tensorflow-probability = ">=0.7.0"
+tensorflow = ">=1.15.0,<2.0"
+tensorflow-probability = ">=0.8.0"
 
 [dev-packages]
 codecov = "*"
