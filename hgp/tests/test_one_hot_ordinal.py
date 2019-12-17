@@ -9,7 +9,7 @@ class TestOneHotOrdinal(tf.test.TestCase):
         self.likelihood = OneHotOrdinal(self.num_classes)
 
     def tearDown(self) -> None:
-        tf.reset_default_graph()
+        tf.compat.v1.reset_default_graph()
 
     def test_call_return_type(self) -> None:
         num_data = 10
@@ -34,11 +34,6 @@ class TestOneHotOrdinal(tf.test.TestCase):
         ret = self.likelihood(f)
         self.assertEqual(shape[:-1], ret.batch_shape)
         self.assertEqual(shape[-1:], ret.event_shape)
-
-    def test_create_summary(self) -> None:
-        self.likelihood.create_summaries()
-        merged_summary = tf.summary.merge_all()
-        self.assertIsNone(merged_summary)
 
 
 if __name__ == "__main__":

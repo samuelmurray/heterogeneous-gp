@@ -40,32 +40,22 @@ class VAEMLGPLVM(BatchMLGPLVM):
         return self._num_layers
 
     def _create_encoder(self) -> Tuple[tf.Tensor, tf.Tensor]:
-        with tf.variable_scope("encoder"):
+        with tf.compat.v1.variable_scope("encoder"):
             nan_mask = tf.math.is_nan(self.y_batch, name="nan_mask")
-            y_batch_wo_nans = tf.where(nan_mask, tf.zeros_like(self.y_batch), self.y_batch,
-                                       name="y_batch_wo_nans")
+            y_batch_wo_nans = tf.compat.v1.where(nan_mask, tf.zeros_like(self.y_batch),
+                                                 self.y_batch,
+                                                 name="y_batch_wo_nans")
             hidden = y_batch_wo_nans
             for i in range(self.num_layers):
-                hidden = tf.layers.dense(hidden, units=self.num_hidden, activation=tf.tanh,
-                                         name=f"hidden_{i}")
-            mean = tf.layers.dense(hidden, units=self.x_dim, activation=None, name="mean")
-            log_var = tf.layers.dense(hidden, units=self.x_dim, activation=None, name="log_var")
+                hidden = tf.compat.v1.layers.dense(hidden, units=self.num_hidden,
+                                                   activation=tf.tanh,
+                                                   name=f"hidden_{i}")
+            mean = tf.compat.v1.layers.dense(hidden, units=self.x_dim, activation=None,
+                                             name="mean")
+            log_var = tf.compat.v1.layers.dense(hidden, units=self.x_dim, activation=None,
+                                                name="log_var")
             var = tf.exp(log_var, name="var")
         return mean, var
 
     def _get_or_subsample_qx(self) -> Tuple[tf.Tensor, tf.Tensor]:
         return self.encoder
-
-    def create_summaries(self) -> None:
-        # FIXME: A bit ugly that we need to override the entire function
-        tf.summary.scalar("kl_qx_px", self._kl_qx_px(), family="Model")
-        tf.summary.scalar("kl_qu_pu", self._kl_qu_pu(), family="Model")
-        tf.summary.scalar("expectation", self._mc_expectation(), family="Model")
-        # TODO: Find a way to include loss
-        # tf.summary.scalar("elbo_loss", self._loss(), family="Loss")
-        # TODO: Find a way to add encoder to summary
-        tf.summary.histogram("z", self.z)
-        tf.summary.histogram("qu_mean", self.qu_mean)
-        tf.summary.histogram("qu_scale", tfp.distributions.fill_triangular_inverse(self.qu_scale))
-        self.kernel.create_summaries()
-        self.likelihood.create_summaries()

@@ -11,6 +11,3 @@ class Poisson(Likelihood):
 
     def __call__(self, f: tf.Tensor) -> tfp.distributions.Poisson:
         return tfp.distributions.Poisson(log_rate=f)
-
-    def create_summaries(self) -> None:
-        pass

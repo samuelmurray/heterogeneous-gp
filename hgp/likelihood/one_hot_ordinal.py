@@ -10,6 +10,3 @@ class OneHotOrdinal(Likelihood):
 
     def __call__(self, f: tf.Tensor) -> OneHotOrdinalDistribution:
         return OneHotOrdinalDistribution(params=f)
-
-    def create_summaries(self) -> None:
-        pass

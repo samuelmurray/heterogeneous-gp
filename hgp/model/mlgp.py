@@ -27,15 +27,15 @@ class MLGP(InducingPointsModel):
         z = x[inducing_indices]
         self._num_samples = num_samples
         # TODO: Try changing to float64 and see if it solves Cholesky inversion problems!
-        self.x = tf.convert_to_tensor(x, dtype=tf.float32, name="x")
-        self.y = tf.convert_to_tensor(y, dtype=tf.float32, name="y")
+        self.x = tf.convert_to_tensor(value=x, dtype=tf.float32, name="x")
+        self.y = tf.convert_to_tensor(value=y, dtype=tf.float32, name="y")
         if likelihood.y_dim != self.y_dim:
             raise ValueError(f"The likelihood must have as many dimensions as y, "
                              f"but likelihood.y_dim={likelihood.y_dim} and y.shape={y.shape}")
         self.kernel = kernel
         self.likelihood = likelihood
-        self.z = tf.get_variable("z", shape=[self.num_inducing, self.x_dim],
-                                 initializer=tf.constant_initializer(z))
+        self.z = tf.compat.v1.get_variable("z", shape=[self.num_inducing, self.x_dim],
+                                           initializer=tf.compat.v1.constant_initializer(z))
         self.qu_mean, self.qu_scale = self._create_qu()
 
     @property
@@ -47,12 +47,12 @@ class MLGP(InducingPointsModel):
         return self._num_samples
 
     def _create_qu(self) -> Tuple[tf.Tensor, tf.Tensor]:
-        with tf.variable_scope("qu"):
-            mean = tf.get_variable("mean", shape=[self.f_dim, self.num_inducing],
-                                   initializer=tf.random_normal_initializer())
+        with tf.compat.v1.variable_scope("qu"):
+            mean = tf.compat.v1.get_variable("mean", shape=[self.f_dim, self.num_inducing],
+                                             initializer=tf.compat.v1.random_normal_initializer())
             log_scale_shape = [self.f_dim, self.num_inducing * (self.num_inducing + 1) / 2]
-            log_scale_vec = tf.get_variable("log_scale_vec", shape=log_scale_shape,
-                                            initializer=tf.zeros_initializer())
+            log_scale_vec = tf.compat.v1.get_variable("log_scale_vec", shape=log_scale_shape,
+                                                      initializer=tf.compat.v1.zeros_initializer())
             log_scale = tfp.distributions.fill_triangular(log_scale_vec, name="log_scale")
             log_scale_diag_part = tf.linalg.diag_part(log_scale, name="log_scale_diag_part")
             log_scale_diag = tf.linalg.diag(log_scale_diag_part, name="log_scale_diag")
@@ -62,52 +62,45 @@ class MLGP(InducingPointsModel):
         return mean, scale
 
     def initialize(self) -> None:
-        tf.losses.add_loss(self._loss())
+        tf.compat.v1.losses.add_loss(self._loss())
 
     def _loss(self) -> tf.Tensor:
-        with tf.name_scope("loss"):
-            loss = tf.negative(self._elbo(), name="loss")
+        loss = tf.negative(self._elbo(), name="loss")
         return loss
 
     def _elbo(self) -> tf.Tensor:
-        with tf.name_scope("elbo"):
-            elbo = tf.identity(self._mc_expectation() - self._kl_qu_pu(), name="elbo")
+        elbo = tf.identity(self._mc_expectation() - self._kl_qu_pu(), name="elbo")
         return elbo
 
     def _kl_qu_pu(self) -> tf.Tensor:
-        with tf.name_scope("kl_qu_pu"):
-            qu = tfp.distributions.MultivariateNormalTriL(self.qu_mean, self.qu_scale, name="qu")
-            k_zz = self.kernel(self.z, name="k_zz")
-            chol_zz = tf.linalg.cholesky(k_zz, name="chol_zz")
-            zeros = tf.zeros(self.num_inducing, name="zeros")
-            pu = tfp.distributions.MultivariateNormalTriL(zeros, chol_zz, name="pu")
-            kl = tfp.distributions.kl_divergence(qu, pu, allow_nan_stats=False, name="kl")
-            kl_sum = tf.reduce_sum(kl, axis=0, name="kl_sum")
+        qu = tfp.distributions.MultivariateNormalTriL(self.qu_mean, self.qu_scale, name="qu")
+        k_zz = self.kernel(self.z, name="k_zz")
+        chol_zz = tf.linalg.cholesky(k_zz, name="chol_zz")
+        zeros = tf.zeros(self.num_inducing, name="zeros")
+        pu = tfp.distributions.MultivariateNormalTriL(zeros, chol_zz, name="pu")
+        kl = tfp.distributions.kl_divergence(qu, pu, allow_nan_stats=False, name="kl")
+        kl_sum = tf.reduce_sum(input_tensor=kl, axis=0, name="kl_sum")
         return kl_sum
 
     def _mc_expectation(self) -> tf.Tensor:
-        with tf.name_scope("mc_expectation"):
-            approx_exp_all = tfp.monte_carlo.expectation(f=self._log_prob,
-                                                         samples=self._sample_f(),
-                                                         name="approx_exp_all")
-            approx_exp = tf.reduce_sum(approx_exp_all, axis=[0, 1], name="approx_exp")
+        approx_exp_all = tfp.monte_carlo.expectation(f=self._log_prob, samples=self._sample_f(),
+                                                     name="approx_exp_all")
+        approx_exp = tf.reduce_sum(input_tensor=approx_exp_all, axis=[0, 1], name="approx_exp")
         return approx_exp
 
     def _log_prob(self, samples: tf.Tensor) -> tf.Tensor:
-        with tf.name_scope("log_prob"):
-            y = self._get_or_subsample_y()
-            samples_transpose = tf.linalg.matrix_transpose(samples, name="samples_transpose")
-            log_prob = self.likelihood.log_prob(samples_transpose, y, name="log_prob")
+        y = self._get_or_subsample_y()
+        samples_transpose = tf.linalg.matrix_transpose(samples, name="samples_transpose")
+        log_prob = self.likelihood.log_prob(samples_transpose, y, name="log_prob")
         return log_prob
 
     def _get_or_subsample_y(self) -> tf.Tensor:
         return self.y
 
     def _sample_f(self) -> tf.Tensor:
-        with tf.name_scope("sample_f"):
-            x = self._get_or_subsample_x()
-            u_samples = self._sample_u()
-            f_samples = self._sample_f_from_x_and_u(x, u_samples)
+        x = self._get_or_subsample_x()
+        u_samples = self._sample_u()
+        f_samples = self._sample_f_from_x_and_u(x, u_samples)
         return f_samples
 
     def _get_or_subsample_x(self) -> tf.Tensor:
@@ -170,38 +163,27 @@ class MLGP(InducingPointsModel):
 
     @staticmethod
     def _get_num_data_from_x(x: tf.Tensor) -> tf.Tensor:
-        return tf.shape(x)[0]
+        return tf.shape(input=x)[0]
 
     def predict(self, xs: np.ndarray) -> Tuple[tf.Tensor, tf.Tensor]:
         # TODO: Not clear how to report the variances.
         # Should we use qu_scale?
         # Do we in the end want mean and std of f(x), h(f(x)) or p(y|x)=ExpFam(h(f(x)))?
         # For now, we just report mean and std of ExpFam(h(f_mean(x)))
-        with tf.name_scope("predict"):
-            xs = tf.convert_to_tensor(xs, dtype=tf.float32, name="xs")
-            k_zz = self.kernel(self.z, name="k_zz")
-            k_zz_inv = tf.linalg.inv(k_zz, name="k_zz_inv")
-            k_xs_z = self.kernel(xs, self.z, name="k_xs_z")
-            k_xs_z_mul_kzz_inv = tf.matmul(k_xs_z, k_zz_inv, name="k_xs_z_mul_kzz_inv")
-            f_mean = tf.matmul(k_xs_z_mul_kzz_inv, self.qu_mean, transpose_b=True, name="f_mean")
-            f_mean_expanded = tf.expand_dims(f_mean, axis=0, name="f_mean_expanded")
-            posteriors = self.likelihood(f_mean_expanded)
+        xs = tf.convert_to_tensor(value=xs, dtype=tf.float32, name="xs")
+        k_zz = self.kernel(self.z, name="k_zz")
+        k_zz_inv = tf.linalg.inv(k_zz, name="k_zz_inv")
+        k_xs_z = self.kernel(xs, self.z, name="k_xs_z")
+        k_xs_z_mul_kzz_inv = tf.matmul(k_xs_z, k_zz_inv, name="k_xs_z_mul_kzz_inv")
+        f_mean = tf.matmul(k_xs_z_mul_kzz_inv, self.qu_mean, transpose_b=True, name="f_mean")
+        f_mean_expanded = tf.expand_dims(f_mean, axis=0, name="f_mean_expanded")
+        posteriors = self.likelihood(f_mean_expanded)
 
-            means = [distribution.mean() for distribution in posteriors]
-            means_squeezed = [tf.squeeze(mean, axis=0) for mean in means]
-            mean = tf.concat(means_squeezed, axis=-1, name="mean")
+        means = [distribution.mean() for distribution in posteriors]
+        means_squeezed = [tf.squeeze(mean, axis=0) for mean in means]
+        mean = tf.concat(means_squeezed, axis=-1, name="mean")
 
-            stds = [distribution.stddev() for distribution in posteriors]
-            stds_squeezed = [tf.squeeze(std, axis=0) for std in stds]
-            std = tf.concat(stds_squeezed, axis=-1, name="std")
+        stds = [distribution.stddev() for distribution in posteriors]
+        stds_squeezed = [tf.squeeze(std, axis=0) for std in stds]
+        std = tf.concat(stds_squeezed, axis=-1, name="std")
         return mean, std
-
-    def create_summaries(self) -> None:
-        tf.summary.scalar("kl_qu_pu", self._kl_qu_pu(), family="Model")
-        tf.summary.scalar("expectation", self._mc_expectation(), family="Model")
-        tf.summary.scalar("elbo_loss", self._loss(), family="Loss")
-        tf.summary.histogram("z", self.z)
-        tf.summary.histogram("qu_mean", self.qu_mean)
-        tf.summary.histogram("qu_scale", tfp.distributions.fill_triangular_inverse(self.qu_scale))
-        self.kernel.create_summaries()
-        self.likelihood.create_summaries()

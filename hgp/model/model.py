@@ -18,11 +18,3 @@ class Model(abc.ABC):
     @property
     def num_data(self) -> int:
         return self._num_data
-
-    @abc.abstractmethod
-    def initialize(self) -> None:
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def create_summaries(self) -> None:
-        raise NotImplementedError

@@ -21,7 +21,3 @@ class Likelihood(abc.ABC):
     @property
     def output_dim(self) -> int:
         return self._output_dim
-
-    @abc.abstractmethod
-    def create_summaries(self) -> None:
-        raise NotImplementedError

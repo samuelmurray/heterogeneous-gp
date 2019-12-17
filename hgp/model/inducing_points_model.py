@@ -15,7 +15,3 @@ class InducingPointsModel(Model):
     @abc.abstractmethod
     def initialize(self) -> None:
         raise NotImplementedError
-
-    @abc.abstractmethod
-    def create_summaries(self) -> None:
-        raise NotImplementedError

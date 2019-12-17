@@ -9,8 +9,8 @@ from hgp.model import GPLVM
 class TestGPLVM(tf.test.TestCase):
     def setUp(self) -> None:
         np.random.seed(1363431413)
-        tf.random.set_random_seed(1534135313)
-        with tf.variable_scope("gplvm", reuse=tf.AUTO_REUSE):
+        tf.compat.v1.random.set_random_seed(1534135313)
+        with tf.compat.v1.variable_scope("gplvm", reuse=tf.compat.v1.AUTO_REUSE):
             num_data = 100
             latent_dim = 2
             output_dim = 5
@@ -18,28 +18,20 @@ class TestGPLVM(tf.test.TestCase):
             y, _ = make_blobs(num_data, output_dim, num_classes)
             kernel = RBF()
             self.m = GPLVM(y, latent_dim, kernel=kernel)
-            self.m.initialize()
 
     def tearDown(self) -> None:
-        tf.reset_default_graph()
-
-    def test_initialize(self) -> None:
-        num_losses = len(tf.losses.get_losses())
-        self.assertGreaterEqual(num_losses, 1)
+        tf.compat.v1.reset_default_graph()
 
     def test_train_loss(self) -> None:
-        with tf.variable_scope("gplvm", reuse=tf.AUTO_REUSE):
-            loss = tf.losses.get_total_loss()
+        with tf.compat.v1.variable_scope("gplvm", reuse=tf.compat.v1.AUTO_REUSE):
             learning_rate = 0.1
-            optimizer = tf.train.RMSPropOptimizer(learning_rate)
-            train_all = optimizer.minimize(loss, var_list=tf.trainable_variables())
+            optimizer = tf.compat.v1.train.RMSPropOptimizer(learning_rate)
 
-            init = tf.global_variables_initializer()
-            with self.session() as sess:
-                sess.run(init)
-                loss_before = sess.run(loss)
-                sess.run(train_all)
-                loss_after = sess.run(loss)
+            with tf.GradientTape() as tape:
+                loss_before = self.m.loss()
+                gradients = tape.gradient(loss_before, [self.m.x])
+                optimizer.apply_gradients(zip(gradients, [self.m.x]))
+                loss_after = self.m.loss()
             self.assertLess(loss_after, loss_before)
 
     def test_x_num_data_exception(self) -> None:
@@ -64,20 +56,11 @@ class TestGPLVM(tf.test.TestCase):
         latent_dim = 1
         output_dim = 5
         num_data = 10
-        x = np.empty((num_data, latent_dim))
-        y = np.empty((num_data, output_dim))
+        x = np.random.rand(num_data, latent_dim)
+        y = np.random.rand(num_data, output_dim)
         kernel = RBF()
         m = GPLVM(y, latent_dim, x=x, kernel=kernel)
-        init = tf.global_variables_initializer()
-        with self.session() as sess:
-            sess.run(init)
-            m_x = sess.run(m.x)
-        self.assertAllClose(x, m_x)
-
-    def test_create_summary(self) -> None:
-        self.m.create_summaries()
-        merged_summary = tf.summary.merge_all()
-        self.assertIsNotNone(merged_summary)
+        self.assertAllClose(x, m.x.read_value())
 
 
 if __name__ == "__main__":

@@ -13,7 +13,7 @@ class TestUnsupervisedData(tf.test.TestCase):
         self.output_dim = 3
 
     def tearDown(self) -> None:
-        tf.reset_default_graph()
+        tf.compat.v1.reset_default_graph()
 
     def test_circle(self) -> None:
         y, likelihood, labels = Unsupervised.make_circle(self.num_data, self.output_dim)
@@ -46,7 +46,7 @@ class TestStubOutDataFilesExist(tf.test.TestCase):
     def setUp(self) -> None:
         self.num_data = 5
         self.num_classes = 2
-        self.stubs = tf.test.StubOutForTesting()
+        self.stubs = tf.compat.v1.test.StubOutForTesting()
         self.stub_num_data = 1100
         self.stub_output_dim = 10
         stubbed_data = np.empty([self.stub_num_data, self.stub_output_dim])
@@ -56,7 +56,7 @@ class TestStubOutDataFilesExist(tf.test.TestCase):
                        lambda x, delimiter=None, filling_values=None: stubbed_data)
 
     def tearDown(self) -> None:
-        tf.reset_default_graph()
+        tf.compat.v1.reset_default_graph()
 
     def test_abalone(self) -> None:
         y, likelihood, labels = Unsupervised.make_abalone(self.num_data)
@@ -132,12 +132,12 @@ class TestStubOutDataFilesExist(tf.test.TestCase):
 class TestStubOutFileNotFound(tf.test.TestCase):
     def setUp(self) -> None:
         self.num_data = 10
-        self.stubs = tf.test.StubOutForTesting()
+        self.stubs = tf.compat.v1.test.StubOutForTesting()
         self.stubs.Set(os.path, "isfile", lambda x: False)
 
     def tearDown(self) -> None:
         self.stubs.CleanUp()
-        tf.reset_default_graph()
+        tf.compat.v1.reset_default_graph()
 
     def test_abalone(self) -> None:
         with self.assertRaises(FileNotFoundError):
@@ -202,18 +202,18 @@ class TestMockPodsPackage(tf.test.TestCase):
         self.mocked_data = {"X": X, "Y": Y}
 
     def tearDown(self) -> None:
-        tf.reset_default_graph()
+        tf.compat.v1.reset_default_graph()
 
-    @tf.test.mock.patch("hgp.data.unsupervised.pods")
-    def test_oilflow(self, mocked_pods: tf.test.mock.MagicMock) -> None:
+    @tf.compat.v1.test.mock.patch("hgp.data.unsupervised.pods")
+    def test_oilflow(self, mocked_pods: tf.compat.v1.test.mock.MagicMock) -> None:
         mocked_pods.datasets.oil = lambda: self.mocked_data
         y, likelihood, labels = Unsupervised.make_oilflow(self.num_data, self.output_dim)
         self.assertAllEqual((self.num_data, self.output_dim), y.shape)
         self.assertAllEqual((self.num_data,), labels.shape)
         self.assertEqual(self.output_dim, likelihood.y_dim)
 
-    @tf.test.mock.patch("hgp.data.unsupervised.pods")
-    def test_oilflow_one_hot(self, mocked_pods: tf.test.mock.MagicMock) -> None:
+    @tf.compat.v1.test.mock.patch("hgp.data.unsupervised.pods")
+    def test_oilflow_one_hot(self, mocked_pods: tf.compat.v1.test.mock.MagicMock) -> None:
         mocked_pods.datasets.oil = lambda: self.mocked_data
         y, likelihood, labels = Unsupervised.make_oilflow(self.num_data, self.output_dim,
                                                           one_hot_labels=True)

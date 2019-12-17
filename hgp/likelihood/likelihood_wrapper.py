@@ -1,4 +1,4 @@
-from typing import List, Optional, Sequence, Tuple
+from typing import List, Sequence, Tuple
 
 import numpy as np
 import tensorflow as tf
@@ -55,17 +55,16 @@ class LikelihoodWrapper:
     def y_dim(self) -> int:
         return self._y_dim
 
-    def log_prob(self, f: tf.Tensor, y: tf.Tensor, name: Optional[str] = None) -> tf.Tensor:
-        with tf.name_scope(name):
-            nan_mask = tf.math.is_nan(y, name="nan_mask")
-            log_prob = self._create_log_prob(f, y, nan_mask)
-            log_prob_mask = self._create_log_prob_mask(log_prob, nan_mask)
-            filtered_log_prob = tf.where(log_prob_mask, tf.zeros_like(log_prob), log_prob,
-                                         name="filtered_log_prob")
+    def log_prob(self, f: tf.Tensor, y: tf.Tensor) -> tf.Tensor:
+        nan_mask = tf.math.is_nan(y, name="nan_mask")
+        log_prob = self._create_log_prob(f, y, nan_mask)
+        log_prob_mask = self._create_log_prob_mask(log_prob, nan_mask)
+        filtered_log_prob = tf.compat.v1.where(log_prob_mask, tf.zeros_like(log_prob), log_prob,
+                                               name="filtered_log_prob")
         return filtered_log_prob
 
     def _create_log_prob(self, f: tf.Tensor, y: tf.Tensor, nan_mask: tf.Tensor) -> tf.Tensor:
-        y_wo_nans = tf.where(nan_mask, tf.zeros_like(y), y, name="y_wo_nans")
+        y_wo_nans = tf.compat.v1.where(nan_mask, tf.zeros_like(y), y, name="y_wo_nans")
         log_probs = [likelihood(f[..., f_dims]).log_prob(y_wo_nans[..., y_dims]) for
                      likelihood, f_dims, y_dims in
                      zip(self.likelihoods, self.f_dims_per_likelihood, self.y_dims_per_likelihood)]
@@ -75,10 +74,6 @@ class LikelihoodWrapper:
     def _create_log_prob_mask(self, log_prob: tf.Tensor, nan_mask: tf.Tensor) -> tf.Tensor:
         log_prob_masks = [nan_mask[..., dims.start] for dims in self.f_dims_per_likelihood]
         log_prob_mask = tf.stack(log_prob_masks, axis=-1, name="log_prob_mask")
-        log_prob_mask_broadcast = tf.broadcast_to(log_prob_mask, tf.shape(log_prob),
+        log_prob_mask_broadcast = tf.broadcast_to(log_prob_mask, tf.shape(input=log_prob),
                                                   name="log_prob_mask_broadcast")
         return log_prob_mask_broadcast
-
-    def create_summaries(self) -> None:
-        for likelihood in self.likelihoods:
-            likelihood.create_summaries()

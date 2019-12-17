@@ -14,7 +14,7 @@ class TestLikelihoodWrapper(tf.test.TestCase):
         self.likelihood = LikelihoodWrapper([ber, cat, nor])
 
     def tearDown(self) -> None:
-        tf.reset_default_graph()
+        tf.compat.v1.reset_default_graph()
 
     def test_call_return_type(self) -> None:
         f = tf.constant(np.array([[0.7, 0.4, 0.4, 2.]]), dtype=tf.float32)
@@ -71,11 +71,6 @@ class TestLikelihoodWrapper(tf.test.TestCase):
 
     def test_num_likelihoods(self) -> None:
         self.assertEqual(self.likelihood.num_likelihoods, 3)
-
-    def test_create_summary(self) -> None:
-        self.likelihood.create_summaries()
-        merged_summary = tf.summary.merge_all()
-        self.assertIsNotNone(merged_summary)
 
 
 if __name__ == "__main__":

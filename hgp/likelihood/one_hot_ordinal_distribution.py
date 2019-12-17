@@ -12,11 +12,10 @@ class OneHotOrdinalDistribution(tfp.distributions.Distribution):
         self.mean_param, self.theta = tf.split(params, num_or_size_splits=[1, -1], axis=-1)
 
     def _prob(self, y: tf.Tensor) -> tf.Tensor:
-        with tf.name_scope("prob"):
-            prob_of_category = self._prob_of_category()
-            prob_of_observation = self._prob_of_observation(y, prob_of_category)
-            # We need to clip to avoid zeros, otherwise we get log_prob = -inf
-            prob_clipped = self._clip_probability(prob_of_observation)
+        prob_of_category = self._prob_of_category()
+        prob_of_observation = self._prob_of_observation(y, prob_of_category)
+        # We need to clip to avoid zeros, otherwise we get log_prob = -inf
+        prob_clipped = self._clip_probability(prob_of_observation)
         return prob_clipped
 
     def _prob_of_category(self) -> tf.Tensor:

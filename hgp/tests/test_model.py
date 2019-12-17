@@ -10,7 +10,7 @@ class TestModel(tf.test.TestCase):
         pass
 
     def tearDown(self) -> None:
-        tf.reset_default_graph()
+        tf.compat.v1.reset_default_graph()
 
     def test_abc(self) -> None:
         with self.assertRaises(TypeError):

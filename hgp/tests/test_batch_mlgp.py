@@ -10,8 +10,8 @@ from hgp.model import BatchMLGP
 class TestMLGP(tf.test.TestCase):
     def setUp(self) -> None:
         np.random.seed(1363431413)
-        tf.random.set_random_seed(1534135313)
-        with tf.variable_scope("batch_mlgp", reuse=tf.AUTO_REUSE):
+        tf.compat.v1.random.set_random_seed(1534135313)
+        with tf.compat.v1.variable_scope("batch_mlgp", reuse=tf.compat.v1.AUTO_REUSE):
             num_data = 40
             input_dim = 1
             self.output_dim = 1
@@ -26,16 +26,16 @@ class TestMLGP(tf.test.TestCase):
             self.m.initialize()
 
     def tearDown(self) -> None:
-        tf.reset_default_graph()
+        tf.compat.v1.reset_default_graph()
 
     def test_train_loss(self) -> None:
-        with tf.variable_scope("batch_mlgp", reuse=tf.AUTO_REUSE):
-            loss = tf.losses.get_total_loss()
+        with tf.compat.v1.variable_scope("batch_mlgp", reuse=tf.compat.v1.AUTO_REUSE):
+            loss = tf.compat.v1.losses.get_total_loss()
             learning_rate = 0.1
-            optimizer = tf.train.RMSPropOptimizer(learning_rate)
-            train_all = optimizer.minimize(loss, var_list=tf.trainable_variables())
+            optimizer = tf.compat.v1.train.RMSPropOptimizer(learning_rate)
+            train_all = optimizer.minimize(loss, var_list=tf.compat.v1.trainable_variables())
 
-            init = tf.global_variables_initializer()
+            init = tf.compat.v1.global_variables_initializer()
 
             indices = np.arange(self.batch_size)
             feed_dict = {self.m.batch_indices: indices}
@@ -47,9 +47,9 @@ class TestMLGP(tf.test.TestCase):
             self.assertLess(loss_after, loss_before)
 
     def test_predict_mean_shape(self) -> None:
-        with tf.variable_scope("batch_mlgp", reuse=tf.AUTO_REUSE):
+        with tf.compat.v1.variable_scope("batch_mlgp", reuse=tf.compat.v1.AUTO_REUSE):
             num_test = 30
-            init = tf.global_variables_initializer()
+            init = tf.compat.v1.global_variables_initializer()
             with self.session() as sess:
                 sess.run(init)
                 x_test = np.linspace(-2, 2 * np.pi + 2, num_test)[:, np.newaxis]
@@ -57,19 +57,14 @@ class TestMLGP(tf.test.TestCase):
             self.assertShapeEqual(np.empty([num_test, self.output_dim]), mean)
 
     def test_predict_std_shape(self) -> None:
-        with tf.variable_scope("batch_mlgp", reuse=tf.AUTO_REUSE):
+        with tf.compat.v1.variable_scope("batch_mlgp", reuse=tf.compat.v1.AUTO_REUSE):
             num_test = 30
-            init = tf.global_variables_initializer()
+            init = tf.compat.v1.global_variables_initializer()
             with self.session() as sess:
                 sess.run(init)
                 x_test = np.linspace(-2, 2 * np.pi + 2, num_test)[:, np.newaxis]
                 _, std = self.m.predict(x_test)
             self.assertShapeEqual(np.empty([num_test, self.output_dim]), std)
-
-    def test_create_summary(self) -> None:
-        self.m.create_summaries()
-        merged_summary = tf.summary.merge_all()
-        self.assertIsNotNone(merged_summary)
 
 
 if __name__ == "__main__":

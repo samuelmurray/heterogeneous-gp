@@ -11,7 +11,7 @@ class TestUtil(tf.test.TestCase):
         pass
 
     def tearDown(self) -> None:
-        tf.reset_default_graph()
+        tf.compat.v1.reset_default_graph()
 
     def test_categorical_error(self) -> None:
         prediction = np.array([[1., 0.], [1., 0.], [0., 1.], [0., 1.]])

@@ -9,7 +9,7 @@ class TestSupervisedData(tf.test.TestCase):
         self.output_dim = 1
 
     def tearDown(self) -> None:
-        tf.reset_default_graph()
+        tf.compat.v1.reset_default_graph()
 
     def test_sin(self) -> None:
         x, likelihood, y = Supervised.make_sin(self.num_data)

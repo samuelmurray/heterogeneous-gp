@@ -9,7 +9,7 @@ from sklearn.datasets import make_blobs
 
 import hgp
 from hgp.likelihood import (Bernoulli, Likelihood, LikelihoodWrapper, LogNormal, Normal,
-                            OneHotCategorical, OneHotOrdinal, QuantizedNormal)
+                               OneHotCategorical, OneHotOrdinal, QuantizedNormal)
 
 DataTuple = Tuple[np.ndarray, LikelihoodWrapper, np.ndarray]
 ROOT_PATH = os.path.dirname(hgp.__file__)

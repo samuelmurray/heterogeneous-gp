@@ -10,8 +10,8 @@ from hgp.model import BatchMLGPLVM
 class TestBatchMLGPLVM(tf.test.TestCase):
     def setUp(self) -> None:
         np.random.seed(1363431413)
-        tf.random.set_random_seed(1534135313)
-        with tf.variable_scope("batch_mlgplvm", reuse=tf.AUTO_REUSE):
+        tf.compat.v1.random.set_random_seed(1534135313)
+        with tf.compat.v1.variable_scope("batch_mlgplvm", reuse=tf.compat.v1.AUTO_REUSE):
             self.num_data = 100
             self.latent_dim = 2
             self.output_dim = 5
@@ -24,16 +24,16 @@ class TestBatchMLGPLVM(tf.test.TestCase):
             self.m.initialize()
 
     def tearDown(self) -> None:
-        tf.reset_default_graph()
+        tf.compat.v1.reset_default_graph()
 
     def test_train_loss(self) -> None:
-        with tf.variable_scope("batch_mlgplvm", reuse=tf.AUTO_REUSE):
-            loss = tf.losses.get_total_loss()
+        with tf.compat.v1.variable_scope("batch_mlgplvm", reuse=tf.compat.v1.AUTO_REUSE):
+            loss = tf.compat.v1.losses.get_total_loss()
             learning_rate = 0.1
-            optimizer = tf.train.RMSPropOptimizer(learning_rate)
-            train_all = optimizer.minimize(loss, var_list=tf.trainable_variables())
+            optimizer = tf.compat.v1.train.RMSPropOptimizer(learning_rate)
+            train_all = optimizer.minimize(loss, var_list=tf.compat.v1.trainable_variables())
 
-            init = tf.global_variables_initializer()
+            init = tf.compat.v1.global_variables_initializer()
             indices = np.arange(self.batch_size)
             feed_dict = {self.m.batch_indices: indices}
             with self.session() as sess:
@@ -44,17 +44,17 @@ class TestBatchMLGPLVM(tf.test.TestCase):
             self.assertLess(loss_after, loss_before)
 
     def test_train_batch(self) -> None:
-        with tf.variable_scope("batch_mlgplvm", reuse=tf.AUTO_REUSE):
-            loss = tf.losses.get_total_loss()
+        with tf.compat.v1.variable_scope("batch_mlgplvm", reuse=tf.compat.v1.AUTO_REUSE):
+            loss = tf.compat.v1.losses.get_total_loss()
             learning_rate = 0.1
-            optimizer = tf.train.RMSPropOptimizer(learning_rate)
-            train_all = optimizer.minimize(loss, var_list=tf.trainable_variables())
+            optimizer = tf.compat.v1.train.RMSPropOptimizer(learning_rate)
+            train_all = optimizer.minimize(loss, var_list=tf.compat.v1.trainable_variables())
 
-            init = tf.global_variables_initializer()
+            init = tf.compat.v1.global_variables_initializer()
             indices = np.arange(self.batch_size)
             feed_dict = {self.m.batch_indices: indices}
-            qx_mean = tf.get_variable("qx/mean")
-            qx_log_var = tf.get_variable("qx/log_var")
+            qx_mean = tf.compat.v1.get_variable("qx/mean")
+            qx_log_var = tf.compat.v1.get_variable("qx/log_var")
             with self.session() as sess:
                 sess.run(init)
                 qx_in_batch_before = sess.run(
@@ -79,8 +79,8 @@ class TestBatchMLGPLVM(tf.test.TestCase):
                     self.assertAllEqual(before, after)
 
     def test_impute(self) -> None:
-        with tf.variable_scope("batch_mlgplvm", reuse=tf.AUTO_REUSE):
-            init = tf.global_variables_initializer()
+        with tf.compat.v1.variable_scope("batch_mlgplvm", reuse=tf.compat.v1.AUTO_REUSE):
+            init = tf.compat.v1.global_variables_initializer()
             indices = np.arange(self.batch_size)
             feed_dict = {self.m.batch_indices: indices}
             with self.session() as sess:
@@ -88,11 +88,6 @@ class TestBatchMLGPLVM(tf.test.TestCase):
                 y_impute = self.m.impute()
                 y_impute_arr = sess.run(y_impute, feed_dict=feed_dict)
             self.assertEqual([self.batch_size, self.output_dim], list(y_impute_arr.shape))
-
-    def test_create_summary(self) -> None:
-        self.m.create_summaries()
-        merged_summary = tf.summary.merge_all()
-        self.assertIsNotNone(merged_summary)
 
 
 if __name__ == "__main__":

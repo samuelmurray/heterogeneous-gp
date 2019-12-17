@@ -31,27 +31,24 @@ if __name__ == "__main__":
     m.initialize()
 
     print("Building graph...")
-    loss = tf.losses.get_total_loss()
+    loss = tf.compat.v1.losses.get_total_loss()
     learning_rate = 5e-4
-    with tf.name_scope("train"):
-        optimizer = tf.train.RMSPropOptimizer(learning_rate, name="RMSProp")
-        train_all = optimizer.minimize(loss, var_list=tf.trainable_variables(),
-                                       global_step=tf.train.create_global_step(),
-                                       name="train")
-    with tf.name_scope("summary"):
-        m.create_summaries()
-        tf.summary.scalar("total_loss", loss, family="Loss")
-        for reg_loss in tf.losses.get_regularization_losses():
-            tf.summary.scalar(f"{reg_loss.name}", reg_loss, family="Loss")
-        merged_summary = tf.summary.merge_all()
+    optimizer = tf.compat.v1.train.RMSPropOptimizer(learning_rate, name="RMSProp")
+    train_all = optimizer.minimize(loss, var_list=tf.compat.v1.trainable_variables(),
+                                   global_step=tf.compat.v1.train.create_global_step(),
+                                   name="train")
+    tf.compat.v1.summary.scalar("total_loss", loss, family="Loss")
+    for reg_loss in tf.compat.v1.losses.get_regularization_losses():
+        tf.compat.v1.summary.scalar(f"{reg_loss.name}", reg_loss, family="Loss")
+    merged_summary = tf.compat.v1.summary.merge_all()
 
-    init = tf.global_variables_initializer()
+    init = tf.compat.v1.global_variables_initializer()
 
     plt.axis([-5, 5, -5, 5])
     plt.ion()
-    with tf.Session() as sess:
+    with tf.compat.v1.Session() as sess:
         log_dir = os.path.join(LOG_DIR_PATH, "mlgplvm", f"{time.strftime('%Y%m%d%H%M%S')}")
-        summary_writer = tf.summary.FileWriter(log_dir, sess.graph)
+        summary_writer = tf.compat.v1.summary.FileWriter(log_dir, sess.graph)
         print("Initializing variables...")
         sess.run(init)
         print(f"Initial loss: {sess.run(loss)}")
@@ -61,8 +58,9 @@ if __name__ == "__main__":
         for i in range(n_iter):
             sess.run(train_all)
             if i % n_print == 0:
-                run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
-                run_metadata = tf.RunMetadata()
+                run_options = tf.compat.v1.RunOptions(
+                    trace_level=tf.compat.v1.RunOptions.FULL_TRACE)
+                run_metadata = tf.compat.v1.RunMetadata()
                 train_loss, summary = sess.run([loss, merged_summary], options=run_options,
                                                run_metadata=run_metadata)
                 summary_writer.add_run_metadata(run_metadata, f"step{i}")

@@ -60,29 +60,28 @@ def run() -> None:
         numerical_errors.append(numerical_error)
         nominal_errors.append(nominal_error)
         # Reset TF graph before restarting
-        tf.reset_default_graph()
+        tf.compat.v1.reset_default_graph()
     final_logging(nominal_errors, numerical_errors)
 
 
 def initialize() -> None:
     sns.set()
     np.random.seed(NUMPY_SEED)
-    tf.random.set_random_seed(TENSORFLOW_SEED)
+    tf.compat.v1.random.set_random_seed(TENSORFLOW_SEED)
 
 
 def train_impute(model: BatchMLGPLVM, y_true: np.ndarray, y_noisy: np.ndarray
                  ) -> Tuple[float, float]:
     model.initialize()
-    loss = tf.losses.get_total_loss()
-    with tf.name_scope("train"):
-        optimizer = tf.train.RMSPropOptimizer(args.lr, name="RMSProp")
-        train_all = optimizer.minimize(loss, var_list=tf.trainable_variables(),
-                                       global_step=tf.train.create_global_step(),
-                                       name="train")
-    init = tf.global_variables_initializer()
+    loss = tf.compat.v1.losses.get_total_loss()
+    optimizer = tf.compat.v1.train.RMSPropOptimizer(args.lr, name="RMSProp")
+    train_all = optimizer.minimize(loss, var_list=tf.compat.v1.trainable_variables(),
+                                   global_step=tf.compat.v1.train.create_global_step(),
+                                   name="train")
+    init = tf.compat.v1.global_variables_initializer()
     all_indices = np.arange(model.num_data)
     impute = model.impute()
-    with tf.Session() as sess:
+    with tf.compat.v1.Session() as sess:
         sess.run(init)
         n_iter = int(model.num_data / args.batch_size * args.epochs)
         for i in range(n_iter):
@@ -92,9 +91,9 @@ def train_impute(model: BatchMLGPLVM, y_true: np.ndarray, y_noisy: np.ndarray
                 train_loss = sess.run(loss, feed_dict={model.batch_indices: all_indices})
                 imputation = sess.run(impute, feed_dict={model.batch_indices: all_indices})
                 numerical_error, nominal_error = hgp.util.imputation_error(imputation,
-                                                                           y_noisy,
-                                                                           y_true,
-                                                                           model.likelihood)
+                                                                              y_noisy,
+                                                                              y_true,
+                                                                              model.likelihood)
                 train_logging(i, train_loss, numerical_error, nominal_error)
     return numerical_error, nominal_error
 
@@ -122,11 +121,10 @@ def final_logging(nominal_errors: List[float], numerical_errors: List[float]) ->
 
 
 def create_model(y_noisy: np.ndarray, likelihood: LikelihoodWrapper) -> BatchMLGPLVM:
-    with tf.name_scope("model"):
-        if args.model == "batch":
-            return create_batch_mlgplvm(y_noisy, likelihood)
-        if args.model == "vae":
-            return create_vae_mlgplvm(y_noisy, likelihood)
+    if args.model == "batch":
+        return create_batch_mlgplvm(y_noisy, likelihood)
+    if args.model == "vae":
+        return create_vae_mlgplvm(y_noisy, likelihood)
     raise ValueError("Only 'batch' and 'vae' allowed")
 
 

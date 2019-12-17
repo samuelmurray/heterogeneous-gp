@@ -11,13 +11,13 @@ if __name__ == "__main__":
     sns.set()
     num_data = 10
     x_train, _, y_train = Supervised.make_sin(num_data)
-    x = tf.convert_to_tensor(x_train, dtype=tf.float32)
-    y = tf.convert_to_tensor(y_train, dtype=tf.float32)
+    x = tf.convert_to_tensor(value=x_train, dtype=tf.float32)
+    y = tf.convert_to_tensor(value=y_train, dtype=tf.float32)
     kernel = RBF()
     m = GP(x, y, kernel=kernel)
 
-    init = tf.global_variables_initializer()
-    with tf.Session() as sess:
+    init = tf.compat.v1.global_variables_initializer()
+    with tf.compat.v1.Session() as sess:
         sess.run(init)
         x_test = np.linspace(0, 2 * np.pi, 50)[:, np.newaxis]
         y_test_mean, y_test_cov = sess.run(m.predict(x_test))

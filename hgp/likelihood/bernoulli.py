@@ -11,6 +11,3 @@ class Bernoulli(Likelihood):
 
     def __call__(self, f: tf.Tensor) -> tfp.distributions.Bernoulli:
         return tfp.distributions.Bernoulli(logits=f)
-
-    def create_summaries(self) -> None:
-        pass

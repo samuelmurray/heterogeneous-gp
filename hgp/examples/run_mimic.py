@@ -17,24 +17,21 @@ LOG_DIR_PATH = os.path.join(ROOT_PATH, os.pardir, "log")
 def train_predict(model: BatchMLGPLVM) -> None:
     model.initialize()
     print("Building graph...")
-    loss = tf.losses.get_total_loss()
+    loss = tf.compat.v1.losses.get_total_loss()
     learning_rate = 5e-4
-    with tf.name_scope("train"):
-        optimizer = tf.train.RMSPropOptimizer(learning_rate, name="RMSProp")
-        train_all = optimizer.minimize(loss, var_list=tf.trainable_variables(),
-                                       global_step=tf.train.create_global_step(),
-                                       name="train")
-    with tf.name_scope("summary"):
-        model.create_summaries()
-        merged_summary = tf.summary.merge_all()
+    optimizer = tf.compat.v1.train.RMSPropOptimizer(learning_rate, name="RMSProp")
+    train_all = optimizer.minimize(loss, var_list=tf.compat.v1.trainable_variables(),
+                                   global_step=tf.compat.v1.train.create_global_step(),
+                                   name="train")
+    merged_summary = tf.compat.v1.summary.merge_all()
 
-    init = tf.global_variables_initializer()
+    init = tf.compat.v1.global_variables_initializer()
 
     all_indices = np.arange(num_data)
     test_indices = np.arange(train_split, num_data)
-    with tf.Session() as sess:
+    with tf.compat.v1.Session() as sess:
         log_dir = os.path.join(LOG_DIR_PATH, "impute", f"{time.strftime('%Y%m%d%H%M%S')}")
-        summary_writer = tf.summary.FileWriter(log_dir, sess.graph)
+        summary_writer = tf.compat.v1.summary.FileWriter(log_dir, sess.graph)
         print("Initializing variables...")
         sess.run(init)
         print(f"Initial loss: {sess.run(loss, feed_dict={model.batch_indices: all_indices})}")
@@ -47,8 +44,9 @@ def train_predict(model: BatchMLGPLVM) -> None:
             batch_indices = np.random.choice(num_data, batch_size, replace=False)
             sess.run(train_all, feed_dict={model.batch_indices: batch_indices})
             if i % n_print == 0:
-                run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
-                run_metadata = tf.RunMetadata()
+                run_options = tf.compat.v1.RunOptions(
+                    trace_level=tf.compat.v1.RunOptions.FULL_TRACE)
+                run_metadata = tf.compat.v1.RunMetadata()
                 train_loss, summary = sess.run([loss, merged_summary], options=run_options,
                                                run_metadata=run_metadata,
                                                feed_dict={model.batch_indices: all_indices})
@@ -64,7 +62,7 @@ def train_predict(model: BatchMLGPLVM) -> None:
 if __name__ == "__main__":
     sns.set()
     np.random.seed(114123)
-    tf.random.set_random_seed(135314)
+    tf.compat.v1.random.set_random_seed(135314)
     print("Generating data...")
     num_data = None
     latent_dim = 10
@@ -77,12 +75,11 @@ if __name__ == "__main__":
     y_noisy = y.copy()
     y_noisy[train_split:] = np.nan
     labels = y[train_split:, -1]
-    with tf.name_scope("VAEMLGPLVM"):
-        print("Creating model...")
-        kernel = hgp.kernel.ARDRBF(x_dim=latent_dim)
-        num_inducing = 100
-        num_hidden = 100
-        num_layers = 0
-        m = VAEMLGPLVM(y_noisy, latent_dim, kernel=kernel, likelihood=likelihood,
-                       num_inducing=num_inducing, num_hidden=num_hidden, num_layers=num_layers)
-        train_predict(m)
+    print("Creating model...")
+    kernel = hgp.kernel.ARDRBF(x_dim=latent_dim)
+    num_inducing = 100
+    num_hidden = 100
+    num_layers = 0
+    m = VAEMLGPLVM(y_noisy, latent_dim, kernel=kernel, likelihood=likelihood,
+                   num_inducing=num_inducing, num_hidden=num_hidden, num_layers=num_layers)
+    train_predict(m)
