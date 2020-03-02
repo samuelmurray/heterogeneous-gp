@@ -1,31 +1,32 @@
 -i https://pypi.org/simple
-appnope==0.1.0 ; sys_platform == 'darwin'
+appnope==0.1.0 ; platform_system == 'Darwin'
 attrs==19.3.0
 backcall==0.1.0
-bleach==3.1.0
+bleach==3.1.1
 certifi==2019.11.28
 chardet==3.0.4
-codecov==2.0.15
-comet-git-pure==0.19.14
-comet-ml==3.0.2
+codecov==2.0.16
+comet-git-pure==0.19.15
+comet-ml==3.1.1
 configobj==5.0.6
 coverage==5.0.3
-decorator==4.4.1
+decorator==4.4.2
 defusedxml==0.6.0
 entrypoints==0.3
 everett[ini]==1.0.2 ; python_version >= '3.0'
-idna==2.8
+filelock==3.0.12
+idna==2.9
 importlib-metadata==1.5.0 ; python_version < '3.8'
 ipykernel==5.1.4
 ipython-genutils==0.2.0
-ipython==7.11.1
+ipython==7.13.0
 ipywidgets==7.5.1
 jedi==0.16.0
-jinja2==2.11.0
+jinja2==2.11.1
 jsonschema==3.0.2
-jupyter-client==5.3.4
+jupyter-client==6.0.0
 jupyter-console==6.1.0
-jupyter-core==4.6.1
+jupyter-core==4.6.3
 jupyter==1.0.0
 markupsafe==1.1.1
 mistune==0.8.4
@@ -39,7 +40,7 @@ notebook==6.0.3
 nvidia-ml-py3==7.352.0
 packaging==20.1
 pandocfilters==1.4.2
-parso==0.6.0
+parso==0.6.2
 pexpect==4.8.0 ; sys_platform != 'win32'
 pickleshare==0.7.5
 pluggy==0.13.1
@@ -55,12 +56,13 @@ pyrsistent==0.15.7
 pytest-codestyle==2.0.0
 pytest-cov==2.8.1
 pytest-flakes==4.0.0
-pytest-mypy==0.4.2
+pytest-mypy==0.5.0
 pytest==5.3.5
 python-dateutil==2.8.1
-pyzmq==18.1.1
-qtconsole==4.6.0
-requests==2.22.0
+pyzmq==19.0.0
+qtconsole==4.7.0
+qtpy==1.9.0
+requests==2.23.0
 send2trash==1.5.0
 six==1.14.0
 terminado==0.8.3
@@ -75,4 +77,4 @@ webencodings==0.5.1
 websocket-client==0.57.0
 widgetsnbextension==3.5.1
 wurlitzer==2.0.0
-zipp==2.1.0
+zipp==3.0.0
