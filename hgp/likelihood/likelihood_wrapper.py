@@ -12,10 +12,10 @@ class LikelihoodWrapper:
         self._likelihoods = list(likelihoods)
         self._num_likelihoods = len(self.likelihoods)
 
-        input_dims = [l.input_dim for l in self.likelihoods]
+        input_dims = [likelihood.input_dim for likelihood in self.likelihoods]
         self._f_dim, self._f_dims_per_likelihood = self._dim_and_dims_per_likelihood(input_dims)
 
-        output_dims = [l.output_dim for l in self.likelihoods]
+        output_dims = [likelihood.output_dim for likelihood in self.likelihoods]
         self._y_dim, self._y_dims_per_likelihood = self._dim_and_dims_per_likelihood(output_dims)
 
     @staticmethod

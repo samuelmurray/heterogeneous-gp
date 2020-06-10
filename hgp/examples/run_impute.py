@@ -117,8 +117,8 @@ def final_logging(nominal_errors: List[float], numerical_errors: List[float]) ->
     mean_nominal_error = np.mean(nominal_errors)
     print("-------------------")
     print(f"Average imputation errors: {mean_numerical_error},  {mean_nominal_error}")
-    experiment.log_metric(f"numerical error avg", mean_numerical_error)
-    experiment.log_metric(f"nominal error avg", mean_nominal_error)
+    experiment.log_metric("numerical error avg", mean_numerical_error)
+    experiment.log_metric("nominal error avg", mean_nominal_error)
 
 
 def create_model(y_noisy: np.ndarray, likelihood: LikelihoodWrapper) -> BatchMLGPLVM:
